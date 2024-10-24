@@ -1,1 +1,0 @@
-/usr/bin/c++  -g   CMakeFiles/Chat_With_CUHKSZ.dir/main.cpp.o  -o Chat_With_CUHKSZ 
