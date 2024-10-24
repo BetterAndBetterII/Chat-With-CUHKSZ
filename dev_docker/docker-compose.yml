@@ -1,0 +1,24 @@
+version: '3'
+services:
+  cpp-dev:
+    image: ubuntu:20.04
+    container_name: cpp_dev_env
+    stdin_open: true
+    tty: true
+    environment:
+      - TZ=Asia/Shanghai
+    ports:
+      - "2224:22"  # SSH 端口映射到宿主机的 2222 端口
+    volumes:
+      - ../../workspace:/home/deploy/workspace  # 将本地的 workspace 目录挂载到容器内
+    build:
+      context: .
+    command: /usr/sbin/sshd -D  # 启动 SSH 服务
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: "512M"
+
+volumes:
+  workspace:
