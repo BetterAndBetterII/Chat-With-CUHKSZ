@@ -7,6 +7,10 @@ include_directories(include)
 # 查找后端的源文件
 file(GLOB_RECURSE BACKEND_SOURCES "src/*.cpp")
 
+# 添加cpp-httplib
+find_package(httplib REQUIRED)
+
+
 # 添加后端的可执行文件
 add_executable(backend_executable ./test/test_blackboard.cpp
         ${BACKEND_SOURCES})
@@ -16,3 +20,5 @@ add_executable(backend_executable ./test/test_blackboard.cpp
 #        pthread  # Linux 系统上的线程库示例
 #        # 其他库
 #)
+target_link_libraries(backend_executable httplib::httplib)
+
