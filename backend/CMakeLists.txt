@@ -7,7 +7,8 @@ include_directories(include)
 # 查找后端的源文件
 file(GLOB_RECURSE BACKEND_SOURCES "src/*.cpp")
 
-#OpenSSL support via cmake
+
+#通过Cmake 为httplib提供OPENSSL服务
 find_package(OpenSSL REQUIRED)
 if(OPENSSL_FOUND)
     set(HTTPLIB_IS_USING_OPENSSL TRUE)
@@ -25,6 +26,7 @@ add_executable(backend_executable ./test/test_blackboard.cpp
 #)
 
 #The cpp-httplib library also needs a few linker flags and compile options
+
 target_link_libraries(${PROJECT_NAME} PUBLIC
         $<$<BOOL:${HTTPLIB_IS_USING_OPENSSL}>:OpenSSL::SSL>
         $<$<BOOL:${HTTPLIB_IS_USING_OPENSSL}>:OpenSSL::Crypto>)
@@ -32,4 +34,3 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 target_compile_definitions(${PROJECT_NAME} PUBLIC
         $<$<BOOL:${HTTPLIB_IS_USING_OPENSSL}>:CPPHTTPLIB_OPENSSL_SUPPORT>
         )
-
