@@ -5,29 +5,36 @@
 #ifndef CHAT_WITH_CUHKSZ_BLACKBOARD_H
 #define CHAT_WITH_CUHKSZ_BLACKBOARD_H
 
+//#include "../../include/System/System.h" 
+#include "../../include/System/CurlGlobal.h"
+#include <curl/curl.h>
+#include <set>
 
-
-#include "../../include/System/System.h"
-
-class BlackBoardSystem : public System {
+class BlackBoardSystem{
 private:
     std::string username;
     std::string password;
-    bool isLogin{};
+    std::set<std::string> command_list;
+    CURL* bb_handle;
+    CurlGlobal curl_global_manager;
+    bool is_login;
 
-    bool login();
+    //callback functions
+    static size_t ignore_calback(void *ptr, size_t size, size_t nmemb, void *userdata);
 
-    std::string getLoginSession();
 
 public:
-    // 构造函数声明，按引用传递参数
-    BlackBoardSystem(std::string username, std::string password);
+    // 构造函数声明
+    BlackBoardSystem(const std::string& username, const std::string& password);
+    //析构函数
+    ~BlackBoardSystem();
+    //返回command_list
+    std::string show_commands();
+    //运行指定command
+    std::string execute_command(const std::string& command);
+    //登录
+    bool login();
 
-    // 执行命令
-    std::string execute_command(std::string& command) override;
-
-    // 命令列表
-    std::vector<std::string> command_list;
 };
 
 

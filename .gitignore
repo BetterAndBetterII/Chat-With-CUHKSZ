@@ -42,3 +42,6 @@ cmake-build-debug/*
 .vscode/*
 .vs/*
 build/*
+
+#ignore build directory
+backend/backend_build/

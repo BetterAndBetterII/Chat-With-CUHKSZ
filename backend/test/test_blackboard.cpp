@@ -8,19 +8,31 @@
 #include "test_libcurl.cpp"
 
 int main() {
-    std::cout << "Testing BlackBoard~" << std::endl;
-    std::string username = "Gary";
-    std::string password = "12345678";
+    std::cout << "=====Testing BlackBoard=====" << std::endl;
+    std::cout << "---Testing Login---" << std::endl;
+    //basic info input
+    std::string username = "";
+    std::string password = "";
+    std::cout << "Username:" << std::endl;
+    std::cin >> username;
+    std::cout << "Password:" << std::endl;
+    std::cin >> password;
     auto *bb = new BlackBoardSystem(username, password);
-    std::string command = "command0";
-    std::cout << bb->execute_command(command) << std::endl;
-    command = "command2";
-    std::cout << bb->execute_command(command) << std::endl;
-    command = "command1";
-    std::cout << bb->execute_command(command) << std::endl;
+    if(bb->login()){
+
+        std::cout << "---Testing show_command---" << std::endl;
+        //test show_command
+        std::cout << bb->show_commands() << std::endl;
+
+        std::cout << "---Testing excute_command---" << std::endl;
+        //test excute command
+        std::string command = "command0";
+        std::cout << bb->execute_command(command) << std::endl;
+    }
+    delete bb;
 
     //Test Libcurl
-    test_libcurl();
+    //test_libcurl();
 
     return 0;
 }
