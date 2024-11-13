@@ -9,6 +9,8 @@ file(GLOB_RECURSE BACKEND_SOURCES "src/*.cpp")
 
 # 查找libcurl
 find_package(CURL REQUIRED)
+#查找Libxml
+find_package(LibXml2 REQUIRED)
 
 
 # 添加后端的可执行文件
@@ -22,4 +24,5 @@ add_executable(backend_executable
 #        # 其他库
 #)
 target_link_libraries(backend_executable PRIVATE CURL::libcurl)
+target_link_libraries(backend_executable PRIVATE LibXml2::LibXml2)
 

@@ -3,18 +3,20 @@
 //
 #include <iostream>
 #include <sstream>
+#include <fstream>
+#include <cstring>
 #include <stdexcept>
 #include <filesystem>
 #include <curl/curl.h>
 #include <set> //std::set<> command_list
 #include "../../include/System/Blackboard.h"
+#include <libxml/HTMLparser.h>
+#include <libxml/xpath.h> 
 
 BlackBoardSystem::BlackBoardSystem(const std::string& username, const std::string& password) : curl_global_manager(){
     //初始化变量
     this->command_list = {
-        "command0",
-        "command1", 
-        "command2"
+        "get_course",
     };
     this->username = username;
     this->password = password;
@@ -35,7 +37,7 @@ BlackBoardSystem::~BlackBoardSystem(){
                 //std::cout << "CookieFile does not exist or could not be deleted\n";
             }
         } catch (const std::filesystem::filesystem_error& e) {
-            std::cout << "Error: " << e.what() << "\n";
+            std::cerr << "Error: " << e.what() << "\n";
         } 
         //调试：检测bb_handle是否清除
         //std::cout << "bb_handle cleaned up" << std::endl;
@@ -45,6 +47,70 @@ BlackBoardSystem::~BlackBoardSystem(){
 //callback functions implementation
 size_t BlackBoardSystem::ignore_calback(void *ptr, size_t size, size_t nmemb, void *userdata) {
     return size * nmemb;  // 只是返回数据大小，忽略响应体
+}
+
+size_t BlackBoardSystem::write_callback(char *data, size_t size, size_t nmemb, void *clientp)
+{
+  size_t realsize = size * nmemb;
+  struct Memory *mem =(struct Memory *)clientp;
+ 
+  char *ptr = (char*)realloc(mem->response, mem->size + realsize + 1);
+  if(!ptr)
+    return 0;  /* out of memory */
+ 
+  mem->response = ptr;
+  memcpy(&(mem->response[mem->size]), data, realsize);
+  mem->size += realsize;
+  mem->response[mem->size] = 0;
+ 
+  return realsize;
+}
+
+std::string BlackBoardSystem::xpathQuery(const std::string& xmlContent, const std::string& xpathExpr) {
+    // 将字符串形式的XML内容解析为libxml2文档对象
+    xmlDocPtr doc = htmlReadMemory(xmlContent.c_str(), xmlContent.size(), NULL, "utf-8", HTML_PARSE_RECOVER|HTML_PARSE_NOERROR);
+    if (doc == nullptr) {
+        std::cerr << "Failed to parse document\n";
+        return "";
+    }
+
+    // 创建XPath上下文，用于在该文档中执行XPath查询
+    xmlXPathContextPtr context = xmlXPathNewContext(doc);
+    if (context == nullptr) {
+        std::cerr << "Failed to create XPath context\n";
+        xmlFreeDoc(doc);
+        return "";
+    }
+
+    // 使用XPath表达式在文档中查找匹配的节点
+    xmlXPathObjectPtr result = xmlXPathEvalExpression((const xmlChar*)xpathExpr.c_str(), context);
+    if (result == nullptr) {
+        std::cerr << "Failed to evaluate XPath expression\n";
+        xmlXPathFreeContext(context);
+        xmlFreeDoc(doc);
+        return "";
+    }
+
+    std::string output;
+    if (xmlXPathNodeSetIsEmpty(result->nodesetval)) {
+        std::cout << "No results\n";
+    } else {
+        // 遍历找到的节点集合，获取每个节点的内容
+        xmlNodeSetPtr nodes = result->nodesetval;
+        for (int i = 0; i < nodes->nodeNr; i++) {
+            xmlNodePtr node = nodes->nodeTab[i];
+            xmlChar* content = xmlNodeGetContent(node);
+            output += (char*)content;
+            output += "\n";
+            xmlFree(content);
+        }
+    }
+
+    // 释放XPath对象和上下文资源
+    xmlXPathFreeObject(result);
+    xmlXPathFreeContext(context);
+    xmlFreeDoc(doc);
+    return output;
 }
 
 //login function implementation
@@ -76,7 +142,7 @@ bool BlackBoardSystem::login(){
         long redirect_count;
         curl_easy_getinfo(bb_handle, CURLINFO_REDIRECT_COUNT, &redirect_count);
         if(res != CURLE_OK){
-            std::cout << "Login failed because:" << curl_easy_strerror(res) << std::endl;
+            std::cerr << "Login failed because:" << curl_easy_strerror(res) << std::endl;
         }
         else if(redirect_count > 0 ){
             is_login = true;
@@ -84,7 +150,7 @@ bool BlackBoardSystem::login(){
             return true;
         }
         else{
-            std::cout << "Username or Password incorrect!" << std::endl;
+            std::cerr << "Username or Password incorrect!" << std::endl;
             return false;
         }
 
@@ -95,27 +161,44 @@ bool BlackBoardSystem::login(){
 
 }
 
-std::string BlackBoardSystem::execute_command(const std::string& command) {
-    //return iterator of "command"
-    auto it = command_list.find(command);
-    if(it != command_list.end()){
-        //TODO:excute command
-        //尝试POST获取annoucement
-        FILE *output = fopen("annoucement.html", "w");
-        curl_easy_setopt(bb_handle, CURLOPT_URL, "https://bb.cuhk.edu.cn/webapps/blackboard/execute/announcement?method=search&context=mybb&handle=my_announcements&returnUrl=/webapps/portal/execute/tabs/tabAction?tab_tab_group_id=_1_1&tabId=_1_1&forwardUrl=index.jsp");
+std::string BlackBoardSystem::getRequest(const std::string& url){
+    std::string response = "";
+    Memory chunk = {nullptr, 0};
+    if(is_login){
+        curl_easy_setopt(bb_handle, CURLOPT_URL, url.c_str());
         curl_easy_setopt(bb_handle, CURLOPT_HTTPGET, 1L);
         curl_easy_setopt(bb_handle, CURLOPT_HEADER, 0L); 
-        curl_easy_setopt(bb_handle, CURLOPT_WRITEFUNCTION, NULL);
-        curl_easy_setopt(bb_handle, CURLOPT_WRITEDATA, output);
+        curl_easy_setopt(bb_handle, CURLOPT_WRITEFUNCTION, write_callback);
+        curl_easy_setopt(bb_handle, CURLOPT_WRITEDATA, (void*)&chunk);
         CURLcode res;
-        res = curl_easy_perform(bb_handle);  //post请求anouncement网页
-        fclose(output);
-        return "excute " + command;
+        res = curl_easy_perform(bb_handle);  
+        if(res != CURLE_OK){
+            std::cerr<< "Get request failed:" << curl_easy_strerror(res) << std::endl;
+        }
+
+        if (chunk.response){
+            response = chunk.response;
+            free(chunk.response);
+        }
+
+        return response; 
     }
-    return "Command Not Found!";
+    std::cerr<< "GetRequest failed:Login before get request" << std::endl;
+    return response;
 }
 
-std::string BlackBoardSystem::show_commands(){
+bool BlackBoardSystem::change_info(const std::string& username, const std::string& password){
+    if(is_login){
+        return false;
+    }
+    this->username = username;
+    this->password = password;
+    return true;
+}
+
+
+std::string BlackBoardSystem::get_commands(){
+
     std::ostringstream result;
     for(auto it = command_list.begin(); it != command_list.end(); ++it ){
         result << *it;
@@ -126,3 +209,24 @@ std::string BlackBoardSystem::show_commands(){
     return result.str();
 }
 
+std::string BlackBoardSystem::execute_command(const std::string& command) {
+    //return iterator of "command"
+    auto it = command_list.find(command);
+    if(it != command_list.end()){
+        //excute command
+        if(*it == "get_course"){return get_course();}
+    }
+    return "Command Not Found!";
+}
+
+std::string BlackBoardSystem::get_course(){
+    std::string rawData = getRequest("https://bb.cuhk.edu.cn/webapps/portal/execute/tabs/tabAction?tab_tab_group_id=_2_1"); 
+    if (rawData.empty()) {
+        std::cerr << "No response received from server.\n";
+    }
+
+    std::string xpathExpr = "//*[@id=\"_22_1termCourses_noterm\"]/ul/*/a";
+    std::string result = xpathQuery(rawData, xpathExpr);
+
+    return result;
+}
