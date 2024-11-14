@@ -8,10 +8,10 @@ std::string create_request_body(const std::string& model_choice, const std::stri
 
 std::string Model::get_response(const std::string &user_input) const {
     // 使用create_request_body函数构造请求体
-    std::string body = create_request_body(model_choice, user_input);
+    const std::string body = create_request_body(model_choice, user_input);
 
     // API调用
-    cpr::Response r = cpr::Post(
+    cpr::Response r = Post(
         cpr::Url{"https://api.siliconflow.cn/v1/chat/completions"},
         cpr::Header{{"Authorization", "Bearer sk-gwkebcvkhglmxythudwljkhjuafspxfqdgepstnrlzywvdhb"}},
         cpr::Body{body},

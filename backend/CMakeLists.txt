@@ -13,7 +13,8 @@ set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE 
 file(GLOB_RECURSE BACKEND_SOURCES "src/*.cpp")
 
 # 添加后端的可执行文件
-add_executable(backend_executable ${BACKEND_SOURCES})
+add_executable(backend_executable ${BACKEND_SOURCES}
+        test/test_agent.cpp)
 
 # 链接需要的库（例如网络库、数据库库等）
 find_package(cpr CONFIG REQUIRED)
