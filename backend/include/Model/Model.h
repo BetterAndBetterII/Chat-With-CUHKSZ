@@ -12,7 +12,7 @@
 using json = nlohmann::json;
 
 class Model {
-    std::string model_choice = "alibaba/Qwen2-7B-Instruct";
+    std::string model_choice = "gpt-4o-mini";
 public:
     // 返回响应内容的函数
     [[nodiscard]] std::string get_response(const std::string &user_input) const;
