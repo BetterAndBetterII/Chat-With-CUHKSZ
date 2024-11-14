@@ -39,9 +39,16 @@ target_link_libraries(backend_test
 )
 
 # _______ 测试Agent _______
-add_executable(agent_test test/test_agent.cpp)
+add_executable(agent_test test/test_agent.cpp
+        test/test_knowledge.cpp)
 target_link_libraries(agent_test
         PRIVATE
         backend_lib
 )
 
+# _______ 测试Knowledge _______
+add_executable(knowledge_test test/test_knowledge.cpp)
+target_link_libraries(knowledge_test
+        PRIVATE
+        backend_lib
+)
