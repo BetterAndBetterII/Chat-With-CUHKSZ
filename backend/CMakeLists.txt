@@ -1,18 +1,54 @@
 cmake_minimum_required(VERSION 3.16)
 set(CMAKE_CXX_STANDARD 20)
-project(backend_executable)
-# 包含后端的头文件
-include_directories(include)
+project(backend)
 
-# 查找后端的源文件
-file(GLOB_RECURSE BACKEND_SOURCES "src/*.cpp")
 
-# 添加后端的可执行文件
-add_executable(backend_executable ./test/test_blackboard.cpp
-        ${BACKEND_SOURCES})
+# 查找并链接外部库
+find_package(cpr CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 
-# 链接需要的库（例如网络库、数据库库等）
-#target_link_libraries(backend_executable
-#        pthread  # Linux 系统上的线程库示例
-#        # 其他库
-#)
+# 查找源文件（不包含测试文件）
+file(GLOB_RECURSE BACKEND_SOURCES
+        "src/*.cpp"
+)
+
+# 创建后端库而不是可执行文件
+add_library(backend_lib
+        ${BACKEND_SOURCES}
+)
+
+# 设置包含目录
+target_include_directories(backend_lib
+        PUBLIC
+        ${PROJECT_SOURCE_DIR}/include
+)
+
+# 将外部库链接到后端库
+target_link_libraries(backend_lib
+        PUBLIC
+        cpr::cpr
+        nlohmann_json::nlohmann_json
+)
+
+# ----------------- 测试 -----------------
+# _______ 测试BB _______
+add_executable(backend_test test/test_blackboard.cpp)
+target_link_libraries(backend_test
+        PRIVATE
+        backend_lib
+)
+
+# _______ 测试Agent _______
+add_executable(agent_test test/test_agent.cpp
+        test/test_knowledge.cpp)
+target_link_libraries(agent_test
+        PRIVATE
+        backend_lib
+)
+
+# _______ 测试Knowledge _______
+add_executable(knowledge_test test/test_knowledge.cpp)
+target_link_libraries(knowledge_test
+        PRIVATE
+        backend_lib
+)

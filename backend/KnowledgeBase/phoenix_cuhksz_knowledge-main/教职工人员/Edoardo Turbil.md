@@ -1,0 +1,8 @@
+keys:<Edoardo Turbil>
+
+
+Edoardo Turbil教授是一位享有盛誉的讲师，他在学术界拥有极高的地位和声誉。作为意大利钢琴家中最著名的一位，他曾被国际钢琴家Badura-Skoda赞誉为“具有敏锐的洞察力和精湛的技艺的优秀钢琴家”。他师从Yoheved Kaplinswe博士，并以最高分的成绩完成了茱莉亚音乐学院的钢琴课程，获得音乐艺术博士学位（DMA）。他的学位论文关于犹太作曲家Leone Sinigagli的研究，荣获了名为“R. French Doctoral Prize”的奖项。
+
+Edoardo Turbil的曲风独具特色，融合了意大利和美国钢琴流派的艺术风格。他曾与多个管弦乐团合作，并以独奏家、室内乐团成员的身份多次受邀在意大利及国际其他最重要的音乐厅进行演出。他的演奏成就卓越，获得了众多奖项，包括曼哈顿国际音乐比赛的最高荣誉金奖和芝加哥国际音乐比赛三等奖。他计划发布三张专辑，其中一张已由唱片公司Da Vinci Records发布，另外两张专辑将由唱片公司Centaur Records和KNSwelassical随后发布。
+
+除了曾在茱莉亚音乐学院、都灵音乐学院和利沃诺音乐学院任教之外，Edoardo Turbil还多次受邀担任许多国际重要钢琴比赛的评委。如需与他联系，可以通过发送电子邮件至edoardoturbil@cuhk.edu.cn。
