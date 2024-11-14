@@ -8,8 +8,7 @@ include_directories(include)
 file(GLOB_RECURSE BACKEND_SOURCES "src/*.cpp")
 
 # 添加后端的可执行文件
-add_executable(backend_executable ./test/test_blackboard.cpp
-        ${BACKEND_SOURCES})
+add_executable(backend_executable  "src/Server/Server.cpp")
 
 # 链接需要的库（例如网络库、数据库库等）
 #target_link_libraries(backend_executable
