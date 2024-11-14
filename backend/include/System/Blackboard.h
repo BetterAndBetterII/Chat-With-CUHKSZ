@@ -9,6 +9,7 @@
 #include "../../include/System/CurlGlobal.h"
 #include <curl/curl.h>
 #include <set>
+#include<vector>
 
 class BlackBoardSystem{
 private:
@@ -30,10 +31,13 @@ private:
 
     //private function
     std::string getRequest(const std::string& url);
+    std::string postRequest(const std::string& url, const std::string& strdata);
 
-    std::string xpathQuery(const std::string& xmlContent, const std::string& xpathExpr);
+    std::vector<std::string> xpathQuery(const std::string& xmlContent, const std::string& xpathExpr);
 
-    std::string get_course();
+    //接受学期作为参数，默认值为”2410UG“ 
+    std::string get_course_id(const std::string& crouse);
+    
 
 
 public:
@@ -50,6 +54,12 @@ public:
 
     bool change_info(const std::string& username, const std::string& password);
     //若未登录，修改账号密码并返回true，若已登录则不会修改账号密码，返回false
+
+    std::string get_announcement(const std::string& crouse, const int number = 3 );
+
+    std::string get_course(const std::string& term="2410UG");
+    
+    std::string get_undo_assignment();
 
 };
 

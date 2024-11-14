@@ -60,12 +60,16 @@ void test_blackboard(){
     if(bb->login()){
 
         std::cout << "---Testing show_command---" << std::endl;
-        //test show_command
         std::cout << bb->get_commands() << std::endl;
 
         std::cout << "---Testing get_course---" << std::endl;
-        std::string command = "get_course";
-        std::cout << bb->execute_command(command) << std::endl;
+        std::cout << bb->get_course() << std::endl;
+
+        std::cout << "---Testing get_announcement---" << std::endl;
+        std::cout << bb->get_announcement("CSC3002") << std::endl;
+
+        std::cout << "---Testing get_undo_assignments---" << std::endl;
+        std::cout << bb->get_undo_assignment() << std::endl;
     }
     delete bb;
 }
