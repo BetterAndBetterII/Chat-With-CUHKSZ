@@ -1,23 +1,47 @@
 cmake_minimum_required(VERSION 3.16)
 set(CMAKE_CXX_STANDARD 20)
-project(backend_executable)
-# 包含后端的头文件
-include_directories(${PROJECT_SOURCE_DIR}/include)
+project(backend)
 
-#vcpkg包管理器
-set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
-#set(CMAKE_TOOLCHAIN_FILE "include/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
-#set(VCPKG_FEATURE_FLAGS "manifests")
 
-# 查找后端的源文件
-file(GLOB_RECURSE BACKEND_SOURCES "src/*.cpp")
-
-# 添加后端的可执行文件
-add_executable(backend_executable ${BACKEND_SOURCES}
-        test/test_agent.cpp)
-
-# 链接需要的库（例如网络库、数据库库等）
+# 查找并链接外部库
 find_package(cpr CONFIG REQUIRED)
-target_link_libraries(backend_executable PRIVATE cpr::cpr)
 find_package(nlohmann_json CONFIG REQUIRED)
-target_link_libraries(backend_executable PRIVATE nlohmann_json::nlohmann_json)
+
+# 查找源文件（不包含测试文件）
+file(GLOB_RECURSE BACKEND_SOURCES
+        "src/*.cpp"
+)
+
+# 创建后端库而不是可执行文件
+add_library(backend_lib
+        ${BACKEND_SOURCES}
+)
+
+# 设置包含目录
+target_include_directories(backend_lib
+        PUBLIC
+        ${PROJECT_SOURCE_DIR}/include
+)
+
+# 将外部库链接到后端库
+target_link_libraries(backend_lib
+        PUBLIC
+        cpr::cpr
+        nlohmann_json::nlohmann_json
+)
+
+# ----------------- 测试 -----------------
+# _______ 测试BB _______
+add_executable(backend_test test/test_blackboard.cpp)
+target_link_libraries(backend_test
+        PRIVATE
+        backend_lib
+)
+
+# _______ 测试Agent _______
+add_executable(model_test test/test_agent.cpp)
+target_link_libraries(model_test
+        PRIVATE
+        backend_lib
+)
+

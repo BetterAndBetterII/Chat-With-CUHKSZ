@@ -12,8 +12,8 @@ std::string Model::get_response(const std::string &user_input) const {
 
     // API调用
     cpr::Response r = Post(
-        cpr::Url{"https://api.siliconflow.cn/v1/chat/completions"},
-        cpr::Header{{"Authorization", "Bearer sk-gwkebcvkhglmxythudwljkhjuafspxfqdgepstnrlzywvdhb"}},
+        cpr::Url{"https://api.nextapi.fun/v1/chat/completions"},
+        cpr::Header{{"Authorization", "Bearer ak-GZTdsRjD60WUwxUrtf07b76t8K1YSbsOPiu7q01Vj0DPB9Hy"}},
         cpr::Body{body},
         cpr::Header{{"Content-Type", "application/json"}}
     );
