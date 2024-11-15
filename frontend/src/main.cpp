@@ -118,13 +118,13 @@ public:
 
         // 消息输入区域
         messageInput = new CustomTextEdit;
-        messageInput->setPlaceholderText("输入消息...");
+        messageInput->setPlaceholderText("Text anything！");
         messageInput->setStyleSheet("background-color: #ffffff; border: 1px solid #ccc; border-radius: 12px; padding: 10px;");
         messageInput->setMinimumHeight(50);
         messageInput->setMaximumHeight(150);
         messageInput->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
-        auto *sendButton = new QPushButton("发送");
+        auto *sendButton = new QPushButton("Send");
         sendButton->setStyleSheet("background-color: #0078d7; color: white; border-radius: 12px; padding: 10px 20px;");
         sendButton->setFixedHeight(50);
 
@@ -136,7 +136,7 @@ public:
 
         // 主聊天布局
         auto *chatLayout = new QVBoxLayout;
-        chatLayout->addWidget(new QLabel("ChatGPT 模拟聊天窗口"));
+        chatLayout->addWidget(new QLabel("Chat with me @_@"));
         chatLayout->addWidget(chatList);
         chatLayout->addLayout(inputLayout);
         chatLayout->setSpacing(15);
@@ -161,18 +161,18 @@ public:
         sessionHistory[currentSessionIndex] = QList<QString>();  // 新建一个空会话
 
         // 添加多个初始的历史记录
-        addNewHistoryItem("会话 1");
-        addNewHistoryItem("会话 2");
-        addNewHistoryItem("会话 3");
-        addNewHistoryItem("会话 4");
-        addNewHistoryItem("会话 5");
+        addNewHistoryItem("Text 1");
+        addNewHistoryItem("Text 2");
+        addNewHistoryItem("Text 3");
+        addNewHistoryItem("Text 4");
+        addNewHistoryItem("Text 5");
 
         // 初始化每个会话的聊天记录（仅模拟）
-        sessionHistory[1] = QList<QString> { "用户: 你好，今天天气怎么样？", "ChatGPT: 今天的天气很不错，阳光明媚！" };
-        sessionHistory[2] = QList<QString> { "用户: 帮我查一下股票信息。", "ChatGPT: 目前无法直接查股票信息，但你可以访问相关网站。" };
-        sessionHistory[3] = QList<QString> { "用户: 你能给我讲个笑话吗？", "ChatGPT: 当然啦，为什么程序员总是困惑？因为他们总在调试生活的 Bug！" };
-        sessionHistory[4] = QList<QString> { "用户: 今天的新闻头条是什么？", "ChatGPT: 今天的头条是关于科技进展的新闻，新型量子计算机取得了重大突破。" };
-        sessionHistory[5] = QList<QString> { "用户: 你会唱歌吗？", "ChatGPT: 我虽然不会唱歌，但我可以给你提供歌词！" };
+        sessionHistory[1] = QList<QString> { "User: What is Chat with CUHKSZ？", "Chat_With_CUHKSZ: I am a chatbot always ready to help！ I know a lot about CUHKSZ haha." };
+        sessionHistory[2] = QList<QString> { "User: heihei", "Chat_With_CUHKSZ:haha" };
+        sessionHistory[3] = QList<QString> { "User: miaomiao", "Chat_With_CUHKSZ: wangwang" };
+        sessionHistory[4] = QList<QString> { "User: gaga", "Chat_With_CUHKSZ:gugu" };
+        sessionHistory[5] = QList<QString> { "User: sing!", "Chat_With_CUHKSZ:LALALA~" };
 
         // 连接发送按钮功能
         connect(sendButton, &QPushButton::clicked, this, [this]() {
@@ -190,7 +190,7 @@ public:
             loadSession(index + 1);
         });
 
-        setWindowTitle("ChatGPT 模拟界面");
+        setWindowTitle("Chat_With_CUHKSZ >_<");
         resize(1000, 700);
 
         // 设置样式表
@@ -230,7 +230,7 @@ public:
             const QList<QString> &messages = sessionHistory[index];
             for (const QString &message : messages) {
                 // 判断是用户还是ChatGPT消息
-                bool isUser = message.startsWith("用户:");
+                bool isUser = message.startsWith("User:");
                 QString avatarPath = isUser ? ":../resources/picture/img.png" : ":../resources/picture/img_1.png";
                 addMessage(chatList, message, avatarPath, isUser);
             }
@@ -243,7 +243,7 @@ public:
         QString message = messageInput->toPlainText().trimmed();
         if (!message.isEmpty()) {
             // 添加用户消息到当前会话
-            addMessage(chatList, message, ":../resources/picture/img.png", true);
+            addMessage(chatList, message, "/home/yf/Desktop/Workplace/Group-project/Chat-With-CUHKSZ/frontend/resources/picture", true);
             sessionHistory[currentSessionIndex].append("用户: " + message);
 
             // 模拟 ChatGPT 回复
