@@ -6,6 +6,10 @@ project(backend)
 # 查找并链接外部库
 find_package(cpr CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
+# 查找libcurl
+find_package(CURL CONFIG REQUIRED)
+#查找Libxml
+find_package(LibXml2 CONFIG REQUIRED)
 
 # 查找源文件（不包含测试文件）
 file(GLOB_RECURSE BACKEND_SOURCES
@@ -28,6 +32,8 @@ target_link_libraries(backend_lib
         PUBLIC
         cpr::cpr
         nlohmann_json::nlohmann_json
+        curl::curl
+        LibXml2::LibXml2
 )
 
 # ----------------- 测试 -----------------

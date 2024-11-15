@@ -1,7 +1,7 @@
 version: '3'
 services:
   cpp-dev:
-    image: ubuntu:20.04
+    image: ubuntu:22.04
     container_name: cpp_dev_env
     stdin_open: true
     tty: true
