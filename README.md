@@ -40,6 +40,6 @@ target_link_libraries(backend_executable CURL::libcurl)
 - [ ShenXuhuan] 前端完成一个简单的界面，打印 Helloworld
 - [ LinWentao ] 服务器完成一个简单的接口/helloworld，返回 HTTPResponse text/plain Helloworld
 - [ WenMing ] 后端完成 BlackBoardSystem
-- [ ZhangYuzhong] Model 实现一个简单的大模型调用
+- [ ZhangYuzhong ] Model 实现一个简单的大模型调用
 - [ LinYufeng ] Agent 实现简单自循环，实现随机动作（查询，执行，总结输出），实现历史记录存储
 - [ XUYifan] Knowledge 构思完成，实现一个简单的文本存储

@@ -45,3 +45,4 @@ build/*
 
 #ignore build directory
 backend/backend_build/
+./.idea/*
