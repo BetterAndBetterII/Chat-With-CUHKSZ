@@ -3,6 +3,9 @@ project(Chat_With_CUHKSZ_Frontend)
 
 set(CMAKE_CXX_STANDARD 20)
 
+# 启用Qt的自动MOC功能
+set(CMAKE_AUTOMOC ON)
+
 # 查找并链接外部库
 #find_package(cpr CONFIG REQUIRED)
 #find_package(nlohmann_json CONFIG REQUIRED)
@@ -29,8 +32,8 @@ target_link_libraries(frontend_lib
         Qt5::Core
         Qt5::Gui
         Qt5::Widgets
-        #        cpr::cpr
-        #        nlohmann_json::nlohmann_json
+#        cpr::cpr
+#        nlohmann_json::nlohmann_json
 )
 
 # ----------------- 测试 -----------------
