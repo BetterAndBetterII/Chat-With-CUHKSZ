@@ -1,0 +1,8 @@
+{
+  "name" : "backend-executable",
+  "version" : "1.0",
+  "dependencies" : [
+    "cpr",
+    "nlohmann-json"
+  ]
+}
