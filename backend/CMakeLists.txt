@@ -57,3 +57,10 @@ target_link_libraries(knowledge_test
         PRIVATE
         backend_lib
 )
+
+# _______ 测试BackendServer _______
+add_executable(server_test src/Server/Server.cpp)
+target_link_libraries(server_test
+        PRIVATE
+        backend_lib
+)
