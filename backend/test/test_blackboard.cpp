@@ -68,8 +68,11 @@ void test_blackboard(){
         std::cout << "---Testing get_announcement---" << std::endl;
         std::cout << bb->get_announcement("CSC3002") << std::endl;
 
-        std::cout << "---Testing get_undo_assignments---" << std::endl;
-        std::cout << bb->get_undo_assignment() << std::endl;
+        std::cout << "---Testing get_assignments---" << std::endl;
+        std::string crouse;
+        std::cout << "Crouse Name?(e.g. CSC3001)" <<std::endl;
+        std::cin >> crouse;
+        std::cout << bb->get_assignment(crouse) << std::endl;
     }
     delete bb;
 }
