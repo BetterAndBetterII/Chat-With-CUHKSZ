@@ -1,29 +1,23 @@
 //
 // Created by Gary on 24-10-23.
-// Complemented by Wen Ming
+// Complemented by Wen on 24-11-18.
 //
-#include <iostream>
-#include <sstream>
-#include <fstream>
-#include <cstring>
-#include <regex>
-#include <chrono>
-#include <stdexcept>
-#include <filesystem>
-#include <curl/curl.h>
-#include <set> //std::set<> command_list
-#include <vector>
-#include <algorithm>
+
 #include "../../include/System/Blackboard.h"
-#include <libxml/HTMLparser.h>
-#include <libxml/xpath.h> 
+#include <iostream> //std::cerr
+#include <sstream> 
+#include <cstring>
+#include <regex> //space_cutter()
+#include <chrono> //missDue() 
+#include <filesystem> //destructor
 
 BlackBoardSystem::BlackBoardSystem(const std::string& username, const std::string& password) : curl_global_manager(){
     //初始化变量
     this->command_list = {
         "get_course",
         "get_annoucement",
-        "get_assignment"
+        "get_assignment",
+        "get_grades"
     };
     this->username = username;
     this->password = password;
@@ -164,7 +158,7 @@ bool BlackBoardSystem::login(){
 
     }
 
-    throw std::runtime_error("Failed to initialize bb_handle.");
+    std::cerr << "Failed to initialize bb_handle." << std::endl;
     return false;
 
 }
@@ -299,6 +293,7 @@ std::string BlackBoardSystem::get_announcement(const std::string& crouse, const 
         std::for_each(headers.begin(), headers.end(), [](std::string& str) {
             str = str.substr(str.find_first_not_of(" \t\n\r\v"));
         }); 
+        
 
         std::string total_result = "";
         for(int i = 0 ; i < headers.size() && i < number; ++i){
@@ -331,11 +326,6 @@ std::string BlackBoardSystem::get_assignment(const std::string& crouse)const{
                     total_assignment_urls
                 );
             }
-            //test
-            /*std::cout << crouse_name[i] <<std::endl;
-            for(std::string assignment_url : total_assignment_urls){
-                std::cout << assignment_url << std::endl;
-            }*/
         }
     }
 
@@ -353,17 +343,10 @@ void BlackBoardSystem::recursive_search_assignments(const std::string& data, std
 
     std::vector<std::string> assignment_urls = xpathQuery(data, "//a[starts-with(@href, '/webapps/assignment/uploadAssignment') or starts-with(@href, '/webapps/blackboard/content/launchAssessment') ]/@href");
     std::vector<std::string> content_urls = xpathQuery(data, "/html/body/div/div/div/div/div/div/div/ul/li/div/h3/a[starts-with(@href, '/webapps/blackboard/content/listContent')]/@href");
-    //test print
-    //std::cout << "as size: " << assignment_urls.size() << " content size: " << content_urls.size() <<std::endl;
-    //std::cout << vector_toString(assignment_urls) << vector_toString(content_urls) << std::endl;
 
     for(std::string assignmnet_url : assignment_urls){
         total_assignmnet_urls.push_back(assignmnet_url);
-        //test print
-        //std::cout << "total as add 1" << std::endl;
     }
-
-    //std::cout << "add procedure end" << std::endl;
 
     if(!content_urls.empty()){
         for(std::string content_url : content_urls){
@@ -398,10 +381,6 @@ std::string BlackBoardSystem::space_cutter(const std::string& str)const{
 std::string BlackBoardSystem::parse_assignment_url(const std::string& url)const{
     std::stringstream result;
     std::string rawData = getRequest(url);
-    //test
-    std::ofstream outFile("outputassess.html");
-    outFile << rawData;
-    outFile.close();
     if(url.find("launchAssessment")!=std::string::npos){
         std::string header = space_cutter(xpathQuery(rawData, "//span[@id='pageTitleText']")[0]);
         std::string title = header.substr(header.find(":")+1);
@@ -478,4 +457,28 @@ bool BlackBoardSystem::missDue(const std::string& content, const std::string& pa
     
     return false;
     
+}
+
+std::string BlackBoardSystem::get_grades(const std::string& crouse)const{
+    std::string id = get_course_id(crouse);
+    if(!id.empty()){
+        std::string url ="https://bb.cuhk.edu.cn/webapps/bb-mygrades-BBLEARN/myGrades?course_id=" + id + "&stream_name=mygrades";
+        std::string rawData = getRequest(url);
+        std::vector<std::string> name = xpathQuery(rawData, "//div[@id='grades_wrapper']/div/div[@class='cell gradable']/span | //div[@id='grades_wrapper']/div/div[@class='cell gradable']/a ");
+        std::vector<std::string> grades = xpathQuery(rawData, "//div[@id='grades_wrapper']/div/div[@class='cell grade']/span[1]");
+        std::vector<std::string> grade_time = xpathQuery(rawData, "//div[@id='grades_wrapper']/div/div[@class='cell activity timestamp']/span[1]");
+        std::vector<std::string> grade_stamp = xpathQuery(rawData, "//div[@id='grades_wrapper']/div/div[@class='cell activity timestamp']/span[2]");
+        
+
+        std::stringstream total_result;
+        total_result << crouse << " grades: " << std::endl;
+        for(int i = 0 ; i < name.size(); ++i){
+            total_result << space_cutter(name[i]) + " " + space_cutter(grade_stamp[i]) << std::endl;
+            total_result << "Grades: " << space_cutter(grades[i]) << std::endl;
+            total_result << space_cutter(grade_time[i]) << std::endl;
+        }
+
+        return total_result.str();
+    }
+    return "";
 }

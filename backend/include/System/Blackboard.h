@@ -1,15 +1,16 @@
 //
 // Created by Gary on 24-10-24.
-//
+// Complemented by Wen on 24-11-18.
 
 #ifndef CHAT_WITH_CUHKSZ_BLACKBOARD_H
 #define CHAT_WITH_CUHKSZ_BLACKBOARD_H
 
-//#include "../../include/System/System.h" 
 #include "../../include/System/CurlGlobal.h"
 #include <curl/curl.h>
+#include <libxml/HTMLparser.h>
+#include <libxml/xpath.h> 
 #include <set>
-#include<vector>
+#include <vector>
 
 class BlackBoardSystem{
 private:
@@ -104,6 +105,15 @@ public:
      *         分数
     */
 
+    std::string get_grades(const std::string& crouse) const;
+    /*参数：
+     *crouse: 课程名称（例如 'CSC3001') 
+     *number: 返回的annoucements数量（按新到旧依次输出）默认值为3
+     *返回值:
+     * 作业名称
+     * 分数
+     * 批改日期
+    */
 };
 
 

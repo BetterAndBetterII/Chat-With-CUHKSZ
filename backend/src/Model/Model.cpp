@@ -2,8 +2,16 @@
 
 // 函数：构建请求体
 std::string create_request_body(const std::string& model_choice, const std::string& user_input) {
-    return std::format(R"({{"model": "{}", "messages": [{{"role": "user", "content": "{}"}}]}})",
-                       model_choice, user_input);
+    //return std::format(R"({{"model": "{}", "messages": [{{"role": "user", "content": "{}"}}]}})",
+    //                   model_choice, user_input);
+    //不用format的写法
+    std::string json = 
+    R"({"model": ")" + model_choice + 
+    R"(", "messages": [{"role": "user", "content": ")" + user_input + 
+    R"("}]})";
+
+    return json;
+
 }
 
 std::string Model::get_response(const std::string &user_input) const {
