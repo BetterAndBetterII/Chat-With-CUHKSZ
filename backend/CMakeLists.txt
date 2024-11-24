@@ -32,7 +32,7 @@ target_link_libraries(backend_lib
         PUBLIC
         cpr::cpr
         nlohmann_json::nlohmann_json
-        curl::curl
+        CURL::libcurl
         LibXml2::LibXml2
 )
 
