@@ -9,7 +9,7 @@ set(CMAKE_AUTOMOC ON)
 # 查找并链接外部库
 #find_package(cpr CONFIG REQUIRED)
 #find_package(nlohmann_json CONFIG REQUIRED)
-find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets)
+##find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets)
 # 查找源文件（不包含测试文件）
 file(GLOB_RECURSE FRONTEND_SOURCES
         "src/*.cpp"
@@ -32,8 +32,8 @@ target_link_libraries(frontend_lib
         Qt5::Core
         Qt5::Gui
         Qt5::Widgets
-#        cpr::cpr
-#        nlohmann_json::nlohmann_json
+        cpr::cpr
+        nlohmann_json::nlohmann_json
 )
 
 # ----------------- 测试 -----------------

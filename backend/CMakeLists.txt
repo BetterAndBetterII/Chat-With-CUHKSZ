@@ -2,19 +2,20 @@ cmake_minimum_required(VERSION 3.16)
 set(CMAKE_CXX_STANDARD 20)
 project(backend)
 
-
 # 查找并链接外部库
 find_package(cpr CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
-# 查找libcurl
 find_package(CURL CONFIG REQUIRED)
-#查找Libxml
 find_package(LibXml2 CONFIG REQUIRED)
 
 # 查找源文件（不包含测试文件）
 file(GLOB_RECURSE BACKEND_SOURCES
         "src/*.cpp"
 )
+
+# 自动查找并添加所有 include 目录
+file(GLOB_RECURSE INCLUDE_DIRS "include/*" "third_party/*")
+set(INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/include ${INCLUDE_DIRS})
 
 # 创建后端库而不是可执行文件
 add_library(backend_lib
@@ -24,7 +25,7 @@ add_library(backend_lib
 # 设置包含目录
 target_include_directories(backend_lib
         PUBLIC
-        ${PROJECT_SOURCE_DIR}/include
+        ${INCLUDE_DIRS}
 )
 
 # 将外部库链接到后端库
