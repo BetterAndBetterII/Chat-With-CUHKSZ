@@ -1,15 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" remoteFilesAllowedToDisappearOnAutoupload="false" confirmBeforeUploading="false">
+  <component name="PublishConfigData" autoUpload="Always" serverName="CSC3002_CPP (26d0990e-1407-4339-9dbf-361057324c60)" deleteMissingItems="true" createEmptyFolders="true" confirmBeforeUploading="false" confirmBeforeDeletion="false" autoUploadExternalChanges="true">
+    <option name="confirmBeforeDeletion" value="false" />
     <option name="confirmBeforeUploading" value="false" />
     <serverData>
+      <paths name="3050_Proj3_QT (eab35fc9-5feb-475d-ac13-274ca6b9013d)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/tmp/backend" local="$PROJECT_DIR$/backend" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="CSC3002_CPP (26d0990e-1407-4339-9dbf-361057324c60)">
         <serverdata>
           <mappings>
             <mapping deploy="/home/deploy/workspace/Chat_With_CUHKSZ" local="$PROJECT_DIR$" />
           </mappings>
           <excludedPaths>
-            <excludedPath local="true" path="$PROJECT_DIR$/backend/cmake-build-debug" />
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug" />
             <excludedPath local="true" path="$PROJECT_DIR$/backend/cmake-build-debug" />
             <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug" />
           </excludedPaths>
@@ -30,5 +38,6 @@
         </serverdata>
       </paths>
     </serverData>
+    <option name="myAutoUpload" value="ALWAYS" />
   </component>
 </project>
