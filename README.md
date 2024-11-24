@@ -43,3 +43,12 @@ target_link_libraries(backend_executable CURL::libcurl)
 - [ ZhangYuzhong ] Model 实现一个简单的大模型调用
 - [ LinYufeng ] Agent 实现简单自循环，实现随机动作（查询，执行，总结输出），实现历史记录存储
 - [ XUYifan] Knowledge 构思完成，实现一个简单的文本存储
+
+2. 第二阶段
+
+- [ ShenXuhuan] 登录界面，历史记录，(独立运行?)
+- [ LinWentao ] 历史记录管理（agent中分离），传递history给agent 前后端接口（历史记录，加载最后一次对话框，点击直接执行按钮，发送问题id）返回文本文件，
+- [ WenMing ] 后端完成 sis, libary
+- [ ZhangYuzhong ] 后端完成booking, email
+- [ LinYufeng ] Agent get用户最新问题，get history， 接口：各个文件函数的describe
+- [ XUYifan] Knowledge 多选关键词搜索，返回如前20个结果（关键词权重计分排序//加入agent进行排序）
