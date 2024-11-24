@@ -38,8 +38,15 @@ target_link_libraries(backend_lib
 
 # ----------------- 测试 -----------------
 # _______ 测试BB _______
-add_executable(backend_test test/test_blackboard.cpp)
-target_link_libraries(backend_test
+add_executable(blackboard_test test/test_blackboard.cpp)
+target_link_libraries(blackboard_test
+        PRIVATE
+        backend_lib
+)
+
+# _______ 测试Booking _______
+add_executable(booking_test test/test_booking.cpp)
+target_link_libraries(booking_test
         PRIVATE
         backend_lib
 )
