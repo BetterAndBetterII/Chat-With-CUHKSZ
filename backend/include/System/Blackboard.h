@@ -21,6 +21,8 @@ private:
     
     bool is_login;
 
+    static const int ELEM_TO_FIND = 3;
+
     //cookiefile存储libcurl生成的cookie文件的路径
     std::string cookiefile;
 
@@ -78,7 +80,7 @@ public:
     bool change_info(const std::string& username, const std::string& password);
     //若未登录成功(is_login == false)，则修改账号密码并返回true，若已登录则不会修改账号密码，返回false
 
-    std::string get_announcement(const std::string& crouse, const int number = 3 ) const;
+    std::string get_announcement(const std::string& crouse, const int number = ELEM_TO_FIND ) const;
     /*参数：
      *crouse: 课程名称（例如 'CSC3001') 
      *number: 返回的annoucements数量（按新到旧依次输出）默认值为3
