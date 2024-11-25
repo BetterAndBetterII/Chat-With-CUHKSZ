@@ -50,8 +50,8 @@ void test_blackboard(){
     std::cout << "=====Testing BlackBoard=====" << std::endl;
     std::cout << "---Testing Login---" << std::endl;
     //basic info input
-    std::string username = "";
-    std::string password = "";
+    std::string username;
+    std::string password;
     std::cout << "Username:" << std::endl;
     std::cin >> username;
     std::cout << "Password:" << std::endl;

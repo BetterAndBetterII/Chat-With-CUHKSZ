@@ -50,20 +50,27 @@ void test_booking(){
     std::cout << "=====Testing Booking=====" << std::endl;
     std::cout << "---Testing Login---" << std::endl;
     //basic info input
-    std::string username = "";
-    std::string password = "";
+    std::string username;
+    std::string password;
     std::cout << "Username:" << std::endl;
     std::cin >> username;
     std::cout << "Password:" << std::endl;
     std::cin >> password;
+    std::string telephone = "1324567890";
+    std::string reason = "test";
+    std::string details = "test";
+    std::string field_name = "badminton";
+    std::string start_time = "2024-11-25 18:00";
+    std::string end_time = "2024-11-25 19:00";
     auto *booking = new BookingSystem(username, password);
     if(booking->login()){
         std::cout << "---Testing retrieve_field_info---" << std::endl;
-        FieldEvent field_event = booking->retrieve_field_info("badminton", "2024-11-25", "2024-11-25");
-        std::vector<std::string> places = field_event.is_available("2024-11-25 18:00:00", "2024-11-25 19:00:00");
-        for (const auto& place : places) {
-            std::cout << place << std::endl;
-        }
+        std::string available_time = booking->get_available_time("badminton", "2024-11-25");
+        std::cout << available_time << std::endl;
+
+        booking->set_booker(telephone, reason, details);
+        std::string res = booking->book_field(field_name, start_time, end_time);
+        std::cout << res << std::endl;
     }
     delete booking;
 }
