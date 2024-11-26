@@ -32,9 +32,9 @@ jobs:
     - name: Cache CMake
       uses: actions/cache@v4
       with:
-          path: C:\tools\cmake
-          key: cmake-cache-${{ runner.os }}-v1
-          restore-keys: |
+        path: C:\tools\cmake
+        key: cmake-cache-${{ runner.os }}-v1
+        restore-keys: |
           cmake-cache-${{ runner.os }}-
 
     # 缓存 Ninja
@@ -97,6 +97,7 @@ jobs:
 
     # 安装和缓存 vcpkg
     - name: Cache vcpkg
+      id: cache-vcpkg
       uses: actions/cache@v4
       with:
         path: |
@@ -105,7 +106,7 @@ jobs:
           !${{env.VCPKG_ROOT}}/buildtrees
           !${{env.VCPKG_ROOT}}/packages
           !${{env.VCPKG_ROOT}}/downloads
-        key: vcpkg-windows-${{hashFiles('vcpkg.json')}}
+        key: vcpkg-windows-${{hashFiles('frontend/vcpkg.json')}}
 
     - name: Install vcpkg
       if: steps.cache-vcpkg.outputs.cache-hit != 'true'
