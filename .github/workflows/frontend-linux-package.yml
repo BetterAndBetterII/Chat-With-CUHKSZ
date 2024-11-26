@@ -47,7 +47,6 @@ jobs:
           libsystemd-dev \
           pkg-config \
           ninja-build \
-          libxcrypt-dev \
           libmount-dev \
           libblkid-dev \
           libcrypt-dev \
