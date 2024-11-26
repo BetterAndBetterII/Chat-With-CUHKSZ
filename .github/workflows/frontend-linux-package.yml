@@ -56,7 +56,8 @@ jobs:
           libxi-dev \
           libxtst-dev \
           meson \
-          python3-jinja2
+          python3-jinja2 \
+          libfuse2
 
     # 安装 meson（libsystemd 需要）
     - name: Install Meson
