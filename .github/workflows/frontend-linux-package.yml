@@ -14,7 +14,7 @@ env:
 
 jobs:
   build:
-    runs-on: [self-hosted, Linux, x64, azure]
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4

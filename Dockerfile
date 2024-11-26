@@ -14,18 +14,21 @@ RUN apt-get update && apt-get install -y \
     python3 \
     bison \
     # libxcrypt 构建依赖
-    libmount-dev \        
-    libblkid-dev \        
-    libcrypt-dev \        
-    libsystemd-dev \      
-    libssl-dev \          
-    libpcre2-dev \        
+    libmount-dev \
+    libblkid-dev \
+    libcrypt-dev \
+    libsystemd-dev \
+    libssl-dev \
+    libpcre2-dev \
     libxi-dev \
     libxtst-dev \
-    meson \               
+    meson \
     python3-jinja2 
 
 RUN apt install -y autoconf automake libtool pkg-config
+
+# 清理缓存
+RUN rm -rf /var/lib/apt/lists/*
 
 # 第二阶段：vcpkg 安装和依赖缓存
 FROM base AS vcpkg
