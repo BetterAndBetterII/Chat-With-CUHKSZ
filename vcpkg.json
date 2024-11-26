@@ -1,0 +1,16 @@
+{
+    "name": "chat-with-cusz",
+    "version": "1.0.0",
+    "dependencies": [
+      "curl",
+      "nlohmann-json",
+      "libxml2",
+      "openssl",
+      "cpr",
+      {
+        "name": "qt5",
+        "features": ["core", "gui", "widgets"]
+      }
+    ],
+    "builtin-baseline": "2024-03-21"
+}

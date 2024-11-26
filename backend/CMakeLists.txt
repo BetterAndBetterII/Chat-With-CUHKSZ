@@ -37,7 +37,7 @@ target_link_libraries(backend_lib
 )
 
 # ----------------- 部署 -----------------
-add_executable(backend src/main.cpp)
+add_executable(backend src/Server/Server.cpp)
 target_link_libraries(backend
         PRIVATE
         backend_lib
