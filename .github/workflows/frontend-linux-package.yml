@@ -105,6 +105,8 @@ jobs:
               -DVCPKG_TARGET_TRIPLET=${{env.VCPKG_DEFAULT_TRIPLET}} \
               -DCMAKE_C_COMPILER=gcc \
               -DCMAKE_CXX_COMPILER=g++ \
+              -DBUILD_BACKEND=OFF \
+              -DBUILD_FRONTEND=ON \
               -GNinja
 
     - name: Build

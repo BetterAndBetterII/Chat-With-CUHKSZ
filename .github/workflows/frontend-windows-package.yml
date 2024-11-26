@@ -78,6 +78,8 @@ jobs:
               -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} `
               -DCMAKE_TOOLCHAIN_FILE=${{env.VCPKG_ROOT}}/scripts/buildsystems/vcpkg.cmake `
               -DVCPKG_TARGET_TRIPLET=${{env.VCPKG_DEFAULT_TRIPLET}}
+              -DBUILD_BACKEND=OFF \
+              -DBUILD_FRONTEND=ON \
 
     - name: Build
       run: |
