@@ -14,10 +14,6 @@ RUN apt-get update && apt-get install -y \
     python3 \
     bison \
     # libxcrypt 构建依赖
-    autoconf \
-    automake \
-    libtool \
-    pkg-config \
     libmount-dev \        
     libblkid-dev \        
     libcrypt-dev \        
@@ -28,6 +24,8 @@ RUN apt-get update && apt-get install -y \
     libxtst-dev \
     meson \               
     python3-jinja2 
+
+RUN apt install autoconf automake libtool pkg-config
 
 # 第二阶段：vcpkg 安装和依赖缓存
 FROM base AS vcpkg
@@ -60,6 +58,7 @@ WORKDIR /app
 # 复制 CMake 文件
 COPY CMakeLists.txt .
 COPY backend/CMakeLists.txt backend/
+COPY frontend/CMakeLists.txt frontend/
 
 # 配置 CMake
 RUN cmake -B build \
