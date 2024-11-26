@@ -13,12 +13,19 @@ RUN apt-get update && apt-get install -y \
     ninja-build \
     python3 \
     bison \
+    # libxcrypt 构建依赖
+    autoconf \
+    automake \
+    libtool \
+    pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
 # 第二阶段：vcpkg 安装和依赖缓存
 FROM base AS vcpkg
 ENV VCPKG_ROOT=/opt/vcpkg
 ENV VCPKG_DEFAULT_TRIPLET=x64-linux
+# 启用二进制缓存
+ENV VCPKG_BINARY_SOURCES="clear;default,readwrite"
 
 # 安装 vcpkg
 RUN git clone https://github.com/Microsoft/vcpkg.git ${VCPKG_ROOT}
@@ -27,7 +34,11 @@ RUN ${VCPKG_ROOT}/vcpkg integrate install
 
 # 仅复制 vcpkg.json 以利用缓存
 COPY vcpkg.json /tmp/vcpkg.json
-RUN cd /tmp && ${VCPKG_ROOT}/vcpkg install --x-manifest-root=. --x-install-root=${VCPKG_ROOT}/installed
+RUN cd /tmp && ${VCPKG_ROOT}/vcpkg install \
+    --x-manifest-root=. \
+    --x-install-root=${VCPKG_ROOT}/installed \
+    --feature-flags=binarycaching,manifests \
+    --clean-after-build
 
 # 第三阶段：构建项目
 FROM vcpkg AS builder

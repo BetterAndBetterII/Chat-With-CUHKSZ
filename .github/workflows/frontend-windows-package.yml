@@ -16,7 +16,7 @@ env:
 
 jobs:
   build:
-    runs-on: [self-hosted, Windows]
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v4
@@ -24,38 +24,32 @@ jobs:
         submodules: recursive
 
     # 安装必要的编译工具和系统依赖
-    - name: Install Build Tools and Dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          build-essential \
-          gcc \
-          g++ \
-          ninja-build \
-          cmake \
-          libgl1-mesa-dev \
-          libxkbcommon-x11-0 \
-          libxcb-icccm4 \
-          libxcb-image0 \
-          libxcb-keysyms1 \
-          libxcb-randr0 \
-          libxcb-render-util0 \
-          libxcb-shape0 \
-          libxcb-xinerama0 \
-          libsystemd-dev \
-          pkg-config \
-          python3-pip \
-          bison \
-          ninja-build
+    - name: Install Build Tools
+      uses: microsoft/setup-msbuild@v1.1
+      with:
+        msbuild-architecture: x64
 
-    # 安装 meson（libsystemd 需要）
-    - name: Install Meson
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        architecture: 'x64'
+
+    - name: Install Ninja
       run: |
-        pip3 install meson
+        choco install ninja
+
+    # 如果需要其他工具，使用 chocolatey 安装
+    - name: Install Additional Tools
+      run: |
+        choco install -y cmake
+        choco install -y git
+        choco install -y python3
+        choco install -y windows-sdk-10-version-2004-all
 
     # 安装和缓存 vcpkg
     - name: Cache vcpkg
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           ${{env.VCPKG_ROOT}}
