@@ -11,6 +11,8 @@ RUN apt-get update && apt-get install -y \
     tar \
     pkg-config \
     ninja-build \
+    python3 \
+    bison \
     && rm -rf /var/lib/apt/lists/*
 
 # 第二阶段：vcpkg 安装和依赖缓存
@@ -31,10 +33,9 @@ RUN cd /tmp && ${VCPKG_ROOT}/vcpkg install --x-manifest-root=. --x-install-root=
 FROM vcpkg AS builder
 WORKDIR /app
 
-# 首先只复制 CMake 相关文件以利用缓存
+# 复制 CMake 文件
 COPY CMakeLists.txt .
 COPY backend/CMakeLists.txt backend/
-COPY cmake/ cmake/
 
 # 配置 CMake
 RUN cmake -B build \
