@@ -25,7 +25,8 @@ RUN apt-get update && apt-get install -y \
     meson \               
     python3-jinja2 
 
-RUN apt install autoconf automake libtool pkg-config
+RUN apt-get install -y software-properties-common && \
+    apt install autoconf automake libtool pkg-config
 
 # 第二阶段：vcpkg 安装和依赖缓存
 FROM base AS vcpkg
