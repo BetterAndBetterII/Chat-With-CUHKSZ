@@ -149,3 +149,20 @@ jobs:
       with:
         name: ${{ env.PACKAGE_NAME }}
         path: ${{github.workspace}}/package
+
+      # 上传构建产物到 GitHub Release
+    - name: Create GitHub Release
+      id: create_release
+      uses: ncipollo/release-action@v1
+      with:
+        tag: ${{ env.TAG_DATE }}
+        name: Release ${{ env.TAG_DATE }}
+        body: "自动生成的发布，发布日期：${{ env.TAG_DATE }}"
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Asset
+      uses: ncipollo/release-action@v1
+      with:
+        name: ${{ env.PACKAGE_NAME }}.AppImage
+        path: ${{ github.workspace }}/package/*.AppImage

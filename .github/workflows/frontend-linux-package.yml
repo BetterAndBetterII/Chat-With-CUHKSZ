@@ -131,6 +131,10 @@ jobs:
         Categories=Utility;Application;
         EOF
 
+    - name: Add Icon
+      run: |
+        cp ${{ github.workspace }}/assets/icon.png ${{ github.workspace }}/build/frontend/appicon.png
+
     - name: Deploy Qt
       run: |
         cd ${{github.workspace}}/build/frontend
