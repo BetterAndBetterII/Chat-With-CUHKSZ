@@ -49,18 +49,6 @@ jobs:
           restore-keys: |
             ninja-cache-${{ runner.os }}-
 
-      # 缓存 Additional Tools
-      - name: Cache Additional Tools
-        uses: actions/cache@v4
-        with:
-          path: |
-            C:\Program Files\Git
-            C:\Python311
-            C:\Program Files (x86)\Windows Kits\10
-          key: tools-cache-${{ runner.os }}-v1
-          restore-keys: |
-            tools-cache-${{ runner.os }}-
-
       # 安装必要的编译工具和系统依赖
       - name: Install Build Tools
         uses: microsoft/setup-msbuild@v1.1
