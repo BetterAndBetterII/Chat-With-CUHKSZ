@@ -2,15 +2,37 @@
     "name": "chat-with-cusz",
     "version": "1.0.0",
     "dependencies": [
-      "curl",
-      "nlohmann-json",
-      "libxml2",
-      "openssl",
-      "cpr",
-      {
-        "name": "qt5",
-        "default-features": true
-      }
+        {
+            "name": "curl",
+            "default-features": false,
+            "features": ["ssl", "http2"]
+        },
+        "nlohmann-json",
+        "libxml2",
+        "openssl",
+        {
+            "name": "cpr",
+            "default-features": false,
+            "features": ["ssl"]
+        },
+        {
+            "name": "qt5",
+            "default-features": true
+        }
     ],
-    "builtin-baseline": "068d45478f5536589e19f83344749379724b3225"
+    "builtin-baseline": "068d45478f5536589e19f83344749379724b3225",
+    "vcpkg-configuration": {
+        "default-registry": {
+            "kind": "git",
+            "repository": "https://github.com/microsoft/vcpkg",
+            "baseline": "068d45478f5536589e19f83344749379724b3225"
+        },
+        "registries": [
+            {
+                "kind": "artifact",
+                "location": "https://github.com/microsoft/vcpkg-binary-cache/releases/download/cache",
+                "name": "microsoft"
+            }
+        ]
+    }
 }

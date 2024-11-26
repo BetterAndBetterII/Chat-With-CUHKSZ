@@ -26,7 +26,7 @@ jobs:
         submodules: recursive
 
     # 安装必要的编译工具和 Qt5 依赖
-    - name: Install Build Tools
+    - name: Install Build Tools and Dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y \
@@ -47,7 +47,8 @@ jobs:
           libxcb-randr0 \
           libxcb-render-util0 \
           libxcb-shape0 \
-          libxcb-xinerama0
+          libxcb-xinerama0 \
+          libsystemd-dev
 
     # 安装 meson（libsystemd 需要）
     - name: Install Meson
