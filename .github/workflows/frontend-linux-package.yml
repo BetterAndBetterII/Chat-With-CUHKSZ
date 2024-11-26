@@ -120,6 +120,17 @@ jobs:
         chmod +x linuxdeployqt-continuous-x86_64.AppImage
         sudo mv linuxdeployqt-continuous-x86_64.AppImage /usr/local/bin/linuxdeployqt
 
+    - name: Create Desktop File
+      run: |
+        cat <<EOF > ${{ github.workspace }}/build/frontend/default.desktop
+        [Desktop Entry]
+        Name=ChatWithCUSZ
+        Exec=frontend
+        Icon=appicon
+        Type=Application
+        Categories=Utility;Application;
+        EOF
+
     - name: Deploy Qt
       run: |
         cd ${{github.workspace}}/build/frontend
