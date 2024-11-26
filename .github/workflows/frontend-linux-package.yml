@@ -12,6 +12,8 @@ env:
   PACKAGE_NAME: ChatWithCUSZ_Desktop_Linux_${{ github.event.head_commit.timestamp }}
   VCPKG_ROOT: ${{github.workspace}}/vcpkg
   VCPKG_DEFAULT_TRIPLET: x64-linux
+  CC: gcc
+  CXX: g++
 
 jobs:
   build:
@@ -22,8 +24,29 @@ jobs:
       with:
         submodules: recursive
 
+    # 安装必要的编译工具和 Qt5 依赖
+    - name: Install Build Tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          gcc \
+          g++ \
+          ninja-build \
+          cmake \
+          libgl1-mesa-dev \
+          libxkbcommon-x11-0 \
+          libxcb-icccm4 \
+          libxcb-image0 \
+          libxcb-keysyms1 \
+          libxcb-randr0 \
+          libxcb-render-util0 \
+          libxcb-shape0 \
+          libxcb-xinerama0
+
     # 安装和缓存 vcpkg
     - name: Cache vcpkg
+      id: cache-vcpkg
       uses: actions/cache@v3
       with:
         path: |
@@ -44,17 +67,12 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:
-        version: '6.5.2'
+        version: '5.15.2'
         host: 'linux'
         target: 'desktop'
         arch: 'gcc_64'
         tools: 'tools_cmake'
         cache: true
-
-    - name: Install Dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential libgl1-mesa-dev ninja-build
 
     - name: Configure CMake with vcpkg
       run: |
@@ -62,6 +80,8 @@ jobs:
               -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
               -DCMAKE_TOOLCHAIN_FILE=${{env.VCPKG_ROOT}}/scripts/buildsystems/vcpkg.cmake \
               -DVCPKG_TARGET_TRIPLET=${{env.VCPKG_DEFAULT_TRIPLET}} \
+              -DCMAKE_C_COMPILER=gcc \
+              -DCMAKE_CXX_COMPILER=g++ \
               -GNinja
 
     - name: Build
