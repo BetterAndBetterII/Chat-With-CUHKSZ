@@ -1,7 +1,5 @@
 name: Windows Qt Package
 
-runs-on: self-hosted
-
 on:
   push:
     branches: [ "main" ]
@@ -18,7 +16,7 @@ env:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: [self-hosted, Windows]
 
     steps:
     - uses: actions/checkout@v3

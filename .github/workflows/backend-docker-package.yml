@@ -1,7 +1,5 @@
 name: Create and publish a Docker image
 
-runs-on: self-hosted
-
 on:
   push:
     branches:
@@ -15,7 +13,7 @@ env:
 
 jobs:
   build-and-push-image:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux]
     # Sets the permissions granted to the `GITHUB_TOKEN` for the actions in this job.
     permissions:
       contents: read
