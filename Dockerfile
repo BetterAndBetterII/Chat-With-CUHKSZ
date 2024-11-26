@@ -18,7 +18,16 @@ RUN apt-get update && apt-get install -y \
     automake \
     libtool \
     pkg-config \
-    && rm -rf /var/lib/apt/lists/*
+    libmount-dev \        
+    libblkid-dev \        
+    libcrypt-dev \        
+    libsystemd-dev \      
+    libssl-dev \          
+    libpcre2-dev \        
+    libxi-dev \
+    libxtst-dev \
+    meson \               
+    python3-jinja2 
 
 # 第二阶段：vcpkg 安装和依赖缓存
 FROM base AS vcpkg
