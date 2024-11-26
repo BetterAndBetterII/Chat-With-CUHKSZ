@@ -36,6 +36,13 @@ target_link_libraries(backend_lib
         LibXml2::LibXml2
 )
 
+# ----------------- 部署 -----------------
+add_executable(backend src/main.cpp)
+target_link_libraries(backend
+        PRIVATE
+        backend_lib
+)
+
 # ----------------- 测试 -----------------
 # _______ 测试BB _______
 add_executable(blackboard_test test/test_blackboard.cpp)

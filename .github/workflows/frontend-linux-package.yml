@@ -1,0 +1,60 @@
+name: Linux Qt Package
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  BUILD_TYPE: Release
+  BUILD_TAG: ${{ github.event.head_commit.timestamp }}
+  PACKAGE_NAME: ChatWithCUSZ_Desktop_Linux_${{ github.event.head_commit.timestamp }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: '6.5.2'
+        host: 'linux'
+        target: 'desktop'
+        arch: 'gcc_64'
+        tools: 'tools_cmake'
+        cache: true
+
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential libgl1-mesa-dev
+
+    - name: Configure CMake
+      run: |
+        cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+
+    - name: Build
+      run: |
+        cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --target frontend
+
+    - name: Deploy Qt
+      run: |
+        cd ${{github.workspace}}/build/frontend
+        linuxdeployqt frontend -appimage
+
+    - name: Create Package
+      run: |
+        mkdir -p ${{github.workspace}}/package
+        cp -r ${{github.workspace}}/build/frontend/* ${{github.workspace}}/package/
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ env.PACKAGE_NAME }}
+        path: ${{github.workspace}}/package
