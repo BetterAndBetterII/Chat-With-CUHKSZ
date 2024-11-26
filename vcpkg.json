@@ -14,10 +14,6 @@
             "name": "cpr",
             "default-features": false,
             "features": ["ssl"]
-        },
-        {
-            "name": "qt5",
-            "default-features": true
         }
     ],
     "vcpkg-configuration": {

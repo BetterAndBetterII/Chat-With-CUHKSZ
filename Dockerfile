@@ -49,6 +49,10 @@ RUN cd /tmp && ${VCPKG_ROOT}/vcpkg install \
     --feature-flags=binarycaching,manifests \
     --clean-after-build
 
+RUN apt-get install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools -y
+RUN apt-get install qtcreator -y
+RUN apt-get install qt5* -y
+
 # 第三阶段：构建项目
 FROM vcpkg AS builder
 WORKDIR /app
