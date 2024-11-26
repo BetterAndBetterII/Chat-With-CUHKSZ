@@ -1,11 +1,10 @@
-name: Build and Release ChatWithCUSZ Desktop
+name: Build and Release ChatWithCUHKSZ Desktop
 
 on:
   workflow_dispatch:
 
 env:
   BUILD_TYPE: Release
-  BUILD_TAG: ${{ github.event.head_commit.timestamp }}
   VCPKG_ROOT: ${{ github.workspace }}/vcpkg
 
 jobs:
@@ -14,7 +13,7 @@ jobs:
     runs-on: windows-latest
 
     env:
-      PACKAGE_NAME: ChatWithCUSZ_Desktop_Windows_${{ github.event.head_commit.timestamp }}
+      PACKAGE_NAME: ChatWithCUHKSZ_Desktop_Windows_${{ github.event.head_commit.timestamp }}
       VCPKG_DEFAULT_TRIPLET: x64-windows
 
     steps:
@@ -136,7 +135,7 @@ jobs:
           cp -r ${{ github.workspace }}/build/frontend/${{ env.BUILD_TYPE }}/* ${{ github.workspace }}/package/
 
       - name: Upload Windows Package as Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: windows-package
           path: ${{ github.workspace }}/package
@@ -146,7 +145,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     env:
-      PACKAGE_NAME: ChatWithCUSZ_Desktop_Linux_${{ github.event.head_commit.timestamp }}
+      PACKAGE_NAME: ChatWithCUHKSZ_Desktop_Linux_${{ github.event.head_commit.timestamp }}
       VCPKG_DEFAULT_TRIPLET: x64-linux
       CC: gcc
       CXX: g++
@@ -281,7 +280,7 @@ jobs:
           cp -r ${{ github.workspace }}/build/frontend/* ${{ github.workspace }}/package/
 
       - name: Upload Linux Package as Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: linux-package
           path: ${{ github.workspace }}/package
@@ -306,14 +305,21 @@ jobs:
           name: linux-package
           path: ./linux-package
 
-      - name: Generate Date Tag
+      - name: Generate Unique Tag
         id: generate_tag
         run: |
-          TAG_DATE=$(date +'%Y%m%d%H%M%S')
+          TAG_DATE=$(date +'%Y%m%d%H%M%S')-${{ github.run_id }}
           echo "TAG_DATE=${TAG_DATE}" >> $GITHUB_ENV
 
-      - name: Create GitHub Release
-        id: create_release
+      - name: Rename Windows Binary
+        run: |
+          mv ./windows-package/frontend.exe ./windows-package/ChatWithCUHKSZ_Desktop_Windows_${{ env.TAG_DATE }}.exe
+
+      - name: Rename Linux Binary
+        run: |
+          mv ./linux-package/frontend-x86_64.AppImage ./linux-package/ChatWithCUHKSZ_Desktop_Linux_${{ env.TAG_DATE }}.AppImage
+
+      - name: Create GitHub Release and Upload Assets
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ env.TAG_DATE }}
@@ -321,17 +327,6 @@ jobs:
           body: "自动生成的发布，发布日期：${{ env.TAG_DATE }}"
           draft: false
           prerelease: false
-
-      - name: Upload Windows Asset to Release
-        uses: ncipollo/release-action@v1
-        with:
-          tag: ${{ env.TAG_DATE }}
-          name: ChatWithCUSZ_Desktop_Windows.exe
-          path: ./windows-package/frontend.exe
-
-      - name: Upload Linux Asset to Release
-        uses: ncipollo/release-action@v1
-        with:
-          tag: ${{ env.TAG_DATE }}
-          name: ChatWithCUSZ_Desktop_Linux.AppImage
-          path: ./linux-package/frontend-x86_64.AppImage
+          files: |
+            ./windows-package/ChatWithCUHKSZ_Desktop_Windows_${{ env.TAG_DATE }}.exe
+            ./linux-package/ChatWithCUHKSZ_Desktop_Linux_${{ env.TAG_DATE }}.AppImage
