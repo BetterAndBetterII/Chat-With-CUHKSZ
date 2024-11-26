@@ -1,12 +1,7 @@
 {
     "name": "chat-with-cusz",
     "version": "1.0.0",
-    "dependencies": [
-      {
-        "name": "qt5",
-        "default-features": true
-      }
-    ],
+    "dependencies": [],
     "vcpkg-configuration": {
         "default-registry": {
             "kind": "git",

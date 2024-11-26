@@ -61,8 +61,8 @@ WORKDIR /app
 
 # 复制 CMake 文件
 COPY CMakeLists.txt .
-COPY backend/CMakeLists.txt backend/
-COPY frontend/CMakeLists.txt frontend/
+COPY backend .
+COPY frontend .
 
 # 配置 CMake
 RUN cmake -B build \
@@ -70,11 +70,6 @@ RUN cmake -B build \
     -DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake \
     -DVCPKG_TARGET_TRIPLET=${VCPKG_DEFAULT_TRIPLET} \
     -GNinja
-
-# 复制源代码
-COPY backend/include/ backend/include/
-COPY backend/src/ backend/src/
-COPY backend/test/ backend/test/
 
 # 构建项目
 RUN cmake --build build --target backend_lib backend
