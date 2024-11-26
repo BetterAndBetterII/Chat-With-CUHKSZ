@@ -43,16 +43,17 @@ RUN ${VCPKG_ROOT}/bootstrap-vcpkg.sh -disableMetrics
 RUN ${VCPKG_ROOT}/vcpkg integrate install
 
 # 仅复制 vcpkg.json 以利用缓存
-COPY vcpkg.json /tmp/vcpkg.json
-RUN cd /tmp && ${VCPKG_ROOT}/vcpkg install \
+COPY backend/vcpkg.json /backend/vcpkg.json
+RUN cd /backend && ${VCPKG_ROOT}/vcpkg install \
     --x-manifest-root=. \
     --x-install-root=${VCPKG_ROOT}/installed \
     --feature-flags=binarycaching,manifests \
     --clean-after-build
 
-RUN apt-get install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools -y
-RUN apt-get install qtcreator -y
-RUN apt-get install qt5* -y
+# 安装 Qt 相关包
+RUN apt-get update && apt-get install -y \
+    qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools qtcreator qt5* \
+    && rm -rf /var/lib/apt/lists/*
 
 # 第三阶段：构建项目
 FROM vcpkg AS builder

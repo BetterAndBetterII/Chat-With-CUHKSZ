@@ -7,5 +7,18 @@
         "default-features": true
       }
     ],
-    "builtin-baseline": "068d45478f5536589e19f83344749379724b3225"
+    "vcpkg-configuration": {
+        "default-registry": {
+            "kind": "git",
+            "repository": "https://github.com/microsoft/vcpkg",
+            "baseline": "068d45478f5536589e19f83344749379724b3225"
+        },
+        "registries": [
+            {
+                "kind": "artifact",
+                "location": "https://github.com/microsoft/vcpkg-binary-cache/releases/download/cache",
+                "name": "microsoft"
+            }
+        ]
+    }
 }

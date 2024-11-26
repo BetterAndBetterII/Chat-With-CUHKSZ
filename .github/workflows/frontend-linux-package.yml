@@ -44,7 +44,20 @@ jobs:
           libxcb-render-util0 \
           libxcb-shape0 \
           libxcb-xinerama0 \
-          libsystemd-dev
+          libsystemd-dev \
+          pkg-config \
+          ninja-build \
+          libxcrypt-dev \
+          libmount-dev \
+          libblkid-dev \
+          libcrypt-dev \
+          libsystemd-dev \
+          libssl-dev \
+          libpcre2-dev \
+          libxi-dev \
+          libxtst-dev \
+          meson \
+          python3-jinja2
 
     # 安装 meson（libsystemd 需要）
     - name: Install Meson
@@ -54,7 +67,7 @@ jobs:
     # 安装和缓存 vcpkg
     - name: Cache vcpkg
       id: cache-vcpkg
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           ${{env.VCPKG_ROOT}}
@@ -80,6 +93,10 @@ jobs:
         arch: 'gcc_64'
         tools: 'tools_cmake'
         cache: true
+
+    - name: Install Frontend Dependencies
+      run: |
+        ${{env.VCPKG_ROOT}}/vcpkg install --triplet ${{env.VCPKG_DEFAULT_TRIPLET}} --x-manifest-root=${{github.workspace}}/frontend
 
     - name: Configure CMake with vcpkg
       run: |
