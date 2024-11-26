@@ -51,6 +51,13 @@ target_link_libraries(booking_test
         backend_lib
 )
 
+# _______ 测试Email _______
+add_executable(email_test test/test_email.cpp)
+target_link_libraries(email_test
+        PRIVATE
+        backend_lib
+)
+
 # _______ 测试Agent _______
 add_executable(agent_test test/test_agent.cpp)
 target_link_libraries(agent_test
