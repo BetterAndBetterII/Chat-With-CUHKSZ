@@ -1,10 +1,6 @@
 name: Windows Qt Package
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
   workflow_dispatch:
 
 env:
@@ -16,7 +12,7 @@ env:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: [self-hosted, Linux, x64, azure]
 
     steps:
     - uses: actions/checkout@v4
