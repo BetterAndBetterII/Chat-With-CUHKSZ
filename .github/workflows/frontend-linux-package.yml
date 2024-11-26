@@ -1,10 +1,13 @@
 name: Linux Qt Package
 
+runs-on: self-hosted
+
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
 
 env:
   BUILD_TYPE: Release
@@ -34,6 +37,10 @@ jobs:
           g++ \
           ninja-build \
           cmake \
+          pkg-config \
+          python3-pip \
+          python3 \
+          bison \
           libgl1-mesa-dev \
           libxkbcommon-x11-0 \
           libxcb-icccm4 \
@@ -43,6 +50,11 @@ jobs:
           libxcb-render-util0 \
           libxcb-shape0 \
           libxcb-xinerama0
+
+    # 安装 meson（libsystemd 需要）
+    - name: Install Meson
+      run: |
+        pip3 install meson
 
     # 安装和缓存 vcpkg
     - name: Cache vcpkg
