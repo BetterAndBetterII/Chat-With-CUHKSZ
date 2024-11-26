@@ -113,6 +113,12 @@ jobs:
       run: |
         cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --target frontend
 
+    - name: Install linuxdeployqt
+      run: |
+        wget https://github.com/linuxdeploy/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
+        chmod +x linuxdeployqt-continuous-x86_64.AppImage
+        sudo mv linuxdeployqt-continuous-x86_64.AppImage /usr/local/bin/linuxdeployqt
+
     - name: Deploy Qt
       run: |
         cd ${{github.workspace}}/build/frontend
@@ -128,3 +134,27 @@ jobs:
       with:
         name: ${{ env.PACKAGE_NAME }}
         path: ${{github.workspace}}/package
+
+    - name: Generate Date Tag
+      id: generate_tag
+      run: |
+        TAG_DATE=$(date +'%Y%m%d')
+        echo "TAG_DATE=${TAG_DATE}" >> $GITHUB_ENV
+        echo "PACKAGE_NAME=ChatWithCUSZ_Desktop_Linux_${TAG_DATE}" >> $GITHUB_ENV
+
+    # 上传构建产物到 GitHub Release
+    - name: Create GitHub Release
+      id: create_release
+      uses: ncipollo/release-action@v1
+      with:
+        tag: ${{ env.TAG_DATE }}
+        name: Release ${{ env.TAG_DATE }}
+        body: "自动生成的发布，发布日期：${{ env.TAG_DATE }}"
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Asset
+      uses: ncipollo/release-action@v1
+      with:
+        name: ${{ env.PACKAGE_NAME }}.AppImage
+        path: ${{ github.workspace }}/package/*.AppImage
