@@ -2,6 +2,7 @@
 #include <iostream> //std::cerr
 #include <fstream>
 #include <sstream> 
+#include <map>
 #include <cstring>
 #include <regex> //space_cutter()
 #include <filesystem> //destructor
@@ -11,35 +12,17 @@ using std::vector;
 using std::cout;
 using std::endl;
 
-LibarySystem::LibarySystem(const string& username, const string& password) : curl_global_manager(){
+LibarySystem::LibarySystem() : curl_global_manager(){
     //初始化变量
     this->command_list = {
-        "get_course",
-        "get_annoucement",
-        "get_assignment",
-        "get_grades"
+        "search"
     };
-    this->username = username;
-    this->password = password;
     this->libary_handle = curl_easy_init();
-    this->is_login = false;
-
 }
 
 LibarySystem::~LibarySystem(){
     if(libary_handle){
         curl_easy_cleanup(libary_handle);
-        //delete bbcookie.txt
-        std::filesystem::path filepath = cookiefile;  // bbCookies.txt路径
-        try {
-            if (std::filesystem::remove(filepath)) {
-                //cout << "CookieFile deleted successfully\n";
-            } else {
-                cout << "CookieFile does not exist or could not be deleted\n";
-            }
-        } catch (const std::filesystem::filesystem_error& e) {
-            std::cerr << "Error: " << e.what() << "\n";
-        } 
         //调试：检测libary_handle是否清除
         //cout << "libary_handle cleaned up" << endl;
     }
@@ -123,125 +106,57 @@ vector<string> LibarySystem::xpathQuery(const string& xmlContent, const string& 
     return output;
 }
 
-//login function implementation
-bool LibarySystem::login(){
-    if(is_login){
-        return true;
-    }
-
-    //尝试登录
-    if(libary_handle){
-
-        //忽略登录过程返回的响应体（注释下行可把响应体打印到终端）
-        curl_easy_setopt(libary_handle, CURLOPT_WRITEFUNCTION, ignore_calback);
-
-        // 启用自动cookie处理，指定cookie文件
-        cookiefile = username + "libraryCookies.txt";
-        curl_easy_setopt(libary_handle, CURLOPT_COOKIEJAR,  cookiefile.c_str());  // 保存cookies
-        curl_easy_setopt(libary_handle, CURLOPT_COOKIEFILE, cookiefile.c_str()); // 发送保存的cookies
-
-        /*//向libary发送登录请求(POST)
-        string strdata ="UserName=cuhksz\\" + username + "&Kmsi=true&AuthMethod=FormsAuthentication&Password=" + password ; //POST data
-        const char* data = strdata.c_str();
-        curl_easy_setopt(libary_handle, CURLOPT_POSTFIELDS, data);
-        curl_easy_setopt(libary_handle, CURLOPT_FOLLOWLOCATION, 1L);
-        curl_easy_setopt(libary_handle, CURLOPT_URL, "https://sts.cuhk.edu.cn/adfs/oauth2/authorize?response_type=code&client_id=4b71b947-7b0d-4611-b47e-0ec37aabfd5e&redirect_uri=https://bb.cuhk.edu.cn/webapps/bb-SSOIntegrationOAuth2-BBLEARN/authValidate/getCode&client-request-id=dd5ffbba-e761-453e-e58f-014001000089");
-        CURLcode res;
-        res = curl_easy_perform(libary_handle);
-        
-        //通过重定向次数判断是否成功登录
-        long redirect_count;
-        curl_easy_getinfo(libary_handle, CURLINFO_REDIRECT_COUNT, &redirect_count);
-        if(res != CURLE_OK){
-            std::cerr << "Login failed because:" << curl_easy_strerror(res) << endl;
-        }
-        else if(redirect_count > 0 ){
-            is_login = true;
-            cout << "Login successfully!" << endl;
-            return true;
-        }
-        else{
-            std::cerr << "Username or Password incorrect!" << endl;
-            return false;
-        } */
-       is_login = true;
-       return true;
-
-    }
-
-    std::cerr << "Failed to initialize libary_handle." << endl;
-    return false;
-
-}
-
 string LibarySystem::getRequest(const string& url)const{
     string response = "";
     Memory chunk = {nullptr, 0};
-    if(is_login){
-        curl_easy_setopt(libary_handle, CURLOPT_URL, url.c_str());
-        curl_easy_setopt(libary_handle, CURLOPT_FOLLOWLOCATION, 1L);
-        curl_easy_setopt(libary_handle, CURLOPT_HTTPGET, 1L);
-        curl_easy_setopt(libary_handle, CURLOPT_WRITEFUNCTION, write_callback);
-        curl_easy_setopt(libary_handle, CURLOPT_WRITEDATA, (void*)&chunk);
-        CURLcode res;
-        res = curl_easy_perform(libary_handle);  
-        if(res != CURLE_OK){
-            std::cerr<< "Get request failed:" << curl_easy_strerror(res) << endl;
-        }
-
-        if (chunk.response){
-            response = chunk.response;
-            free(chunk.response);
-        }
-        else{
-            std::cerr << "No response received from server.\n";
-        }
-
-        return response; 
+    curl_easy_setopt(libary_handle, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(libary_handle, CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(libary_handle, CURLOPT_HTTPGET, 1L);
+    curl_easy_setopt(libary_handle, CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(libary_handle, CURLOPT_WRITEDATA, (void*)&chunk);
+    CURLcode res;
+    res = curl_easy_perform(libary_handle);  
+    if(res != CURLE_OK){
+        std::cerr<< "Get request failed:" << curl_easy_strerror(res) << endl;
     }
-    std::cerr<< "GetRequest failed:Login before get request" << endl;
-    return response;
+
+    if (chunk.response){
+        response = chunk.response;
+        free(chunk.response);
+    }
+    else{
+        std::cerr << "No response received from server.\n";
+    }
+
+    return response; 
+    
 }
 
 string LibarySystem::postRequest(const string& url, const string& strdata)const{
     string response = "";
     Memory chunk = {nullptr, 0};
-    if(is_login){
-        curl_easy_setopt(libary_handle, CURLOPT_URL, url.c_str());
-        curl_easy_setopt(libary_handle, CURLOPT_WRITEFUNCTION, write_callback);
-        curl_easy_setopt(libary_handle, CURLOPT_WRITEDATA, (void*)&chunk);
-        const char* data = strdata.c_str();
-        curl_easy_setopt(libary_handle, CURLOPT_POSTFIELDS, data);
-        curl_easy_setopt(libary_handle, CURLOPT_FOLLOWLOCATION, 1L);
-        CURLcode res;
-        res = curl_easy_perform(libary_handle);  
-        if(res != CURLE_OK){
-            std::cerr<< "Post request failed:" << curl_easy_strerror(res) << endl;
-        }
-
-        if (chunk.response){
-            response = chunk.response;
-            free(chunk.response);
-        }
-        else{
-            std::cerr << "No response received from server.\n";
-        }
-
-        return response; 
+    curl_easy_setopt(libary_handle, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(libary_handle, CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(libary_handle, CURLOPT_WRITEDATA, (void*)&chunk);
+    const char* data = strdata.c_str();
+    curl_easy_setopt(libary_handle, CURLOPT_POSTFIELDS, data);
+    curl_easy_setopt(libary_handle, CURLOPT_FOLLOWLOCATION, 1L);
+    CURLcode res;
+    res = curl_easy_perform(libary_handle);  
+    if(res != CURLE_OK){
+        std::cerr<< "Post request failed:" << curl_easy_strerror(res) << endl;
     }
-    std::cerr<< "PostRequest failed:Login before post request" << endl;
-    return response;
-}
 
-bool LibarySystem::change_info(const string& username, const string& password){
-    if(is_login){
-        return false;
+    if (chunk.response){
+        response = chunk.response;
+        free(chunk.response);
     }
-    this->username = username;
-    this->password = password;
-    return true;
-}
+    else{
+        std::cerr << "No response received from server.\n";
+    }
 
+    return response; 
+}
 
 string LibarySystem::get_commands()const{
 
@@ -273,13 +188,51 @@ string LibarySystem::space_cutter(const string& str)const{
     }
 }
 
-string LibarySystem::search(const std::string& keyword)const{
+string LibarySystem::search(const std::string& keyword, const int& limit, const string& tab)const{
 
+    std::map<string, string> tab_map={
+        {"Everything","Everything"},
+        {"PrintBooks/Journals","LibraryCatalog"},
+        {"Articles/eBooks","CentralIndex"}
+    };
+    std::map<string, string> scope_map={
+        {"Everything","MyInst_and_CI"},
+        {"PrintBooks/Journals","MyInstitution"},
+        {"Articles/eBooks","CentralIndex"}
+    };
+    string mapped_tab = tab_map[tab];
+    string scope = scope_map[tab];
+
+    //处理输入的空格
     char* escaped_keyword = curl_easy_escape(libary_handle, keyword.c_str(), static_cast<int>(keyword.length()));
 
-    string param = "acTriggered=false&blendFacetsSeparately=false&citationTrailFilterByAvailability=true&disableCache=false&getMore=0&inst=86CUHKSZ_INST&isCDSearch=false&lang=en&limit=10&newspapersActive=false&newspapersSearch=false&offset=0&otbRanking=false&pcAvailability=false&q=any,contains,"
-        +string(escaped_keyword)
-        +"&qExclude=&qInclude=&rapido=false&refEntryActive=false&rtaLinks=true&scope=MyInst_and_CI&searchInFulltextUserSelection=false&skipDelivery=Y&sort=rank&tab=Everything&vid=86CUHKSZ_INST:86CUHKSZ"; 
+    string param = 
+        string("acTriggered=") + "false" +          //+只在string定义
+        "&blendFacetsSeparately=" + "false" +
+        "&citationTrailFilterByAvailability=" + "true" +
+        "&disableCache=" + "false" +
+        "&getMore=" + "0" +
+        "&inst=" + "86CUHKSZ_INST" +
+        "&isCDSearch=" + "false" +
+        "&lang=" + "en" +
+        "&limit=" + std::to_string(limit) +
+        "&newspapersActive=" + "false" +
+        "&newspapersSearch=" + "false" +
+        "&offset=" + "0" +
+        "&otbRanking=" + "false" +
+        "&pcAvailability=" + "false" +
+        "&q=" + "any,contains," + escaped_keyword +
+        "&qExclude=" + "" +
+        "&qInclude=" + "" +
+        "&rapido=" + "false" +
+        "&refEntryActive=" + "false" +
+        "&rtaLinks=" + "true" +
+        "&scope=" + scope +
+        "&searchInFulltextUserSelection=" + "true" +
+        "&skipDelivery=" + "Y" +
+        "&sort=" + "rank" +
+        "&tab=" + mapped_tab +
+        "&vid=" + "86CUHKSZ_INST:86CUHKSZ";
         
     string url = "https://cuhksz.primo.exlibrisgroup.com.cn/primaws/rest/pub/pnxs?"+ param;
 
@@ -292,20 +245,34 @@ string LibarySystem::search(const std::string& keyword)const{
     vector<Info> results;
     nlohmann::json json_res = nlohmann::json::parse(response);
 
+
     for(const auto& doc : json_res["docs"]){
-        Info info = {doc["pnx"]["display"]["title"][0],doc["pnx"]["display"]["publisher"][0],doc["pnx"]["display"]["type"][0]};
+        Info info;
         if (doc["pnx"]["display"].contains("creator"))
                 info.creator = doc["pnx"]["display"]["creator"][0];
         if (doc["pnx"]["display"].contains("subject"))
                 info.subject = doc["pnx"]["display"]["subject"][0];
+        if (doc["pnx"]["display"].contains("title"))
+                info.title = doc["pnx"]["display"]["title"][0];
+        else cout << "Json didn't find title" << endl;
+        if (doc["pnx"]["display"].contains("publisher"))
+                info.publisher = doc["pnx"]["display"]["publisher"][0];
+        if (doc["pnx"]["display"].contains("type"))
+                info.type = doc["pnx"]["display"]["type"][0];
         results.push_back(info);
     }
 
     string str_result="====Search Result====\n";
     for(Info info : results){
-        str_result+=info.title + '\n'+ 
-            "Publisher: " +info.publisher + "\n" +
-            "Type: " + info.type + "\n";
+        if (info.title.has_value()) {
+            str_result+= "Title: " + info.title.value() + "\n";
+        }
+        if (info.publisher.has_value()) {
+            str_result+= "Publisher: " + info.publisher.value() + "\n";
+        }
+        if (info.type.has_value()) {
+            str_result+= "Type: " + info.type.value() + "\n";
+        }
         if (info.creator.has_value()) {
             str_result+= "Creator: " + info.creator.value() + "\n";
         }
@@ -314,5 +281,6 @@ string LibarySystem::search(const std::string& keyword)const{
         }
         str_result+="\n";
     }
+
     return str_result; 
 }

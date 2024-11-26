@@ -21,7 +21,6 @@ private:
     
     bool is_login;
 
-    static const int ELEM_TO_FIND = 3;
 
     //cookiefile存储libcurl生成的cookie文件的路径
     std::string cookiefile;
@@ -64,6 +63,9 @@ private:
 
 
 public:
+
+    static const int ELEM_TO_FIND = 3;
+    
     // 构造函数
     BlackBoardSystem(const std::string& username, const std::string& password);
 

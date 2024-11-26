@@ -6,22 +6,20 @@
 
 void test_libary(){
     std::cout << "=====Testing Libary=====" << std::endl;
-    std::cout << "---Testing Login---" << std::endl;
-    //basic info input
-    std::string username = "";
-    std::string password = "";
-    std::cout << "Username:" << std::endl;
-    std::cin >> username;
-    std::cout << "Password:" << std::endl;
-    std::cin >> password;
-    auto *libary = new LibarySystem(username, password);
-    if(libary->login()){
-        std::string keyword;
-        std::cout << "Keyword?" << std::endl;
-        std::cin.ignore();//跳过换行符
-        std::getline(std::cin, keyword) ;
-        std::cout << libary->search(keyword) << std::endl;
-    }
+    auto *libary = new LibarySystem();
+    std::cout << "---Testing getCommand---" << std::endl;
+    std::cout << libary->get_commands() << std::endl;
+    std::cout << "---Testing Search---" << std::endl;
+    std::string keyword;
+    std::string limit;
+    std::string tab;
+    std::cout << "Keyword?" << std::endl;
+    std::getline(std::cin, keyword) ;
+    std::cout << "limit?" << std::endl;
+    std::getline(std::cin, limit);
+    std::cout << "tab? (Everything, PrintBooks/Journals, Articles/eBooks)" << std::endl;
+    std::getline(std::cin, tab) ;
+    std::cout << libary->search(keyword, std::stoi(limit), tab) << std::endl;
     delete libary;
 }
 

@@ -14,24 +14,17 @@
 
 class LibarySystem{
 private:
-    std::string username;
-    std::string password;
 
     std::set<std::string> command_list;
     
-    bool is_login;
-
     // 定义信息结构体
     struct Info {
-        std::string title;
-        std::string publisher;
-        std::string type;
+        std::optional<std::string> title;
+        std::optional<std::string> publisher;
+        std::optional<std::string> type;
         std::optional<std::string> creator; // 可选字段
         std::optional<std::string> subject; // 可选字段
     };
-
-    //cookiefile存储libcurl生成的cookie文件的路径
-    std::string cookiefile;
 
     CURL* libary_handle;
     //curlglobal类用于避免多次全局初始化
@@ -61,8 +54,11 @@ private:
     std::string space_cutter(const std::string& str)const;
 
 public:
+
+    static const int DEAFULT_SEARCH_NUMBER = 3;
+
     // 构造函数
-    LibarySystem(const std::string& username, const std::string& password);
+    LibarySystem();
 
     //析构函数
     ~LibarySystem();
@@ -70,14 +66,13 @@ public:
     //返回command_list
     std::string get_commands() const;
 
-    //登录
-    bool login();
-
-    //初始化时若输入了错误的密码可以用change_info()来修改
-    bool change_info(const std::string& username, const std::string& password);
-    //若未登录成功(is_login == false)，则修改账号密码并返回true，若已登录则不会修改账号密码，返回false
-
-    std::string search(const std::string& keyword)const;
+    std::string search(const std::string& keyword, const int& limit = DEAFULT_SEARCH_NUMBER, const std::string& tab="Everything")const;
+    /*参数：
+     *keyword: 查询内容
+     *limit: 返回的数量，默认为3
+     *tab: 查询的范围
+     *可输入的值："Everything", "PrintBooks/Journals", "Articles/eBooks"
+    */
 };
 
 
