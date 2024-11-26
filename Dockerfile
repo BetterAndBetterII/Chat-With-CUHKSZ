@@ -1,16 +1,6 @@
-FROM ubuntu:24.04
-
-# 设置环境变量
+# 第一阶段：基础开发环境
+FROM ubuntu:24.04 AS base
 ENV DEBIAN_FRONTEND=noninteractive
-ENV VCPKG_ROOT=/opt/vcpkg
-ENV VCPKG_DEFAULT_TRIPLET=x64-linux
-
-RUN apt-get clean
-RUN apt-get update
-
-ARG DEBIAN_FRONTEND=noninteractive
-
-# 安装基本工具和编译环境
 RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
@@ -23,36 +13,72 @@ RUN apt-get update && apt-get install -y \
     ninja-build \
     && rm -rf /var/lib/apt/lists/*
 
-# 安装并配置 vcpkg
-RUN git clone https://github.com/Microsoft/vcpkg.git ${VCPKG_ROOT} \
-    && ${VCPKG_ROOT}/bootstrap-vcpkg.sh -disableMetrics \
-    && ${VCPKG_ROOT}/vcpkg integrate install
+# 第二阶段：vcpkg 安装和依赖缓存
+FROM base AS vcpkg
+ENV VCPKG_ROOT=/opt/vcpkg
+ENV VCPKG_DEFAULT_TRIPLET=x64-linux
 
-# 复制 vcpkg.json 到容器中
+# 安装 vcpkg
+RUN git clone https://github.com/Microsoft/vcpkg.git ${VCPKG_ROOT}
+RUN ${VCPKG_ROOT}/bootstrap-vcpkg.sh -disableMetrics
+RUN ${VCPKG_ROOT}/vcpkg integrate install
+
+# 仅复制 vcpkg.json 以利用缓存
 COPY vcpkg.json /tmp/vcpkg.json
-
-# 预安装依赖
 RUN cd /tmp && ${VCPKG_ROOT}/vcpkg install --x-manifest-root=. --x-install-root=${VCPKG_ROOT}/installed
 
-# 创建工作目录
+# 第三阶段：构建项目
+FROM vcpkg AS builder
 WORKDIR /app
 
-# 复制源代码
-COPY . .
+# 首先只复制 CMake 相关文件以利用缓存
+COPY CMakeLists.txt .
+COPY backend/CMakeLists.txt backend/
+COPY cmake/ cmake/
 
-# 构建项目
+# 配置 CMake
 RUN cmake -B build \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake \
     -DVCPKG_TARGET_TRIPLET=${VCPKG_DEFAULT_TRIPLET} \
-    -GNinja \
-    && cmake --build build --target backend_lib booking_test
+    -GNinja
 
-# 设置工作目录为构建目标所在目录
-WORKDIR /app/build/backend
+# 复制源代码
+COPY backend/include/ backend/include/
+COPY backend/src/ backend/src/
+COPY backend/test/ backend/test/
 
-# 暴露后端服务端口（如果需要）
+# 构建项目
+RUN cmake --build build --target backend_lib backend
+
+# 最终阶段：运行环境
+FROM ubuntu:24.04 AS runtime
+ENV DEBIAN_FRONTEND=noninteractive
+
+# 安装运行时依赖
+RUN apt-get update && apt-get install -y \
+    libcurl4 \
+    libssl3 \
+    && rm -rf /var/lib/apt/lists/*
+
+# 创建非 root 用户
+RUN useradd -m -s /bin/bash app
+USER app
+
+WORKDIR /app
+
+# 从构建阶段复制必要的文件
+COPY --from=builder /app/build/backend/backend .
+COPY --from=builder /opt/vcpkg/installed/x64-linux/lib/*.so* /usr/local/lib/
+COPY --from=builder /opt/vcpkg/installed/x64-linux/bin/* /usr/local/bin/
+
+# 更新动态链接器缓存
+USER root
+RUN ldconfig
+USER app
+
+# 暴露端口
 EXPOSE 8080
 
-# 启动后端服务
-CMD ["./booking_test"]
+# 启动命令
+CMD ["./backend"]
