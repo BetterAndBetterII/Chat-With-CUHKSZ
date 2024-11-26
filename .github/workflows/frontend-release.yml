@@ -1,0 +1,349 @@
+name: Build and Release ChatWithCUSZ Desktop
+
+on:
+  workflow_dispatch:
+
+env:
+  BUILD_TYPE: Release
+  BUILD_TAG: ${{ github.event.head_commit.timestamp }}
+  VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+
+jobs:
+  build-windows:
+    name: Build Windows Qt Package
+    runs-on: windows-latest
+
+    env:
+      PACKAGE_NAME: ChatWithCUSZ_Desktop_Windows_${{ github.event.head_commit.timestamp }}
+      VCPKG_DEFAULT_TRIPLET: x64-windows
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      # 缓存 Chocolatey 的缓存目录
+      - name: Cache Chocolatey Cache
+        uses: actions/cache@v4
+        with:
+          path: C:\ProgramData\chocolatey\cache
+          key: chocolatey-cache-${{ runner.os }}-${{ hashFiles('**/choco-*.lock') }}
+          restore-keys: |
+            chocolatey-cache-${{ runner.os }}-
+
+      # 缓存 CMake
+      - name: Cache CMake
+        uses: actions/cache@v4
+        with:
+          path: C:\tools\cmake
+          key: cmake-cache-${{ runner.os }}-v1
+          restore-keys: |
+            cmake-cache-${{ runner.os }}-
+
+      # 缓存 Ninja
+      - name: Cache Ninja
+        uses: actions/cache@v4
+        with:
+          path: C:\tools\ninja
+          key: ninja-cache-${{ runner.os }}-v1
+          restore-keys: |
+            ninja-cache-${{ runner.os }}-
+
+      # 缓存 Additional Tools
+      - name: Cache Additional Tools
+        uses: actions/cache@v4
+        with:
+          path: |
+            C:\Program Files\Git
+            C:\Python311
+            C:\Program Files (x86)\Windows Kits\10
+          key: tools-cache-${{ runner.os }}-v1
+          restore-keys: |
+            tools-cache-${{ runner.os }}-
+
+      # 安装必要的编译工具和系统依赖
+      - name: Install Build Tools
+        uses: microsoft/setup-msbuild@v1.1
+        with:
+          msbuild-architecture: x64
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          architecture: 'x64'
+
+      # 安装 CMake
+      - name: Install CMake
+        run: |
+          if (-Not (Test-Path "C:\tools\cmake")) {
+            choco install cmake --installargs 'INSTALLDIR=C:\tools\cmake' -y
+          }
+
+      # 安装 Ninja
+      - name: Install Ninja
+        run: |
+          if (-Not (Test-Path "C:\tools\ninja")) {
+            choco install ninja --version=1.10.2 -y --installargs 'INSTALLDIR=C:\tools\ninja' --no-progress
+          }
+
+      # 安装 Additional Tools
+      - name: Install Additional Tools
+        run: |
+          choco install -y git --installargs 'INSTALLDIR=C:\Program Files\Git' --no-progress
+          choco install -y python --version=3.11.0 --installargs 'INSTALLDIR=C:\Python311' --no-progress
+          choco install -y windows-sdk-10-version-2004-all --no-progress
+
+      # 安装和缓存 vcpkg
+      - name: Cache vcpkg
+        id: cache-vcpkg-windows
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.VCPKG_ROOT }}
+            !${{ env.VCPKG_ROOT }}/.git
+            !${{ env.VCPKG_ROOT }}/buildtrees
+            !${{ env.VCPKG_ROOT }}/packages
+            !${{ env.VCPKG_ROOT }}/downloads
+          key: vcpkg-windows-${{ hashFiles('**/vcpkg.json') }}
+
+      - name: Install vcpkg
+        if: steps.cache-vcpkg-windows.outputs.cache-hit != 'true'
+        run: |
+          git clone https://github.com/Microsoft/vcpkg.git ${{ env.VCPKG_ROOT }}
+          ${{ env.VCPKG_ROOT }}/bootstrap-vcpkg.bat
+          ${{ env.VCPKG_ROOT }}/vcpkg integrate install
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '5.15.2'
+          host: 'windows'
+          target: 'desktop'
+          arch: 'win64_msvc2019_64'
+          tools: 'tools_cmake'
+          cache: true
+
+      - name: Configure CMake with vcpkg
+        run: |
+          cmake -B ${{ github.workspace }}/build `
+                -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} `
+                -DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_ROOT }}/scripts/buildsystems/vcpkg.cmake `
+                -DVCPKG_TARGET_TRIPLET=${{ env.VCPKG_DEFAULT_TRIPLET }} `
+                -DBUILD_BACKEND=OFF `
+                -DBUILD_FRONTEND=ON
+
+      - name: Build
+        run: |
+          cmake --build ${{ github.workspace }}/build --config ${{ env.BUILD_TYPE }} --target frontend
+
+      - name: Deploy Qt
+        run: |
+          cd ${{ github.workspace }}/build/frontend/${{ env.BUILD_TYPE }}
+          windeployqt.exe frontend.exe
+
+      - name: Create Package
+        run: |
+          mkdir ${{ github.workspace }}/package
+          cp -r ${{ github.workspace }}/build/frontend/${{ env.BUILD_TYPE }}/* ${{ github.workspace }}/package/
+
+      - name: Upload Windows Package as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-package
+          path: ${{ github.workspace }}/package
+
+  build-linux:
+    name: Build Linux Qt Package
+    runs-on: ubuntu-20.04
+
+    env:
+      PACKAGE_NAME: ChatWithCUSZ_Desktop_Linux_${{ github.event.head_commit.timestamp }}
+      VCPKG_DEFAULT_TRIPLET: x64-linux
+      CC: gcc
+      CXX: g++
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      # 安装必要的编译工具和 Qt5 依赖
+      - name: Install Build Tools and Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            gcc \
+            g++ \
+            ninja-build \
+            cmake \
+            pkg-config \
+            python3-pip \
+            python3 \
+            bison \
+            libgl1-mesa-dev \
+            libxkbcommon-x11-0 \
+            libxcb-icccm4 \
+            libxcb-image0 \
+            libxcb-keysyms1 \
+            libxcb-randr0 \
+            libxcb-render-util0 \
+            libxcb-shape0 \
+            libxcb-xinerama0 \
+            libsystemd-dev \
+            pkg-config \
+            ninja-build \
+            libmount-dev \
+            libblkid-dev \
+            libcrypt-dev \
+            libsystemd-dev \
+            libssl-dev \
+            libpcre2-dev \
+            libxi-dev \
+            libxtst-dev \
+            meson \
+            python3-jinja2 \
+            libfuse2
+
+      # 安装 meson（libsystemd 需要）
+      - name: Install Meson
+        run: |
+          pip3 install meson
+
+      # 安装和缓存 vcpkg
+      - name: Cache vcpkg
+        id: cache-vcpkg-linux
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.VCPKG_ROOT }}
+            !${{ env.VCPKG_ROOT }}/.git
+            !${{ env.VCPKG_ROOT }}/buildtrees
+            !${{ env.VCPKG_ROOT }}/packages
+            !${{ env.VCPKG_ROOT }}/downloads
+          key: vcpkg-linux-${{ hashFiles('**/vcpkg.json') }}
+
+      - name: Install vcpkg
+        if: steps.cache-vcpkg-linux.outputs.cache-hit != 'true'
+        run: |
+          git clone https://github.com/Microsoft/vcpkg.git ${{ env.VCPKG_ROOT }}
+          ${{ env.VCPKG_ROOT }}/bootstrap-vcpkg.sh
+          ${{ env.VCPKG_ROOT }}/vcpkg integrate install
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '5.15.2'
+          host: 'linux'
+          target: 'desktop'
+          arch: 'gcc_64'
+          tools: 'tools_cmake'
+          cache: true
+
+      - name: Install Frontend Dependencies
+        run: |
+          ${{ env.VCPKG_ROOT }}/vcpkg install --triplet ${{ env.VCPKG_DEFAULT_TRIPLET }} --x-manifest-root=${{ github.workspace }}/frontend
+
+      - name: Configure CMake with vcpkg
+        run: |
+          cmake -B ${{ github.workspace }}/build \
+                -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+                -DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_ROOT }}/scripts/buildsystems/vcpkg.cmake \
+                -DVCPKG_TARGET_TRIPLET=${{ env.VCPKG_DEFAULT_TRIPLET }} \
+                -DCMAKE_C_COMPILER=gcc \
+                -DCMAKE_CXX_COMPILER=g++ \
+                -DBUILD_BACKEND=OFF \
+                -DBUILD_FRONTEND=ON \
+                -GNinja
+
+      - name: Build
+        run: |
+          cmake --build ${{ github.workspace }}/build --config ${{ env.BUILD_TYPE }} --target frontend
+
+      - name: Install linuxdeployqt
+        run: |
+          wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
+          chmod +x linuxdeployqt-continuous-x86_64.AppImage
+          sudo mv linuxdeployqt-continuous-x86_64.AppImage /usr/local/bin/linuxdeployqt
+
+      - name: Create Desktop File
+        run: |
+          cat <<EOF > ${{ github.workspace }}/build/frontend/default.desktop
+          [Desktop Entry]
+          Name=ChatWithCUSZ
+          Exec=frontend
+          Icon=appicon
+          Type=Application
+          Categories=Utility;Application;
+          EOF
+
+      - name: Add Icon
+        run: |
+          cp ${{ github.workspace }}/assets/icon.png ${{ github.workspace }}/build/frontend/appicon.png
+
+      - name: Deploy Qt
+        run: |
+          cd ${{ github.workspace }}/build/frontend
+          linuxdeployqt frontend -appimage
+
+      - name: Create Package
+        run: |
+          mkdir -p ${{ github.workspace }}/package
+          cp -r ${{ github.workspace }}/build/frontend/* ${{ github.workspace }}/package/
+
+      - name: Upload Linux Package as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux-package
+          path: ${{ github.workspace }}/package
+
+  create-release:
+    name: Create GitHub Release
+    needs: [build-windows, build-linux]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Windows Package
+        uses: actions/download-artifact@v3
+        with:
+          name: windows-package
+          path: ./windows-package
+
+      - name: Download Linux Package
+        uses: actions/download-artifact@v3
+        with:
+          name: linux-package
+          path: ./linux-package
+
+      - name: Generate Date Tag
+        id: generate_tag
+        run: |
+          TAG_DATE=$(date +'%Y%m%d%H%M%S')
+          echo "TAG_DATE=${TAG_DATE}" >> $GITHUB_ENV
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ env.TAG_DATE }}
+          name: Release ${{ env.TAG_DATE }}
+          body: "自动生成的发布，发布日期：${{ env.TAG_DATE }}"
+          draft: false
+          prerelease: false
+
+      - name: Upload Windows Asset to Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ env.TAG_DATE }}
+          name: ChatWithCUSZ_Desktop_Windows.exe
+          path: ./windows-package/frontend.exe
+
+      - name: Upload Linux Asset to Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ env.TAG_DATE }}
+          name: ChatWithCUSZ_Desktop_Linux.AppImage
+          path: ./linux-package/frontend-x86_64.AppImage
