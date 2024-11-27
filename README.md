@@ -6,7 +6,7 @@
 
 支持 Windows 和 Linux 平台
 
-[Releases](https://github.com/BetterAndBetterII/Chat-With-CUHKSZ/releases)
+[Releases](https://github.com/BetterAndBetterII/Chat-With-CUHKSZ/releases/latest)
 
 2. 后端快速启动：
 
