@@ -2,7 +2,7 @@
 // Created by Gary on 24-10-24.
 //
 #include <iostream>
-#include "../include/System/Blackboard.h"
+#include "../include/System/Booking.h"
 //Test libcurl
 #include <curl/curl.h>
 //Test libxml
@@ -42,12 +42,12 @@ void test_libcurl(){
         std::cout << "支持 HTTP/3: 是" << std::endl;
     } else {
         std::cout << "支持 HTTP/3: 否" << std::endl;
-    }  
+    }
 
 }
 
-void test_blackboard(){
-    std::cout << "=====Testing BlackBoard=====" << std::endl;
+void test_booking(){
+    std::cout << "=====Testing Booking=====" << std::endl;
     std::cout << "---Testing Login---" << std::endl;
     //basic info input
     std::string username;
@@ -56,22 +56,23 @@ void test_blackboard(){
     std::cin >> username;
     std::cout << "Password:" << std::endl;
     std::cin >> password;
-    auto *bb = new BlackBoardSystem(username, password);
-    if(bb->login()){
+    std::string telephone = "1324567890";
+    std::string reason = "test";
+    std::string details = "test";
+    std::string field_name = "badminton";
+    std::string start_time = "2024-11-25 18:00";
+    std::string end_time = "2024-11-25 19:00";
+    auto *booking = new BookingSystem(username, password);
+    if(booking->login()){
+        std::cout << "---Testing retrieve_field_info---" << std::endl;
+        std::string available_time = booking->get_available_time("badminton", "2024-11-25");
+        std::cout << available_time << std::endl;
 
-        std::cout << "---Testing show_command---" << std::endl;
-        std::cout << bb->get_commands() << std::endl;
-
-        std::cout << "---Testing get_course---" << std::endl;
-        std::cout << bb->get_course() << std::endl;
-
-        std::cout << "---Testing get_announcement---" << std::endl;
-        std::cout << bb->get_announcement("CSC3002") << std::endl;
-
-        std::cout << "---Testing get_undo_assignments---" << std::endl;
-        std::cout << bb->get_undo_assignment() << std::endl;
+        booking->set_booker(telephone, reason, details);
+        std::string res = booking->book_field(field_name, start_time, end_time);
+        std::cout << res << std::endl;
     }
-    delete bb;
+    delete booking;
 }
 
 int main() {
@@ -81,8 +82,8 @@ int main() {
     //Test Libxml
     test_libxml();
 
-    //Test bb class
-    test_blackboard();
+    //Test booking class
+    test_booking();
 
     return 0;
 }

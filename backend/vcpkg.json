@@ -1,8 +1,33 @@
 {
-  "name" : "backend-executable",
-  "version" : "1.0",
-  "dependencies" : [
-    "cpr",
-    "nlohmann-json"
-  ]
+  "name": "chat-with-cusz",
+  "version": "1.0.0",
+  "dependencies": [
+      {
+          "name": "curl",
+          "default-features": false,
+          "features": ["ssl", "http2"]
+      },
+      "nlohmann-json",
+      "libxml2",
+      "openssl",
+      {
+          "name": "cpr",
+          "default-features": false,
+          "features": ["ssl"]
+      }
+  ],
+  "vcpkg-configuration": {
+      "default-registry": {
+          "kind": "git",
+          "repository": "https://github.com/microsoft/vcpkg",
+          "baseline": "068d45478f5536589e19f83344749379724b3225"
+      },
+      "registries": [
+          {
+              "kind": "artifact",
+              "location": "https://github.com/microsoft/vcpkg-binary-cache/releases/download/cache",
+              "name": "microsoft"
+          }
+      ]
+  }
 }

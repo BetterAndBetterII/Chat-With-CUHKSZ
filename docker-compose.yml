@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  chatwifcusz:
+    build: .
+    container_name: chatwifcusz
+    volumes:
+      - linux-chatwifcusz:/opt/vcpkg
+      - linux-cache:/var/cache
+volumes:
+  linux-chatwifcusz:
+    driver: local
+  linux-cache:
+    driver: local

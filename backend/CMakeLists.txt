@@ -33,14 +33,35 @@ target_link_libraries(backend_lib
         PUBLIC
         cpr::cpr
         nlohmann_json::nlohmann_json
-        curl::curl
+        CURL::libcurl
         LibXml2::LibXml2
+)
+
+# ----------------- 部署 -----------------
+add_executable(backend src/Server/Server.cpp)
+target_link_libraries(backend
+        PRIVATE
+        backend_lib
 )
 
 # ----------------- 测试 -----------------
 # _______ 测试BB _______
-add_executable(backend_test test/test_blackboard.cpp)
-target_link_libraries(backend_test
+add_executable(blackboard_test test/test_blackboard.cpp)
+target_link_libraries(blackboard_test
+        PRIVATE
+        backend_lib
+)
+
+# _______ 测试Booking _______
+add_executable(booking_test test/test_booking.cpp)
+target_link_libraries(booking_test
+        PRIVATE
+        backend_lib
+)
+
+# _______ 测试Email _______
+add_executable(email_test test/test_email.cpp)
+target_link_libraries(email_test
         PRIVATE
         backend_lib
 )
