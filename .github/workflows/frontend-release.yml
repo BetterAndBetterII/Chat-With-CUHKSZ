@@ -311,9 +311,13 @@ jobs:
           TAG_DATE=$(date +'%Y%m%d%H%M%S')-${{ github.run_id }}
           echo "TAG_DATE=${TAG_DATE}" >> $GITHUB_ENV
 
+      - name: Zip Windows Package
+        run: |
+          zip -r ./windows-package.zip ./windows-package
+
       - name: Rename Windows Binary
         run: |
-          mv ./windows-package/frontend.exe ./windows-package/ChatWithCUHKSZ_Desktop_Windows_${{ env.TAG_DATE }}.exe
+          mv ./windows-package.zip ./windows-package/ChatWithCUHKSZ_Desktop_Windows_${{ env.TAG_DATE }}.zip
 
       - name: Rename Linux Binary
         run: |
@@ -333,7 +337,7 @@ jobs:
           draft: false
           prerelease: false
           artifacts: |
-            ./windows-package/ChatWithCUHKSZ_Desktop_Windows_${{ env.TAG_DATE }}.exe
+            ./windows-package/ChatWithCUHKSZ_Desktop_Windows_${{ env.TAG_DATE }}.zip
             ./linux-package/ChatWithCUHKSZ_Desktop_Linux_${{ env.TAG_DATE }}.AppImage
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: true
