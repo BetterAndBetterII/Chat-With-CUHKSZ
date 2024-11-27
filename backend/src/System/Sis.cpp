@@ -136,9 +136,9 @@ bool SisSystem::login(){
     if(sis_handle){
 
         //忽略登录过程返回的响应体（注释下行可把响应体打印到终端）
-        curl_easy_setopt(sis_handle, CURLOPT_WRITEFUNCTION, ignore_calback);
+        //curl_easy_setopt(sis_handle, CURLOPT_WRITEFUNCTION, ignore_calback);
         //curl_easy_setopt(sis_handle, CURLOPT_VERBOSE, 1L);//详细输出
-        curl_easy_setopt(sis_handle, CURLOPT_HEADERFUNCTION, header_callback);
+        //curl_easy_setopt(sis_handle, CURLOPT_HEADERFUNCTION, header_callback);
 
         // 启用自动cookie处理，指定cookie文件
         cookiefile = username + "sisCookies.txt";
@@ -147,8 +147,8 @@ bool SisSystem::login(){
 
         //向sts.cuhk.edu.cn发送登录请求(POST)
         string url = string("https://sts.cuhk.edu.cn/adfs/oauth2/authorize?")
-            + "response_type=" + "code" +
-            + "&client_id=" + "3f09a73c-33cf-49b8-8f0c-b79ea2f3e83b" +
+            + "response_type=" + "code" 
+            + "&client_id=" + "3f09a73c-33cf-49b8-8f0c-b79ea2f3e83b" 
             + "&redirect_uri=" + "https://sis.cuhk.edu.cn/sso/dologin.html"
             + "&client-request-id=" + "e4ad901b-ac83-4ace-8413-0040020000e8";
 
@@ -162,15 +162,16 @@ bool SisSystem::login(){
 
         char* final_url;
         curl_easy_getinfo(sis_handle, CURLINFO_EFFECTIVE_URL, &final_url);
-        cout << "final url: \n" << final_url << endl; 
+        //cout << "final url: \n" << final_url << endl; 
         string code = string(final_url).substr(string(final_url).find("code=")+5);
-        cout << "code= \n" << code << endl; 
+        //cout << "code= \n" << code << endl; 
         
         url = string("https://sis.cuhk.edu.cn/psp/csprd/?")
-            + "cmd=" + "login" +
+            + "cmd=" + "login" 
             + "&languageCd=" + "ENG"
             + "&code=" + code;
 
+        cout << "URL: " << url << endl;
         //生成随机字符串
         // 创建一个随机数生成器，使用随机设备作为种子
         std::random_device rd;
@@ -204,9 +205,7 @@ bool SisSystem::login(){
         res = curl_easy_perform(sis_handle);
 
         // 手动添加 Cookie
-        curl_easy_setopt(sis_handle, CURLOPT_COOKIE, ("PS_DEVICEFEATURES=width:1728 height:1152 pixelratio:1.25 touch:0 geolocation:1 websockets:1 webworkers:1 datepicker:1 dtpicker:1 timepicker:1 dnd:1 sessionstorage:1 localstorage:1 history:1 canvas:1 svg:1 postmessage:1 hc:0; ExpirePage=https://sis.cuhk.edu.cn/psp/csprd/; PS_LOGINLIST=https://sis.cuhk.edu.cn/csprd; SignOnDefault="+username).c_str());
-        //curl_easy_setopt(sis_handle, CURLOPT_COOKIE, "PS_TOKENEXPIRE=27_Nov_2024_14:30:23_GMT");
-        //curl_easy_setopt(sis_handle, CURLOPT_COOKIE, "PS_TOKEN=qQAAAAQDAgEBAAAAvAIAAAAAAAAsAAAABABTaGRyAk4Acwg4AC4AMQAwABQRZzwTsDHTz+uyvzTkPrLNjDTnxWkAAAAFAFNkYXRhXXicHYy7DYAwEENfAqKkYA8ikiBEBuBTIQT0DMF6DIfJnWyfTrYfoCysMdLXkqfxBCIdSRjwuquJjYV652Tm4mbloA8yBHpambw4MIr/kMsFLhc5faOQtB4+iaALiQ==");
+        curl_easy_setopt(sis_handle, CURLOPT_COOKIE, "PS_DEVICEFEATURES=width:1728 height:1152 pixelratio:1.25 touch:0 geolocation:1 websockets:1 webworkers:1 datepicker:1 dtpicker:1 timepicker:1 dnd:1 sessionstorage:1 localstorage:1 history:1 canvas:1 svg:1 postmessage:1 hc:0");
         url = "https://sis.cuhk.edu.cn/psc/csprd/EMPLOYEE/HRMS/s/WEBLIB_PTBR.ISCRIPT1.FieldFormula.IScript_StartPage?&";
         curl_easy_setopt(sis_handle, CURLOPT_URL, url.c_str() );
         curl_easy_setopt(sis_handle, CURLOPT_HTTPGET, 1L);
@@ -220,7 +219,7 @@ bool SisSystem::login(){
         //cout << chunk.response;
 
         curl_easy_getinfo(sis_handle, CURLINFO_EFFECTIVE_URL, &final_url);
-        //cout << "final url: \n" << final_url << endl; 
+        cout << "final url: \n" << final_url << endl; 
 
 
         if(res != CURLE_OK){
