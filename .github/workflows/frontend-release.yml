@@ -294,13 +294,13 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Download Windows Package
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: windows-package
           path: ./windows-package
 
       - name: Download Linux Package
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: linux-package
           path: ./linux-package
