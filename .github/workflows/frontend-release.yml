@@ -64,7 +64,7 @@ jobs:
       - name: Install CMake
         run: |
           if (-Not (Test-Path "C:\tools\cmake")) {
-            choco install cmake --installargs 'INSTALLDIR=C:\tools\cmake' -y
+            choco install cmake --installargs 'INSTALLDIR=C:\tools\cmake' -y --version=3.31.0
           }
 
       # 安装 Ninja
