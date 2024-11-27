@@ -258,7 +258,7 @@ jobs:
         run: |
           cat <<EOF > ${{ github.workspace }}/build/frontend/default.desktop
           [Desktop Entry]
-          Name=ChatWithCUSZ
+          Name=ChatWithCUHKSZ
           Exec=frontend
           Icon=appicon
           Type=Application
@@ -272,7 +272,7 @@ jobs:
       - name: Deploy Qt
         run: |
           cd ${{ github.workspace }}/build/frontend
-          linuxdeployqt frontend -appimage
+          linuxdeployqt frontend -appimage -o ${{ github.workspace }}/build/frontend/frontend-x86_64.AppImage
 
       - name: Create Package
         run: |
