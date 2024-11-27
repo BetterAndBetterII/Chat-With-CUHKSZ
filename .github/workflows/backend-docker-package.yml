@@ -6,7 +6,7 @@ on:
 env:
   REGISTRY: ghcr.io
   OWNER: betterandbetterii
-  IMAGE_NAME: chat-with-cusz
+  IMAGE_NAME: chat-with-cuhksz
 
 jobs:
   build-and-push-image:
