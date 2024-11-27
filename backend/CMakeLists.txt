@@ -51,6 +51,13 @@ target_link_libraries(libary_test
         backend_lib
 )
 
+# _______ 测试SIS _______
+add_executable(sis_test test/test_sis.cpp)
+target_link_libraries(sis_test
+        PRIVATE
+        backend_lib
+)
+
 # _______ 测试Agent _______
 add_executable(agent_test test/test_agent.cpp)
 target_link_libraries(agent_test
