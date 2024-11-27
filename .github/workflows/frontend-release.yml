@@ -272,7 +272,7 @@ jobs:
       - name: Deploy Qt
         run: |
           cd ${{ github.workspace }}/build/frontend
-          linuxdeployqt frontend -appimage -o ${{ github.workspace }}/build/frontend/frontend-x86_64.AppImage
+          linuxdeployqt frontend -appimage
 
       - name: Create Package
         run: |
@@ -317,7 +317,12 @@ jobs:
 
       - name: Rename Linux Binary
         run: |
-          mv ./linux-package/frontend-x86_64.AppImage ./linux-package/ChatWithCUHKSZ_Desktop_Linux_${{ env.TAG_DATE }}.AppImage
+          APPIMAGE_FILE=$(find ./linux-package -name "*.AppImage" -type f)
+          if [ -z "$APPIMAGE_FILE" ]; then
+            echo "No .AppImage file found in ./linux-package"
+            exit 1
+          fi
+          mv "$APPIMAGE_FILE" ./linux-package/ChatWithCUHKSZ_Desktop_Linux_${{ env.TAG_DATE }}.AppImage
 
       - name: Create GitHub Release and Upload Assets
         uses: ncipollo/release-action@v1
