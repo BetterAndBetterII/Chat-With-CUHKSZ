@@ -4,9 +4,13 @@
 
 1. 桌面版前端下载
 
-支持 Windows 和 Linux 平台
+支持 Windows 和 Linux 平台：
 
 [Releases](https://github.com/BetterAndBetterII/Chat-With-CUHKSZ/releases/latest)
+
+针对linux平台，需要安装fuse：`sudo apt install libfuse2`
+
+（ubuntu24.04有一定不兼容fuse，参考 [Ubuntu 24.04安装fuse后重启无法进入桌面](https://liar.org.cn/Linux/3.html) ）
 
 2. 后端快速启动：
 
