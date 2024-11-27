@@ -50,25 +50,22 @@ RUN cd /backend && ${VCPKG_ROOT}/vcpkg install \
     --feature-flags=binarycaching,manifests \
     --clean-after-build
 
-# 安装 Qt 相关包
-RUN apt-get update && apt-get install -y \
-    qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools qtcreator qt5* \
-    && rm -rf /var/lib/apt/lists/*
-
 # 第三阶段：构建项目
 FROM vcpkg AS builder
 WORKDIR /app
 
 # 复制 CMake 文件
 COPY CMakeLists.txt .
-COPY backend .
-COPY frontend .
+COPY backend ./backend
+COPY frontend ./frontend
 
 # 配置 CMake
 RUN cmake -B build \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake \
     -DVCPKG_TARGET_TRIPLET=${VCPKG_DEFAULT_TRIPLET} \
+    -DBUILD_BACKEND=ON \
+    -DBUILD_FRONTEND=OFF \
     -GNinja
 
 # 构建项目
@@ -93,7 +90,6 @@ WORKDIR /app
 # 从构建阶段复制必要的文件
 COPY --from=builder /app/build/backend/backend .
 COPY --from=builder /opt/vcpkg/installed/x64-linux/lib/*.so* /usr/local/lib/
-COPY --from=builder /opt/vcpkg/installed/x64-linux/bin/* /usr/local/bin/
 
 # 更新动态链接器缓存
 USER root

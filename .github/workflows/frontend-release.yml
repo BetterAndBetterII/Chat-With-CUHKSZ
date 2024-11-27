@@ -332,6 +332,9 @@ jobs:
           body: "自动生成的发布，发布日期：${{ env.TAG_DATE }}"
           draft: false
           prerelease: false
-          files: |
+          artifacts: |
             ./windows-package/ChatWithCUHKSZ_Desktop_Windows_${{ env.TAG_DATE }}.exe
             ./linux-package/ChatWithCUHKSZ_Desktop_Linux_${{ env.TAG_DATE }}.AppImage
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allowUpdates: true
+          replacesArtifacts: true
