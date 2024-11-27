@@ -338,8 +338,8 @@ jobs:
           prerelease: false
           makeLatest: true
           artifacts: |
-            ./windows-package/ChatWithCUHKSZ_Desktop_Windows_${{ env.TAG_DATE }}.zip
-            ./linux-package/ChatWithCUHKSZ_Desktop_Linux_${{ env.TAG_DATE }}.AppImage
+            ./windows-package/ChatWithCUHKSZ_Desktop_Windows-amd64.zip
+            ./linux-package/ChatWithCUHKSZ_Desktop_Linux-amd64.AppImage
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: true
           replacesArtifacts: true
