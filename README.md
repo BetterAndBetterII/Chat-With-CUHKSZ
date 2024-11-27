@@ -1,4 +1,24 @@
-# Chat-With-CUHKSZ
+# ChatWithCUHKSZ
+
+## 快速开始
+
+1. 桌面版前端下载
+
+支持 Windows 和 Linux 平台
+
+[Releases](https://github.com/BetterAndBetterII/Chat-With-CUHKSZ/releases)
+
+2. 后端快速启动：
+
+```bash
+docker run -d --name chat-with-cuhksz-backend -p 8080:8080 ghcr.io/betterandbetterii/chat-with-cuhksz:latest
+```
+
+## 使用方法
+
+1. 进入程序后输入账号与密码登录
+
+2. 登录后即可开始使用
 
 ## 开发指南
 

@@ -317,7 +317,7 @@ jobs:
 
       - name: Rename Windows Binary
         run: |
-          mv ./windows-package.zip ./windows-package/ChatWithCUHKSZ_Desktop_Windows_${{ env.TAG_DATE }}.zip
+          mv ./windows-package.zip ./windows-package/ChatWithCUHKSZ_Desktop_Windows-64_${{ env.TAG_DATE }}.zip
 
       - name: Rename Linux Binary
         run: |
@@ -326,7 +326,7 @@ jobs:
             echo "No .AppImage file found in ./linux-package"
             exit 1
           fi
-          mv "$APPIMAGE_FILE" ./linux-package/ChatWithCUHKSZ_Desktop_Linux_${{ env.TAG_DATE }}.AppImage
+          mv "$APPIMAGE_FILE" ./linux-package/ChatWithCUHKSZ_Desktop_Linux-64_${{ env.TAG_DATE }}.AppImage
 
       - name: Create GitHub Release and Upload Assets
         uses: ncipollo/release-action@v1
@@ -336,6 +336,7 @@ jobs:
           body: "自动生成的发布，发布日期：${{ env.TAG_DATE }}"
           draft: false
           prerelease: false
+          makeLatest: true
           artifacts: |
             ./windows-package/ChatWithCUHKSZ_Desktop_Windows_${{ env.TAG_DATE }}.zip
             ./linux-package/ChatWithCUHKSZ_Desktop_Linux_${{ env.TAG_DATE }}.AppImage
