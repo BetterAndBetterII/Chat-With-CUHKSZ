@@ -1,7 +1,7 @@
 #include "../include/Agent/Agent.h"
 #include<iostream>
 int main() {
-    Agent agent;
+    Agent agent = Agent("","");
     while(true) {
         std::string user_input;
         getline(std::cin,user_input);

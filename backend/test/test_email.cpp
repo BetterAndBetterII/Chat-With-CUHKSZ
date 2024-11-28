@@ -30,6 +30,13 @@ void test_libcurl(){
         std::cout << "支持 SSL: 否" << std::endl;
     }
 
+    // 检查是否支持 SMTP
+    if(info->features & CURLPROTO_SMTPS) {
+        std::cout << "支持 SMTP: 是" << std::endl;
+    } else {
+        std::cout << "支持 SMTP: 否" << std::endl;
+    }
+
     // 检查是否支持 HTTP/2
     if(info->features & CURL_VERSION_HTTP2) {
         std::cout << "支持 HTTP/2: 是" << std::endl;

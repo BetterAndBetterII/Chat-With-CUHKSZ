@@ -1,6 +1,5 @@
 #include "../../include/Model/Model.h"
 
-#include "../../include/System/Tools.h"
 Model::Model() {}
 Model::~Model() {}
 

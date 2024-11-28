@@ -1,11 +1,15 @@
 #include "../../include/Agent/Agent.h"
-#include "../../include/Model/Model.h"
-Agent::Agent() = default;
+
+Agent::Agent(const std::string& _username, const std::string& _password): tools(new Tools(_username, _password)) {
+    this->username = _username;
+    this->password = _password;
+}
+
 Agent::~Agent() = default;
 
 std::vector<Function> Agent::get_tools() const
 {
-    return tools.functions;
+    return tools->functions;
 }
 
 void Agent::insert_memory(const std::string& message, const std::string& role) {
@@ -35,7 +39,7 @@ std::string Agent::run(const std::string &message, const bool enable_tools) {
         insert_memory(tool_str, "assistant");
 
         std::cout<<tool_str<<std::endl;
-        std::string tool_result = "<Tool> Called " + tool_str + " <Result>: " + Tools::handle_tool_call(tool_call, tool_arguments);
+        std::string tool_result = "<Tool> Called " + tool_str + " <Result>: " + tools->handle_tool_call(tool_call, tool_arguments);
         insert_memory(tool_result, "user");
         return tool_result;
     }

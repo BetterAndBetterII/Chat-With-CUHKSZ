@@ -143,6 +143,7 @@ bool BlackBoardSystem::login(){
         //通过重定向次数判断是否成功登录
         long redirect_count;
         curl_easy_getinfo(bb_handle, CURLINFO_REDIRECT_COUNT, &redirect_count);
+        std::cout<<username<<"   "<<password<<std::endl;
         if(res != CURLE_OK){
             std::cerr << "Login failed because:" << curl_easy_strerror(res) << std::endl;
         }
@@ -255,6 +256,10 @@ std::string BlackBoardSystem::execute_command(const std::string& command) {
 }
 
 std::string BlackBoardSystem::get_course(const std::string& term){
+    change_info(username, password);
+    if (!login()) {
+        return "Invalid username or password!";
+    }
     std::string rawData = getRequest("https://bb.cuhk.edu.cn/webapps/bb-enhance-BBLEARN/normal/mycourse/search"); 
     std::vector<std::string> crouse_name = xpathQuery(rawData, "//*[@id[starts-with(., 'listContainer_row:')]]/td[1]/span[2]");
     std::vector<std::string> crouse_instructor = xpathQuery(rawData, "//*[@id[starts-with(., 'listContainer_row:')]]/td[3]/span[2]");

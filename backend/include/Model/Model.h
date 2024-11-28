@@ -2,6 +2,7 @@
 #define MODEL_H
 #include <string>
 #include <nlohmann/json.hpp>
+#include "../System/Tools.h"
 #include <iostream>
 #include <cpr/cpr.h>
 class Function;

@@ -8,8 +8,10 @@
 
 #include <nlohmann/json.hpp>
 #include <utility>
-using json = nlohmann::json;
 
+#include "Blackboard.h"
+#include "Booking.h"
+using json = nlohmann::json;
 class FunctionProperty
 {
 public:
@@ -41,9 +43,8 @@ public:
     std::vector<std::string> required;
 
     FunctionParameters(std::vector<FunctionProperty> properties, std::vector<std::string> required)
-        : properties(std::move(properties)), required(std::move(required))
-    {
-    }
+        : properties(std::move(properties)), required(std::move(required)){}
+    FunctionParameters() = default;
 };
 
 class FunctionDescription
@@ -65,7 +66,7 @@ public:
     std::string type = "function";
     FunctionDescription description;
 
-    Function(std::string name, std::string description, FunctionParameters parameters)
+    Function(std::string name, std::string description, FunctionParameters parameters={})
         : description(std::move(name), std::move(description), std::move(parameters))
     {
     }
@@ -117,7 +118,13 @@ public:
 
 class Tools
 {
+    BlackBoardSystem *bb;
+    BookingSystem *booking;
 public:
+    Tools(const std::string &_username, const std::string &_password)
+        : bb(new BlackBoardSystem(_username, _password)),
+          booking(new BookingSystem(_username, _password)){}
+    ~Tools();
     std::vector<Function> functions = {
         Function{
             "generate_image",
@@ -132,17 +139,82 @@ public:
                 },
                 {"prompt"}
             }
-        }
+        },
+        Function{
+            "get_course",
+            "Get the course of the user",
+            FunctionParameters{
+                    {
+                        FunctionProperty{
+                            "placeholder", "string", "The placeholder of the parameter.",
+                        }
+                    },
+                    {}
+            }
+        },
+        Function{
+            "get_announcement",
+            "Get the announcement of a class based on its class_id. Given the name of the class, you can get the class id from get_course function",
+            FunctionParameters{
+                        {
+                            FunctionProperty{
+                                "class_id", "string", "The id of the class.",
+                            }
+                        },
+                        {}
+            }
+        },
+        Function{
+            "get_available_time",
+            "Get the available time of the badminton court based on a date",
+            FunctionParameters{
+                            {
+                                FunctionProperty{
+                                    "date", "string", "The date of the query with the format %Y-%m-%d",
+                                }
+                            },
+                            {}
+            }
+        },
+        Function{
+            "set_booker",
+            "a function that must be call before calling book_field function",
+            FunctionParameters{
+                            {
+                                FunctionProperty{
+                                    "telephone_number", "string", "The telephone number of the user.",
+                                },
+                                FunctionProperty{
+                                    "reason", "string", "The reason for the reservation.",
+                                },
+                                FunctionProperty{
+                                    "details", "string", "The detail of the reservation.",
+                                }
+                            },
+                            {}
+            }
+        },
+        Function{
+            "book_field",
+            "book a field",
+            FunctionParameters{
+                            {
+                                FunctionProperty{
+                                    "field_name", "string", "The name of the field.",
+                                },
+                                FunctionProperty{
+                                    "start_time", "string", "The start time of the reservation with the format %Y-%m-%d %H:%M",
+                                },
+                                FunctionProperty{
+                                    "end_time", "string", "The end time of the reservation with the format %Y-%m-%d %H:%M",
+                                },
+                            },
+                            {}
+            }
+        },
     };
 
-    static std::string handle_tool_call(const std::string& tool_name, const json& arguments)
-    {
-        if (tool_name == "generate_image")
-        {
-            return "Image generated!";
-        }
-        return "Unknown tool!";
-    }
+    std::string handle_tool_call(const std::string &tool_name, json &arguments);
 };
 
 #endif // TOOLS_H
