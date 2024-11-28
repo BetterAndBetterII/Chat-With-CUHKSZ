@@ -36,6 +36,7 @@ private:
     static size_t ignore_calback(void *ptr, size_t size, size_t nmemb, void *userdata);
     static size_t write_callback(char *data, size_t size, size_t nmemb, void *clientp);
     static size_t header_callback(char *ptr, size_t size, size_t nmemb, void *userdata);
+    static size_t debug_callback(CURL *handle, curl_infotype type, char *data, size_t size, void *userptr);
 
     //command helper functions
     std::string getRequest(const std::string& url)const;

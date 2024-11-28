@@ -3,6 +3,7 @@
 #include <curl/curl.h>
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
+#include <cstdlib>
 
 
 void test_sis(){
@@ -11,10 +12,20 @@ void test_sis(){
     //basic info input
     std::string username = "";
     std::string password = "";
-    std::cout << "Username:" << std::endl;
-    std::cin >> username;
-    std::cout << "Password:" << std::endl;
-    std::cin >> password;
+    const char* env_username = std::getenv("STUDENT_USERNAME");
+    const char* env_password = std::getenv("STUDENT_PASSWORD");
+    if (env_username) {
+        username = env_username;
+    } else {
+        std::cout << "Username:" << std::endl;
+        std::cin >> username;
+    }
+    if (env_password) {
+        password = env_username;
+    } else {
+        std::cout << "Password:" << std::endl;
+        std::cin >> username;
+    }
     auto *sis = new SisSystem(username, password);
     if(sis->login()){
 
