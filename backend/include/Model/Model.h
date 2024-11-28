@@ -17,7 +17,7 @@ public:
         std::string new_user_content,
         std::vector<Function> tools
     );
-    std::string send_message(json message);
+    json send_message(json message);
 private:
     const std::string API_KEY = "ak-GZTdsRjD60WUwxUrtf07b76t8K1YSbsOPiu7q01Vj0DPB9Hy";
 };

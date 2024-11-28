@@ -80,7 +80,7 @@ public:
 
     return {
       {"type", type},
-      {"description", {
+      {"function", {
         {"name", description.name},
         {"description", description.description},
         {"parameters", {
@@ -109,7 +109,7 @@ public:
     }
   };
 
-  std::string handle_tool_call(const std::string& tool_name, const json& arguments) {
+  static std::string handle_tool_call(const std::string& tool_name, const json& arguments) {
     if (tool_name == "generate_image") {
       return "Image generated!";
     }

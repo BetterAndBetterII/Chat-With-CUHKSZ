@@ -1,6 +1,6 @@
 #include "../../include/Model/Model.h"
 
-#include "../System/Tools.h"
+#include "../../include/System/Tools.h"
 Model::Model() {}
 Model::~Model() {}
 
@@ -29,17 +29,19 @@ json Model::build_message(
     return data;
 }
 
-std::string Model::send_message(const json message) {
+json Model::send_message(const json message) {
+    std::cout << "body: " << message.dump() << std::endl;
     cpr::Response response = Post(
         cpr::Url{"https://api.nextapi.fun/v1/chat/completions"},
         cpr::Header{{"Authorization", "Bearer " + API_KEY}},
         cpr::Body{message.dump()}
     );
-    std::cout << "body: " << message.dump() << std::endl;
     std::cout << "response: " << response.text << std::endl;
     if (response.status_code == 200) {
-        auto reply = json::parse(response.text)["choices"][0]["message"]["content"];
-        return reply;
+        if (json::parse(response.text)["choices"][0]["message"].contains("tool_calls")) {
+            return json::parse(response.text)["choices"][0]["message"];
+        }
+        return json::parse(response.text)["choices"][0]["message"];
     }
     std::cerr << "请求失败: " << response.status_code << std::endl;
     return "";
