@@ -27,7 +27,11 @@ public:
     std::vector<KnowledgeRecord> parseFiles(const std::filesystem::path& directoryPath, const std::string& filename);
 
     //检索文件内容
-    std::string searchKnowledgeBase(const std::vector<KnowledgeRecord>& records, const std::string& keyword);
+    std::string searchKnowledgeBase(const std::vector<KnowledgeRecord>& records,
+                                    const std::string& keyword1, int weight1,
+                                    const std::string& keyword2, int weight2,
+                                    const std::string& keyword3, int weight3);
+
 
     //处理agent请求
     void handleAgentRequest(const std::string& request, const std::vector<KnowledgeRecord>& records);
