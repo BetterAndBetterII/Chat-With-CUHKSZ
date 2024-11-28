@@ -23,6 +23,7 @@ private:
     std::string cookiefile;
 
     CURL* sis_handle;
+    struct curl_slist* headers;
     //curlglobal类用于避免多次全局初始化
     CurlGlobal curl_global_manager;
 

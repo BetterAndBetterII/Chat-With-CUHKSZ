@@ -21,10 +21,10 @@ void test_sis(){
         std::cin >> username;
     }
     if (env_password) {
-        password = env_username;
+        password = env_password;
     } else {
         std::cout << "Password:" << std::endl;
-        std::cin >> username;
+        std::cin >> password;
     }
     auto *sis = new SisSystem(username, password);
     if(sis->login()){
