@@ -1,6 +1,25 @@
 #include "../../include/Model/Model.h"
 Model::Model() {}
 Model::~Model() {}
+
+json Model::build_message(
+    std::string model,
+    std::string system_prompt,
+    const std::vector<std::string>& past_messages,
+    std::string new_user_content,
+    json tools
+) {
+    json message = json::parse(past_messages);
+    message.push_back({{"role", "system"}, {"content", system_prompt}});
+    message.push_back({{"role", "user"}, {"content", new_user_content}});
+    json data = {
+        {"model", model},
+        {"messages", message},
+        {"tools", tools}
+    };
+    return data;
+}
+
 std::string Model::send_message(const json message) {
     json request_body = {
         {"model", "gpt-4o"},
