@@ -120,6 +120,7 @@ class Tools
 {
     BlackBoardSystem *bb;
     BookingSystem *booking;
+    // KnowledgeBase *knowledge;
 public:
     Tools(const std::string &_username, const std::string &_password)
         : bb(new BlackBoardSystem(_username, _password)),
@@ -212,6 +213,24 @@ public:
                             {}
             }
         },
+        // Function{
+        //     "getKnowledge",
+        //     "pass three key words as parameters to perform search in the knowledge base of  the university",
+        //     FunctionParameters{
+        //                         {
+        //                             FunctionProperty{
+        //                                 "keyword_1", "string", "The most relevant key word.",
+        //                             },
+        //                             FunctionProperty{
+        //                                 "keyword_2", "string", "The second relevant key word",
+        //                             },
+        //                             FunctionProperty{
+        //                                 "keyword_3", "string", "The third relevant key word",
+        //                             },
+        //                         },
+        //                         {}
+        //     }
+        // },
     };
 
     std::string handle_tool_call(const std::string &tool_name, json &arguments);

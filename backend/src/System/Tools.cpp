@@ -20,5 +20,8 @@ std::string Tools::handle_tool_call(const std::string& tool_name,  json& argumen
     if (tool_name == "book_field") {
         return booking->book_field(std::string(arguments["field_name"]),std::string(arguments["start_time"]),std::string(arguments["end_time"]));
     }
+    // if (tool_name=="getKnowledge") {
+    //     return knowledge->getKnowledge(std::string(arguments["keyword_1"]),std::string(arguments["keyword_2"]),std::string(arguments["keyword_3"]));
+    // }
     return "Unknown tool!";
 }
