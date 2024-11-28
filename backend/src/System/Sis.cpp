@@ -4,6 +4,7 @@
 #include "../../include/System/Sis.h"
 #include <iostream> //std::cerr
 #include <sstream> 
+#include <fstream>
 #include <cstring>
 #include <regex> //space_cutter()
 #include <chrono> //missDue() 
@@ -18,10 +19,7 @@ using std::endl;
 SisSystem::SisSystem(const string& username, const string& password) : curl_global_manager(){
     //初始化变量
     this->command_list = {
-        "get_course",
-        "get_annoucement",
-        "get_assignment",
-        "get_grades"
+        "get_schedule",
     };
     this->username = username;
     this->password = password;
@@ -138,7 +136,7 @@ vector<string> SisSystem::xpathQuery(const string& xmlContent, const string& xpa
     }
 
     if (xmlXPathNodeSetIsEmpty(result->nodesetval)) {
-        //cout << "No results\n";
+        cout << "No results\n";
         //如果没有匹配正确的内容则返回空的output
     } else {
         // 遍历找到的节点集合，获取每个节点的内容
@@ -355,125 +353,131 @@ string SisSystem::get_commands()const{
 }
 
 
-string SisSystem::get_course(const string& term)const{
-    string rawData = getRequest("https://bb.cuhk.edu.cn/webapps/bb-enhance-BBLEARN/normal/mycourse/search"); 
-    vector<string> crouse_name = xpathQuery(rawData, "//*[@id[starts-with(., 'listContainer_row:')]]/td[1]/span[2]");
-    vector<string> crouse_instructor = xpathQuery(rawData, "//*[@id[starts-with(., 'listContainer_row:')]]/td[3]/span[2]");
-    vector<string> crouse_term = xpathQuery(rawData, "//*[@id[starts-with(., 'listContainer_row:')]]/td[4]/span[2]");
+string SisSystem::get_schedule()const{
 
-    string total_result = "";
-    for(int i = 0 ; i < crouse_name.size(); ++i){
-        if(crouse_term[i] == term ){
-            total_result+= "Crouse Name: " + crouse_name[i] + "\n";
-            total_result+= "Instructor: " + crouse_instructor[i] + "\n";
-            total_result+= "Crouse Term: " + crouse_term[i] + "\n\n";
-        }
+    string url = string("https://sis.cuhk.edu.cn/psc/csprd/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.SSR_SSENRL_SCHD_W.GBL?") +
+    "FolderPath=PORTAL_ROOT_OBJECT.CO_EMPLOYEE_SELF_SERVICE.HCCC_ENROLLMENT.HC_SSR_SSENRL_SCHD_W_GBL"+
+    "&IsFolder=false"+
+    "&IgnoreParamTempl=FolderPath,IsFolder";
+
+    string rawData = getRequest(url);
+
+    //std::ofstream outFile;
+    //outFile.open("output.html");
+    //outFile << rawData;
+    //outFile.close();
+
+    //截取课表部分（否则xpath查询不到）
+    size_t startpos = rawData.find("<table cellspacing='0' cellpadding='2' width='100%' class='PSLEVEL1GRIDNBO' id='WEEKLY_SCHED_HTMLAREA'>");
+    if (startpos == std::string::npos) {
+        std::cout << "Can not find class table! from page" << std::endl;
     }
+    rawData = rawData.substr(startpos);
+    size_t endpos = rawData.find("class='PSLEVEL3GRID'>&nbsp;</td></tr></table></div>");
+    rawData = rawData.substr(0, endpos+45);
+    rawData = "<html><head></head><body>"+rawData+"</body></html>";
+    //cout << "rawData:\n" <<rawData <<endl;
 
-    return total_result;
-}
-
-string SisSystem::get_course_id(const string& crouse)const{
-    string rawData = getRequest("https://bb.cuhk.edu.cn/webapps/bb-enhance-BBLEARN/normal/mycourse/search"); 
-    vector<string> crouse_name = xpathQuery(rawData, "//*[@id[starts-with(., 'listContainer_row:')]]/td[1]/span[2]");
-    vector<string> crouse_id = xpathQuery(rawData, "//*[@id[starts-with(., 'listContainer_row:')]]/th/a/@onclick");
-    //截取id部分
-    std::for_each(crouse_id.begin(), crouse_id.end(), [](string& str) {
-        str = str.substr(str.find("id=") + 3, str.find("&url") - str.find("id=")-3);
-    }); 
-    for(int i = 0 ; i < crouse_id.size(); ++i){
-        if(crouse_name[i].find(crouse) != string::npos ){
-            return crouse_id[i];
+    vector<vector<string>> table(16, vector<string>(8));
+    table[0][0]="Time";table[0][1]="Monday";table[0][2]="Tuesday";table[0][3]="Wednesday";table[0][4]="Thursday";table[0][5]="Friday";table[0][6]="Saturday";table[0][7]="Sunday";
+    
+    for(int row = 2 ; row <= 16 ; row++){
+        //cout << "===row=" << row << "===" << endl;
+        int item_counter = 0 ;
+        if(row!=2){
+            for(string item : table[row-1]){if(item!=""){item_counter++;}}
         }
-    }
-    return "";
-}
-
-string SisSystem::get_announcement(const string& crouse, const int number )const{
-    string id = get_course_id(crouse);
-    if(!id.empty()){
-        string data ="method=search&viewChoice=3&editMode=false&tabAction=false&announcementId=&course_id=&context=mybb&internalHandle=my_announcements&searchSelect=" + id; //POST data
-        string rawData = postRequest("https://bb.cuhk.edu.cn/webapps/blackboard/execute/announcement", data);
-        vector<string> headers = xpathQuery(rawData, "//li[@class='clearfix']/h3");
-        vector<string> postTime = xpathQuery(rawData, "//li[@class='clearfix']/div[@class='details']/p[1]");
-        vector<string> details = xpathQuery(rawData, "//li[@class='clearfix']/div[@class='details']/div");
-        vector<string> posters = xpathQuery(rawData, "//li[@class='clearfix']/div[@class='announcementInfo']/p[1]");
-        
-        //去除多余空格
-        std::for_each(headers.begin(), headers.end(), [](string& str) {
-            str = str.substr(str.find_first_not_of(" \t\n\r\v"));
-        }); 
-        
-
-        string total_result = "";
-        for(int i = 0 ; i < headers.size() && i < number; ++i){
-            total_result+="Announcement:\n"+headers[i]+"\n"+postTime[i]+"\n"+details[i]+"\n"+posters[i]+"\n";
-        }
-
-        return total_result;
-    }
-    return "";
-}
-
-string SisSystem::get_assignment(const string& crouse)const{
-    string rawData = getRequest("https://bb.cuhk.edu.cn/webapps/bb-enhance-BBLEARN/normal/mycourse/search"); 
-    vector<string> crouse_name = xpathQuery(rawData, "//*[@id[starts-with(., 'listContainer_row:')]]/td[1]/span[2]");
-    vector<string> crouse_id = xpathQuery(rawData, "//*[@id[starts-with(., 'listContainer_row:')]]/th/a/@onclick");
-    //截取id部分
-    std::for_each(crouse_id.begin(), crouse_id.end(), [](string& str) {
-        str = str.substr(str.find("id=") + 3, str.find("&url") - str.find("id=")-3);
-    }); 
-
-    vector<string> total_assignment_urls;
-
-    for(int i = 0 ; i < crouse_id.size(); ++i){
-        if((crouse_name[i].find(crouse) != string::npos)||(crouse=="ALL")){
-            string crouseData = getRequest("https://bb.cuhk.edu.cn/webapps/blackboard/execute/launcher?type=Course&id=" + crouse_id[i] + "&url=");
-            vector<string> content_urls = xpathQuery(crouseData, "//a[starts-with(@href, '/webapps/blackboard/content/listContent')]/@href");
-            for(string contetn_url : content_urls){
-                recursive_search_assignments(
-                    getRequest("https://bb.cuhk.edu.cn"+contetn_url),
-                    total_assignment_urls
-                );
+        //cout << "itemnum: " << item_counter << endl;;
+        int table_index = 0;
+        for(int col = 1 ; col <= 8-item_counter ; col++){
+            std::stringstream xpath;
+            xpath <<  "/html/body/table/tr[" << row << "]/td[" << col << "]/";
+            //cout << xpath.str() << endl;;
+            while(table[row-1][table_index]!=""){table_index++;}
+            //课程格
+            if(xpathQuery(rawData, xpath.str()+"@class")[0]=="SSSWEEKLYBACKGROUND"){
+                table[row-1][table_index]=xpathQuery(rawData, xpath.str()+"/span")[0];;
+                if(xpathQuery(rawData, xpath.str()+"@rowspan")[0]=="2"){
+                    table[row][table_index]="*";
+                }
+                if(xpathQuery(rawData, xpath.str()+"@rowspan")[0]=="3"){
+                    table[row][table_index]="*";
+                    table[row+1][table_index]="*";
+                }
             }
+            //时间格
+            if(xpathQuery(rawData, xpath.str()+"@class")[0]=="SSSWEEKLYTIMEBACKGROUND"){
+                table[row-1][table_index]=xpathQuery(rawData, xpath.str()+"/span")[0];
+            }
+
+            table_index+=1;            
+            
         }
+
     }
 
-    std::stringstream result;
-    result << crouse << " assignments:" << endl;
-    for(string assignment_url : total_assignment_urls){
-        result << parse_assignment_url("https://bb.cuhk.edu.cn"+assignment_url) << endl;
+    //返回string
+    string final_result;
+    for(int day=1 ; day<=7 ; day++){
+        final_result+= table[0][day] + ":\n";
+        for(int time_index = 1 ; time_index<=15 ; time_index++){
+            if(table[time_index][day]!="*"&&table[time_index][day]!=""){
+                //cout << "table[time_index][day]= " << table[time_index][day] << endl;;
+                final_result+=course_parser(table[time_index][day]);
+            }
+        } 
+        final_result+="\n";
     }
 
-    return result.str();
-}
-
-
-void SisSystem::recursive_search_assignments(const string& data, vector<string>& total_assignmnet_urls)const{
-
-    vector<string> assignment_urls = xpathQuery(data, "//a[starts-with(@href, '/webapps/assignment/uploadAssignment') or starts-with(@href, '/webapps/blackboard/content/launchAssessment') ]/@href");
-    vector<string> content_urls = xpathQuery(data, "/html/body/div/div/div/div/div/div/div/ul/li/div/h3/a[starts-with(@href, '/webapps/blackboard/content/listContent')]/@href");
-
-    for(string assignmnet_url : assignment_urls){
-        total_assignmnet_urls.push_back(assignmnet_url);
-    }
-
-    if(!content_urls.empty()){
-        for(string content_url : content_urls){
-        
-            //cout << "https://bb.cuhk.edu.cn" + content_url << endl;
-            recursive_search_assignments(
-                getRequest("https://bb.cuhk.edu.cn" + content_url),
-                total_assignmnet_urls
-            );
-        }
-    }
+    return final_result;
 }
 
 string SisSystem::vector_toString(const vector<string>& vector)const{
     string result;
     for(string element : vector){
         result+=element+"\n";
+    }
+    return result;
+}
+
+void SisSystem::printTable(const vector<vector<string>>& Vector)const{
+    cout<< "[Table]" <<endl;
+    string result;
+    for(vector<string> rowvector : Vector){
+        string rowstr="";
+        for(string item : rowvector){
+            if(item==""){
+                //注意空值填入'x'
+                rowstr+="x";
+            }
+            else{
+                rowstr+=item;
+            }
+        }
+        cout << rowstr << endl;
+
+    }
+}
+
+string SisSystem::course_parser(const string& courseinfo)const{
+    string result;
+    std::regex pattern("^([A-Z]{3}\\s[0-9]{4}\\s-\\s[LT]\\d+)(Lecture|Tutorial)(\\d{1,2}:\\d{2}(AM|PM) - \\d{1,2}:\\d{2}(AM|PM))(.+)");
+    std::smatch match;
+    if (std::regex_search(courseinfo, match, pattern)) {
+        //std::cout << "Matched" << std::endl;
+        if (match.size() == 7) { // 有 6 个捕获组，match[0] 是整个匹配内容
+            string course_name = match[1];
+            string type = match[2];
+            string time = match[3];
+            string location = match[6];
+
+            result += "Course: " + course_name + "\n" 
+                + "Type: " + type + "\n"
+                + "Duration: " + time + "\n"
+                + "Location: " + location + "\n";
+        }
+    } else {
+        std::cout << "No match found." << std::endl;
     }
     return result;
 }
@@ -486,109 +490,4 @@ string SisSystem::space_cutter(const string& str)const{
     } else {
         return "";
     }
-}
-
-string SisSystem::parse_assignment_url(const string& url)const{
-    std::stringstream result;
-    string rawData = getRequest(url);
-    if(url.find("launchAssessment")!=string::npos){
-        string header = space_cutter(xpathQuery(rawData, "//span[@id='pageTitleText']")[0]);
-        string title = header.substr(header.find(":")+1);
-        string dueinfo = space_cutter(xpathQuery(rawData, "//*[@id='stepcontent1']/ol/li[position()=last()]/div[2]/text()")[0]);
-
-        result << title << endl;
-
-        //提取时间
-        int startpos = dueinfo.find("due on ")+7;
-        string duedate = dueinfo.substr(startpos);
-        int endpos = duedate.find("Test");
-        duedate = duedate.substr(0, endpos);
-        result << "Duedate:" << duedate <<endl;
-        result << "you need visit bb.cuhk.edu.cn to check wether this assignment is done." << endl;
-
-    }
-    else{
-        vector<string> header = xpathQuery(rawData, "//li[@class='placeholder']/span");
-        string status = header[0].substr(0,header[0].find(":"));
-        string title = header[0].substr(header[0].find(":")+2);
-        title = space_cutter(title);
-        result << title << endl;
-        if(status.find("Review")!=string::npos){
-            result << "Status: Already Upload!" << endl;
-            vector<string> grades = xpathQuery(rawData, "//*[@id='aggregateGrade']/@value");
-            vector<string> maximum_grades = xpathQuery(rawData, "//*[@id='aggregateGrade_pointsPossible']");
-            result << grades[0] << maximum_grades[0] << endl;
-            if(grades[0].find("-")!=string::npos){
-                result << "Grades not yet updated" << endl;
-            }
-        }
-        if(status.find("Upload")!=string::npos){
-            string due = space_cutter(xpathQuery(rawData, "//*[@id='metadata']/div/div/div[1]/div[2]/text()")[0])
-                            + space_cutter(xpathQuery(rawData, "//*[@id='metadata']/div/div/div[1]/div[2]/span")[0]);
-            string possible_points = space_cutter(xpathQuery(rawData, "//*[@id='metadata']/div/div/div[2]/div[2]/text()")[0]);
-            result << "Points Possible: " << possible_points << endl;
-            result << "DueDate: " << due << endl;
-            if (missDue(due, "%A, %B %d, %Y %I:%M %p" )) {
-                result << "Missed the due date!" << endl;
-            }
-            else{
-                result << "Need Upload!" << endl;
-            }
-        }
-    }
-
-    return result.str();
-
-}
-
-
-bool SisSystem::missDue(const string& content, const string& pattern)const{
-
-    // 定义时间结构体
-    std::tm tm = {};
-    std::istringstream ss(content);
-
-    // 解析时间字符串（需根据实际格式调整格式符）
-    ss >> std::get_time(&tm, pattern.c_str());
-    if (ss.fail()) {
-        std::cerr << "Failed to parse time string!" << endl;
-    }
-
-    // 将 tm 转换为 time_t
-    std::time_t input_time_t = std::mktime(&tm);
-    if (input_time_t == -1) {
-        std::cerr << "Failed to convert to time_t!" << endl;
-    }
-    auto now_time = std::chrono::system_clock::now();
-    std::time_t now_time_t = std::chrono::system_clock::to_time_t(now_time);
-    if (input_time_t <= now_time_t) {
-        return true;
-    }
-    
-    return false;
-    
-}
-
-string SisSystem::get_grades(const string& crouse)const{
-    string id = get_course_id(crouse);
-    if(!id.empty()){
-        string url ="https://bb.cuhk.edu.cn/webapps/bb-mygrades-BBLEARN/myGrades?course_id=" + id + "&stream_name=mygrades";
-        string rawData = getRequest(url);
-        vector<string> name = xpathQuery(rawData, "//div[@id='grades_wrapper']/div/div[@class='cell gradable']/span | //div[@id='grades_wrapper']/div/div[@class='cell gradable']/a ");
-        vector<string> grades = xpathQuery(rawData, "//div[@id='grades_wrapper']/div/div[@class='cell grade']/span[1]");
-        vector<string> grade_time = xpathQuery(rawData, "//div[@id='grades_wrapper']/div/div[@class='cell activity timestamp']/span[1]");
-        vector<string> grade_stamp = xpathQuery(rawData, "//div[@id='grades_wrapper']/div/div[@class='cell activity timestamp']/span[2]");
-        
-
-        std::stringstream total_result;
-        total_result << crouse << " grades: " << endl;
-        for(int i = 0 ; i < name.size(); ++i){
-            total_result << space_cutter(name[i]) + " " + space_cutter(grade_stamp[i]) << endl;
-            total_result << "Grades: " << space_cutter(grades[i]) << endl;
-            total_result << space_cutter(grade_time[i]) << endl;
-        }
-
-        return total_result.str();
-    }
-    return "";
 }

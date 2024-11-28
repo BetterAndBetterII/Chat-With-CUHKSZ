@@ -29,13 +29,13 @@ void test_sis(){
     auto *sis = new SisSystem(username, password);
     if(sis->login()){
 
-        /* std::cout << "---Testing show_command---" << std::endl;
+        std::cout << "---Testing get_command---" << std::endl;
         std::cout << sis->get_commands() << std::endl;
 
-        std::cout << "---Testing get_course---" << std::endl;
-        std::cout << sis->get_course() << std::endl;
+        std::cout << "---Testing get_schedule---" << std::endl;
+        std::cout << sis->get_schedule() << std::endl;
 
-        std::string crouse;
+        /*std::string crouse;
         std::cout << "---Testing get_announcement---" << std::endl;
         std::cout << "Crouse Name?(e.g. CSC3001)" <<std::endl;
         std::cin >> crouse;
