@@ -85,3 +85,10 @@ target_link_libraries(server_test
         PRIVATE
         backend_lib
 )
+
+# _______ 测试CURL协议 _______
+add_executable(curl_protocol_test test/test_curl_protocol.cpp)
+target_link_libraries(curl_protocol_test
+        PRIVATE
+        backend_lib
+)
