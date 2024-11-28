@@ -8,7 +8,7 @@ int main() {
         if(user_input=="EXIT") {
             break;
         }
-        std::string response=agent.handler(user_input,"");
+        std::string response=agent.run_until_done(user_input);
         std::cout<<response<<std::endl;
     }
 }

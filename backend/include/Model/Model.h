@@ -4,6 +4,7 @@
 #include <nlohmann/json.hpp>
 #include <iostream>
 #include <cpr/cpr.h>
+class Function;
 using json = nlohmann::json;
 class Model {
 public:
@@ -12,9 +13,9 @@ public:
     json build_message(
         std::string model,
         std::string system_prompt,
-        const std::vector<std::string>& past_messages,
+        const std::vector<json>& past_messages,
         std::string new_user_content,
-        json tools
+        std::vector<Function> tools
     );
     std::string send_message(json message);
 private:
