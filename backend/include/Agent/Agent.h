@@ -1,35 +1,28 @@
-//
-// Created by yf on 11/13/24.
-//
 #ifndef AGENT_H
 #define AGENT_H
-
 #include <string>
-#include <set>
+#include<iostream>
 #include <nlohmann/json.hpp>
-#include <fstream>
-#include <iostream>
-#include "../../include/Model/Model.h"
-
+#include <cpr/cpr.h>
+using json = nlohmann::json;
 class Agent {
-    std::ofstream log_file;  // 用于存储历史记录
-    std::ifstream history_file;  // 用于读取历史记录
-    Model model;
-    std::string filename;
-    nlohmann::json conversation_history;
-    std::set<std::string> system_list = {"teaching_system", "library_system", "homework_system"};
-
-    std::string system_agent(const std::string& user_input, const std::string& history) const;
-    std::string conversation_agent(const std::string& user_input, const std::string& history) const;
-    void history_file_manager(int number);
-    std::string history_string_maker();
-    void conversation_history_updater(const std::string& user_input, const std::string& response);
-    void log_file_saver();
-
+private:
+    std::vector<json> conversation_history;
+    std::string system_agent(const std::string& user_input);
+    std::string system_conversation_agent(const std::string& user_input, const std::string& system_input);
+    std::string directly_conversation_agent(const std::string &user_input);
+    const std::string API_KEY = "ak-GZTdsRjD60WUwxUrtf07b76t8K1YSbsOPiu7q01Vj0DPB9Hy";
 public:
-    explicit Agent(int number = 0);
+    Agent();
     ~Agent();
-    std::string handler(const std::string& user_input);
-};
 
-#endif // AGENT_H
+    std::string build_system_agent_prompt(const std::string &user_input);
+
+    std::string build_system_conversation_agent_prompt(const std::string &user_input, const std::string &system_input);
+
+    std::string build_directly_conversation_agent_prompt(const std::string &user_input);
+
+    std::string handler(const std::string &user_input, const std::string &history_input);
+    std::string send_message(const std::string &message);
+};
+#endif
