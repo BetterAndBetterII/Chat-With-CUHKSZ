@@ -1,9 +1,9 @@
 #include "../../include/Agent/Agent.h"
 #include "../../include/Model/Model.h"
-Agent::Agent() {}
-Agent::~Agent() {}
+Agent::Agent() = default;
+Agent::~Agent() = default;
 
-std::vector<Function> Agent::get_tools()
+std::vector<Function> Agent::get_tools() const
 {
     return tools.functions;
 }
