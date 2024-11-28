@@ -32,12 +32,13 @@ target_link_libraries(frontend_lib
         Qt5::Core
         Qt5::Gui
         Qt5::Widgets
-#        cpr::cpr
-#        nlohmann_json::nlohmann_json
+        cpr::cpr
+        nlohmann_json::nlohmann_json
 )
 
 # ----------------- 部署 -----------------
-add_executable(frontend src/main.cpp)
+add_executable(frontend src/main.cpp
+)
 target_link_libraries(frontend
         PRIVATE
         frontend_lib
@@ -45,7 +46,8 @@ target_link_libraries(frontend
 
 # ----------------- 测试 -----------------
 # _______ 测试前端 _______
-add_executable(frontend_test src/main.cpp)
+add_executable(frontend_test src/main.cpp
+)
 target_link_libraries(frontend_test
         PRIVATE
         frontend_lib
