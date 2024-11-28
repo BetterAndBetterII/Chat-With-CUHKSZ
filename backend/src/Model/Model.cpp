@@ -1,11 +1,7 @@
 #include "../../include/Model/Model.h"
-#include <iostream>
-#include <string>
-#include <cpr/cpr.h>
-#include <nlohmann/json.hpp>
 Model::Model() {}
 Model::~Model() {}
-std::string Model::send_message(const std::string& message) {
+std::string Model::send_message(const json message) {
     json request_body = {
         {"model", "gpt-4o"},
         {"messages", message}

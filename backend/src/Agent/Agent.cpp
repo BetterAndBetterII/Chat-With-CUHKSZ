@@ -1,4 +1,5 @@
 #include "../../include/Agent/Agent.h"
+#include "../../include/Model/Model.h"
 Agent::Agent() {}
 Agent::~Agent() {}
 std::string Agent::build_system_agent_prompt(const std::string &user_input) {
@@ -47,31 +48,18 @@ std::string Agent::handler(const std::string& user_input, const std::string& his
     return output;
 }
 std::string Agent::send_message(const std::string& message) {
+    Model model;
     std::cout<<message;
     json user_message = {
         {"role", "user"},
         {"content", message}
     };
     conversation_history.push_back(user_message);
-    json request_body = {
-        {"model", "gpt-4o"},
-        {"messages", conversation_history}
+    std::string reply=model.send_message(conversation_history);
+    json assistant_reply = {
+        {"role", "assistant"},
+        {"content", reply}
     };
-    cpr::Response response = cpr::Post(
-        cpr::Url{"https://api.nextapi.fun/v1/chat/completions"},
-        cpr::Header{{"Authorization", "Bearer " + API_KEY}},
-        cpr::Body{request_body.dump()}
-    );
-    if (response.status_code == 200) {
-        auto reply = json::parse(response.text)["choices"][0]["message"]["content"];
-        json assistant_reply = {
-            {"role", "assistant"},
-            {"content", reply}
-        };
-        conversation_history.push_back(assistant_reply);
-        return reply;
-    } else {
-        std::cerr << "请求失败: " << response.status_code << std::endl;
-        return "";
-    }
+    conversation_history.push_back(assistant_reply);
+    return reply;
 }
