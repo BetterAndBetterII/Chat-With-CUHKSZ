@@ -163,7 +163,7 @@ public:
     //booker类
     Booker booker;
 
-    void set_booker(const std::string& telephone, const std::string& reason, const std::string& details);
+    std::string set_booker(const std::string& telephone, const std::string& reason, const std::string& details);
 
     [[nodiscard]] std::string get_available_time(const std::string& field_name, const std::string& date_string);
 

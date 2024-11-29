@@ -179,7 +179,7 @@ public:
         },
         Function{
             "set_booker",
-            "a function that must be call before calling book_field function",
+            "a function that must be call before calling book_field function. You must explicitly ask user for the telephone number, reason and details before calling this function",
             FunctionParameters{
                             {
                                 FunctionProperty{
@@ -192,17 +192,14 @@ public:
                                     "details", "string", "The detail of the reservation.",
                                 }
                             },
-                            {}
+                            {"telephone_number", "reason", "details"}
             }
         },
         Function{
             "book_field",
-            "book a field",
+            "Book a badminton court. The booking period should NOT longer than 1 hour! You must call set_booker function before calling this function.",
             FunctionParameters{
                             {
-                                FunctionProperty{
-                                    "field_name", "string", "The name of the field.",
-                                },
                                 FunctionProperty{
                                     "start_time", "string", "The start time of the reservation with the format %Y-%m-%d %H:%M",
                                 },
@@ -210,7 +207,7 @@ public:
                                     "end_time", "string", "The end time of the reservation with the format %Y-%m-%d %H:%M",
                                 },
                             },
-                            {}
+                            {"start_time", "end_time"}
             }
         },
         // Function{

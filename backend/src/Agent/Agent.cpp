@@ -7,6 +7,12 @@ Agent::Agent(const std::string& _username, const std::string& _password): tools(
 
 Agent::~Agent() = default;
 
+std::string Agent::get_current_date() {
+    time_t now = time(0);
+    tm *ltm = localtime(&now);
+    return std::to_string(1900 + ltm->tm_year) + "-" + std::to_string(1 + ltm->tm_mon) + "-" + std::to_string(ltm->tm_mday);
+}
+
 std::vector<Function> Agent::get_tools() const
 {
     return tools->functions;
@@ -30,7 +36,7 @@ std::string Agent::run(const std::string &message, const bool enable_tools) {
         function_tools
     );
     json answer = model.send_message(messages);
-    std::cout<<"answer: "<<answer<<std::endl;
+    // std::cout<<"answer: "<<answer<<std::endl;
     if (answer["content"].is_null()) {
         // **工具调用**
         std::string tool_call = answer["tool_calls"][0]["function"]["name"];
@@ -45,7 +51,7 @@ std::string Agent::run(const std::string &message, const bool enable_tools) {
     }
     // **普通回答**
     insert_memory(answer["content"], "assistant");
-    std::cout<<"answer content: "<<answer["content"]<<std::endl;
+    // std::cout<<"answer content: "<<answer["content"]<<std::endl;
     return std::string(answer["content"]) + "\n\n" + EXIT_SIGNAL;
 }
 
@@ -53,7 +59,7 @@ std::string Agent::run_until_done(const std::string &message) {
     std::string output;
     int loop_count = 0;
     while (loop_count < MAX_LOOP_COUNT) {
-        std::cout<<"loop_count: "<<loop_count<<std::endl;
+        // std::cout<<"loop_count: "<<loop_count<<std::endl;
         output = run(message, loop_count < MAX_LOOP_COUNT - 1);
         insert_memory(output, "user");
         if (output.find(EXIT_SIGNAL) != std::string::npos) {
