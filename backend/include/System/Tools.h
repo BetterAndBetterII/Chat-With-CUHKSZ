@@ -233,7 +233,7 @@ public:
         // },
     };
 
-    std::string handle_tool_call(const std::string &tool_name, json &arguments);
+    std::string handle_tool_call(const std::string &tool_name, const json& arguments);
 };
 
 #endif // TOOLS_H
