@@ -49,6 +49,8 @@ private:
     std::string vector_toString(const std::vector<std::string>& vector)const;
     std::string course_parser(const std::string& courseinfo)const;
     void printTable(const std::vector<std::vector<std::string>>& Vector)const;
+    std::string parse_ICSID(const std::string& text)const;
+    std::string parse_ICStateNum(const std::string& text)const;
     
     //删除字符串前后多余空格和换行符
     std::string space_cutter(const std::string& str)const;
@@ -73,9 +75,14 @@ public:
     bool change_info(const std::string& username, const std::string& password);
     //若未登录成功(is_login == false)，则修改账号密码并返回true，若已登录则不会修改账号密码，返回false
 
-    std::string get_schedule() const;
+    std::string get_schedule()const;
     /*
      *返回课表
+    */
+
+    std::string get_course(std::string course_code , std::string term="2410UG", std::string openOnly="Y");
+    /*
+     *返回课程信息
     */
     
 };

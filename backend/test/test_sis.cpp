@@ -35,13 +35,19 @@ void test_sis(){
         std::cout << "---Testing get_schedule---" << std::endl;
         std::cout << sis->get_schedule() << std::endl;
 
-        /*std::string crouse;
-        std::cout << "---Testing get_announcement---" << std::endl;
-        std::cout << "Crouse Name?(e.g. CSC3001)" <<std::endl;
-        std::cin >> crouse;
-        std::cout << sis->get_announcement(crouse) << std::endl;
+        std::cout << "---Testing get_course---" << std::endl;
+        std::string course;
+        std::cout << "Course Name?(e.g. CSC3001)Press'exit'to stop" <<std::endl;
+        std::cin >> course;
+        while (course!="exit")
+        {
+            std::cout << sis->get_course(course) << std::endl;
+            std::cout << "Course Name?(e.g. CSC3001)Press'exit'to stop" <<std::endl;
+            std::cin >> course;
+        }
+        
 
-        std::cout << "---Testing get_assignments---" << std::endl;
+        /*std::cout << "---Testing get_assignments---" << std::endl;
         std::cout << "Crouse Name?(e.g. CSC3001)" <<std::endl;
         std::cin >> crouse;
         std::cout << sis->get_assignment(crouse) << std::endl;   
