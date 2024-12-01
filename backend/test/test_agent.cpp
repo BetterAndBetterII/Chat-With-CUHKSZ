@@ -1,5 +1,5 @@
 #include "../include/Agent/Agent.h"
-#include<iostream>
+#include <iostream>
 int main() {
     Agent agent = Agent("","");
     while(true) {

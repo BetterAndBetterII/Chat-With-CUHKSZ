@@ -18,6 +18,7 @@ private:
     Model model;
     Tools* tools;
 public:
+	Agent() = default;
     explicit Agent(const std::string& _username, const std::string& _password);
     ~Agent();
 
