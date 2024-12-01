@@ -7,8 +7,8 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_AUTOMOC ON)
 
 # 查找并链接外部库
-#find_package(cpr CONFIG REQUIRED)
-#find_package(nlohmann_json CONFIG REQUIRED)
+find_package(cpr CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets)
 # 查找源文件（不包含测试文件）
 file(GLOB_RECURSE FRONTEND_SOURCES
