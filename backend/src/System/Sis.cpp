@@ -20,6 +20,7 @@ SisSystem::SisSystem(const string& username, const string& password) : curl_glob
     //初始化变量
     this->command_list = {
         "get_schedule",
+        "get_course"
     };
     this->username = username;
     this->password = password;
@@ -549,19 +550,25 @@ string SisSystem::parse_ICStateNum(const std::string& text)const{
 }
 
 string SisSystem::get_course(string course_code, string term, string openOnly){
+    //debug print
+    //curl_easy_setopt(sis_handle, CURLOPT_VERBOSE, 1L);
+    //curl_easy_setopt(sis_handle, CURLOPT_DEBUGFUNCTION, debug_callback);
+
     //get ICSID
     string url=string("https://sis.cuhk.edu.cn/psc/csprd/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.CLASS_SEARCH.GBL?") + 
         "PORTALPARAM_PTCNAV=HC_CLASS_SEARCH&EOPP.SCNode=HRMS&EOPP.SCPortal=EMPLOYEE&EOPP.SCName=HCCC_SS_CATALOG&EOPP.SCLabel=Class%20Search%20%2f%20Browse%20Catalog&EOPP.SCPTfname=HCCC_SS_CATALOG&FolderPath=PORTAL_ROOT_OBJECT.CO_EMPLOYEE_SELF_SERVICE.HCCC_SS_CATALOG.HC_CLASS_SEARCH&IsFolder=false&PortalActualURL=https%3a%2f%2fsis.cuhk.edu.cn%2fpsc%2fcsprd%2fEMPLOYEE%2fHRMS%2fc%2fSA_LEARNER_SERVICES.CLASS_SEARCH.GBL&PortalContentURL=https%3a%2f%2fsis.cuhk.edu.cn%2fpsc%2fcsprd%2fEMPLOYEE%2fHRMS%2fc%2fSA_LEARNER_SERVICES.CLASS_SEARCH.GBL&PortalContentProvider=HRMS&PortalCRefLabel=Class%20Search&PortalRegistryName=EMPLOYEE&PortalServletURI=https%3a%2f%2fsis.cuhk.edu.cn%2fpsp%2fcsprd%2f&PortalURI=https%3a%2f%2fsis.cuhk.edu.cn%2fpsc%2fcsprd%2f&PortalHostNode=HRMS&NoCrumbs=yes&PortalKeyStruct=yes";
     string response = getRequest(url);
     
-    //std::ofstream outFile;
-    //outFile.open("forminput.html");
-    //outFile << response;
-    //outFile.close();
+    std::ofstream outFile;
+    outFile.open("forminput.html");
+    outFile << response;
+    outFile.close();
 
     string ICSID = parse_ICSID(response);
     string ICStateNum = parse_ICStateNum(response);
-    //cout << "ICSID=" << ICSID << endl;
+    char* escaped_icsid = curl_easy_escape(sis_handle, ICSID.c_str(), static_cast<int>(ICSID.length()));
+    cout << "ICSID=" << ICSID << endl;
+    cout << "escaped_ICSID=" << escaped_icsid << endl;
     //cout << "ICStateNum=" << ICStateNum << endl;
     //cout << "CourseCode=" << course_code << endl;
     //cout << "term=" << term << endl;
@@ -584,7 +591,7 @@ string SisSystem::get_course(string course_code, string term, string openOnly){
         "&ICChanged=-1" +
         "&ICAutoSave=0" +
         "&ICResubmit=0" +
-        "&ICSID=" + ICSID +
+        "&ICSID=" + escaped_icsid +
         "&ICActionPrompt=false" +
         "&ICTypeAheadID=" +
         "&ICBcDomData=undefined" +
@@ -611,13 +618,14 @@ string SisSystem::get_course(string course_code, string term, string openOnly){
 
     //cout << "PostData:\n" << data << endl;
     string rawData = postRequest(url, data);
+    curl_free(escaped_icsid);
     
     //变成xpath可访问格式
     rawData = "<html><head></head><body>"+rawData+"</body></html>";
 
-    //outFile.open("course.html");
-    //outFile << rawData;
-    //outFile.close();
+    outFile.open("course.html");
+    outFile << rawData;
+    outFile.close();
 
     vector time = xpathQuery(rawData, "//*[@id[starts-with(.,'MTG_DAYTIME$')]]");
     vector location = xpathQuery(rawData, "//*[@id[starts-with(.,'MTG_ROOM$')]]");
