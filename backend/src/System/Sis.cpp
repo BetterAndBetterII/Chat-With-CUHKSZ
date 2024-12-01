@@ -20,7 +20,8 @@ SisSystem::SisSystem(const string& username, const string& password) : curl_glob
     //初始化变量
     this->command_list = {
         "get_schedule",
-        "get_course"
+        "get_course",
+        "get_term_grades"
     };
     this->username = username;
     this->password = password;
@@ -90,7 +91,6 @@ size_t SisSystem::debug_callback(CURL *handle, curl_infotype type, char *data, s
 
     switch (type) {
         case CURLINFO_TEXT:
-            //fprintf(stderr, "== Info: %.*s", (int)size, data);
             break;
         case CURLINFO_HEADER_OUT:
             fprintf(stderr, ">> Request Header: %.*s", (int)size, data);
@@ -102,7 +102,6 @@ size_t SisSystem::debug_callback(CURL *handle, curl_infotype type, char *data, s
             fprintf(stderr, "<< Response Header: %.*s", (int)size, data);
             break;
         case CURLINFO_DATA_IN:
-            //fprintf(stderr, "<< Response Body: %.*s", (int)size, data);
             break;
         default:
             break;
@@ -206,16 +205,12 @@ bool SisSystem::login(){
 
         char* final_url;
         curl_easy_getinfo(sis_handle, CURLINFO_EFFECTIVE_URL, &final_url);
-        //cout << "final url: \n" << final_url << endl; 
         string code = string(final_url).substr(string(final_url).find("code=")+5);
-        //cout << "code= \n" << code << endl; 
         
         url = string("https://sis.cuhk.edu.cn/psp/csprd/?")
             + "cmd=" + "login" 
             + "&languageCd=" + "ENG"
             + "&code=" + code;
-
-        //cout << "URL: " << url << endl;
 
         //生成随机字符串用于第二阶段的post
         // 创建一个随机数生成器，使用随机设备作为种子
@@ -232,8 +227,6 @@ bool SisSystem::login(){
             char letter = alphabet[distrib(gen)];
             randomstring += letter;  // 将字母添加到结果字符串中
         }
-
-        //cout << "Randomstring:" << randomstring << endl;
 
         strdata = 
                 string("timezoneOffset=") + "-480" +
@@ -259,8 +252,6 @@ bool SisSystem::login(){
         res = curl_easy_perform(sis_handle);
 
         curl_easy_getinfo(sis_handle, CURLINFO_EFFECTIVE_URL, &final_url);
-        //cout << "final url: \n" << final_url << endl; 
-
 
         if(res != CURLE_OK){
             std::cerr << "Login failed because:" << curl_easy_strerror(res) << endl;
@@ -274,7 +265,6 @@ bool SisSystem::login(){
             std::cerr << "Username or Password incorrect!" << endl;
             return false;
         }
-
 
     }
 
@@ -374,11 +364,6 @@ string SisSystem::get_schedule()const{
 
     string rawData = getRequest(url);
 
-    //std::ofstream outFile;
-    //outFile.open("output.html");
-    //outFile << rawData;
-    //outFile.close();
-
     //截取课表部分（否则xpath查询不到）
     size_t startpos = rawData.find("<table cellspacing='0' cellpadding='2' width='100%' class='PSLEVEL1GRIDNBO' id='WEEKLY_SCHED_HTMLAREA'>");
     if (startpos == std::string::npos) {
@@ -388,23 +373,19 @@ string SisSystem::get_schedule()const{
     size_t endpos = rawData.find("class='PSLEVEL3GRID'>&nbsp;</td></tr></table></div>");
     rawData = rawData.substr(0, endpos+45);
     rawData = "<html><head></head><body>"+rawData+"</body></html>";
-    //cout << "rawData:\n" <<rawData <<endl;
 
     vector<vector<string>> table(16, vector<string>(8));
     table[0][0]="Time";table[0][1]="Monday";table[0][2]="Tuesday";table[0][3]="Wednesday";table[0][4]="Thursday";table[0][5]="Friday";table[0][6]="Saturday";table[0][7]="Sunday";
     
     for(int row = 2 ; row <= 16 ; row++){
-        //cout << "===row=" << row << "===" << endl;
         int item_counter = 0 ;
         if(row!=2){
             for(string item : table[row-1]){if(item!=""){item_counter++;}}
         }
-        //cout << "itemnum: " << item_counter << endl;;
         int table_index = 0;
         for(int col = 1 ; col <= 8-item_counter ; col++){
             std::stringstream xpath;
             xpath <<  "/html/body/table/tr[" << row << "]/td[" << col << "]/";
-            //cout << xpath.str() << endl;;
             while(table[row-1][table_index]!=""){table_index++;}
             //课程格
             if(xpathQuery(rawData, xpath.str()+"@class")[0]=="SSSWEEKLYBACKGROUND"){
@@ -434,7 +415,6 @@ string SisSystem::get_schedule()const{
         final_result+= table[0][day] + ":\n";
         for(int time_index = 1 ; time_index<=15 ; time_index++){
             if(table[time_index][day]!="*"&&table[time_index][day]!=""){
-                //cout << "table[time_index][day]= " << table[time_index][day] << endl;;
                 final_result+=course_parser(table[time_index][day]);
             }
         } 
@@ -459,8 +439,8 @@ void SisSystem::printTable(const vector<vector<string>>& Vector)const{
         string rowstr="";
         for(string item : rowvector){
             if(item==""){
-                //注意空值填入'x'
-                rowstr+="x";
+                //注意空值填入'None'
+                rowstr+="None";
             }
             else{
                 rowstr+=item;
@@ -550,28 +530,15 @@ string SisSystem::parse_ICStateNum(const std::string& text)const{
 }
 
 string SisSystem::get_course(string course_code, string term, string openOnly){
-    //debug print
-    //curl_easy_setopt(sis_handle, CURLOPT_VERBOSE, 1L);
-    //curl_easy_setopt(sis_handle, CURLOPT_DEBUGFUNCTION, debug_callback);
 
     //get ICSID
     string url=string("https://sis.cuhk.edu.cn/psc/csprd/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.CLASS_SEARCH.GBL?") + 
         "PORTALPARAM_PTCNAV=HC_CLASS_SEARCH&EOPP.SCNode=HRMS&EOPP.SCPortal=EMPLOYEE&EOPP.SCName=HCCC_SS_CATALOG&EOPP.SCLabel=Class%20Search%20%2f%20Browse%20Catalog&EOPP.SCPTfname=HCCC_SS_CATALOG&FolderPath=PORTAL_ROOT_OBJECT.CO_EMPLOYEE_SELF_SERVICE.HCCC_SS_CATALOG.HC_CLASS_SEARCH&IsFolder=false&PortalActualURL=https%3a%2f%2fsis.cuhk.edu.cn%2fpsc%2fcsprd%2fEMPLOYEE%2fHRMS%2fc%2fSA_LEARNER_SERVICES.CLASS_SEARCH.GBL&PortalContentURL=https%3a%2f%2fsis.cuhk.edu.cn%2fpsc%2fcsprd%2fEMPLOYEE%2fHRMS%2fc%2fSA_LEARNER_SERVICES.CLASS_SEARCH.GBL&PortalContentProvider=HRMS&PortalCRefLabel=Class%20Search&PortalRegistryName=EMPLOYEE&PortalServletURI=https%3a%2f%2fsis.cuhk.edu.cn%2fpsp%2fcsprd%2f&PortalURI=https%3a%2f%2fsis.cuhk.edu.cn%2fpsc%2fcsprd%2f&PortalHostNode=HRMS&NoCrumbs=yes&PortalKeyStruct=yes";
     string response = getRequest(url);
     
-    std::ofstream outFile;
-    outFile.open("forminput.html");
-    outFile << response;
-    outFile.close();
-
     string ICSID = parse_ICSID(response);
     string ICStateNum = parse_ICStateNum(response);
     char* escaped_icsid = curl_easy_escape(sis_handle, ICSID.c_str(), static_cast<int>(ICSID.length()));
-    cout << "ICSID=" << ICSID << endl;
-    cout << "escaped_ICSID=" << escaped_icsid << endl;
-    //cout << "ICStateNum=" << ICStateNum << endl;
-    //cout << "CourseCode=" << course_code << endl;
-    //cout << "term=" << term << endl;
 
     url=("https://sis.cuhk.edu.cn/psc/csprd/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.CLASS_SEARCH.GBL");
     string data = 
@@ -616,16 +583,8 @@ string SisSystem::get_course(string course_code, string term, string openOnly){
         "&ptus_workcenterid=" +
         "&ptus_componenturl=https://sis.cuhk.edu.cn/psp/csprd/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.CLASS_SEARCH.GBL";
 
-    //cout << "PostData:\n" << data << endl;
     string rawData = postRequest(url, data);
     curl_free(escaped_icsid);
-    
-    //变成xpath可访问格式
-    rawData = "<html><head></head><body>"+rawData+"</body></html>";
-
-    outFile.open("course.html");
-    outFile << rawData;
-    outFile.close();
 
     vector time = xpathQuery(rawData, "//*[@id[starts-with(.,'MTG_DAYTIME$')]]");
     vector location = xpathQuery(rawData, "//*[@id[starts-with(.,'MTG_ROOM$')]]");
@@ -636,6 +595,7 @@ string SisSystem::get_course(string course_code, string term, string openOnly){
     vector capacity = xpathQuery(rawData, "//*[@id[starts-with(.,'SSR_CLS_DTL_WRK_ENRL_CAP$')]]");
 
     std::stringstream final_result ;
+    
     string openstatus;
     if(openOnly=="Y"){openstatus="Yes";}
     else{openstatus="No";}
@@ -653,4 +613,93 @@ string SisSystem::get_course(string course_code, string term, string openOnly){
     }
 
     return final_result.str();
+}
+
+string SisSystem::get_grades(string term){
+
+    //get ICSID
+    string url=string("https://sis.cuhk.edu.cn/psc/csprd/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.SSR_SSENRL_GRADE.GBL?") + 
+        "FolderPath=PORTAL_ROOT_OBJECT.CO_EMPLOYEE_SELF_SERVICE.HCCC_ENROLLMENT.HC_SSR_SSENRL_GRADE_GBL&IsFolder=false&IgnoreParamTempl=FolderPath%2cIsFolder&PortalActualURL=https%3a%2f%2fsis.cuhk.edu.cn%2fpsc%2fcsprd%2fEMPLOYEE%2fHRMS%2fc%2fSA_LEARNER_SERVICES.SSR_SSENRL_GRADE.GBL&PortalContentURL=https%3a%2f%2fsis.cuhk.edu.cn%2fpsc%2fcsprd%2fEMPLOYEE%2fHRMS%2fc%2fSA_LEARNER_SERVICES.SSR_SSENRL_GRADE.GBL&PortalContentProvider=HRMS&PortalCRefLabel=View%20My%20Grades&PortalRegistryName=EMPLOYEE&PortalServletURI=https%3a%2f%2fsis.cuhk.edu.cn%2fpsp%2fcsprd%2f&PortalURI=https%3a%2f%2fsis.cuhk.edu.cn%2fpsc%2fcsprd%2f&PortalHostNode=HRMS&NoCrumbs=yes&PortalKeyStruct=yes";
+    string response = getRequest(url);
+    
+    string ICSID = parse_ICSID(response);
+    string ICStateNum = parse_ICStateNum(response);
+    char* escaped_icsid = curl_easy_escape(sis_handle, ICSID.c_str(), static_cast<int>(ICSID.length()));
+
+    vector termlist = xpathQuery(response, "//span[@id[starts-with(.,'TERM_CAR$')]]");
+
+    // 使用 std::find 查找 term 是否存在
+    auto it = std::find(termlist.begin(), termlist.end(), term);
+
+    if (it == termlist.end()) {
+        return term + " not found.\n";
+    }
+
+    std::map<string, size_t> term_index;
+    for(size_t i = 0 ; i< termlist.size() ; i++){
+        term_index[termlist[i]]=i;
+    }
+
+    url=("https://sis.cuhk.edu.cn/psc/csprd/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.SSR_SSENRL_GRADE.GBL");
+    string data = 
+        string("ICAJAX=1") +
+        "&ICNAVTYPEDROPDOWN=0" +
+        "&ICType=Panel" +
+        "&ICElementNum=0" +
+        "&ICStateNum=" + ICStateNum +
+        "&ICAction=DERIVED_SSS_SCT_SSR_PB_GO" +
+        "&ICXPos=0" +
+        "&ICYPos=0" +
+        "&ResponsetoDiffFrame=-1" +
+        "&TargetFrameName=None" +
+        "&FacetPath=None" +
+        "&ICFocus=" +
+        "&ICSaveWarningFilter=0" +
+        "&ICChanged=-1" +
+        "&ICAutoSave=0" +
+        "&ICResubmit=0" +
+        "&ICSID=" + escaped_icsid +
+        "&ICActionPrompt=false" +
+        "&ICTypeAheadID=" +
+        "&ICBcDomData=undefined" +
+        "&ICFind=" +
+        "&ICAddCount=" +
+        "&ICAPPCLSDATA=" +
+        "&#ICDataLang=ENG" +
+        "&DERIVED_SSTSNAV_SSTS_MAIN_GOTO$7$=9999" +
+        "&SSR_DUMMY_RECV1$sels$3$$0=" + std::to_string(term_index[term]) +
+        "&DERIVED_SSTSNAV_SSTS_MAIN_GOTO$8$=9999" +
+        "&ptus_defaultlocalnode=PSFT_HR" +
+        "&ptus_dbname=CSPRD" +
+        "&ptus_portal=EMPLOYEE" +
+        "&ptus_node=HRMS" +
+        "&ptus_workcenterid=" +
+        "&ptus_componenturl=https://sis.cuhk.edu.cn/psp/csprd/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.SSR_SSENRL_GRADE.GBL" ;
+
+    string rawData = postRequest(url, data);
+
+    curl_free(escaped_icsid);
+
+    vector coursename = xpathQuery(rawData, "//a[@id[starts-with(.,'CLS_LINK$')]]");
+    vector units = xpathQuery(rawData, "//*[@id[starts-with(.,'STDNT_ENRL_SSV1_UNT_TAKEN$')]]");
+    vector gradings = xpathQuery(rawData, "//span[@id[starts-with(.,'GRADING_BASIS$')]]");
+    vector grades = xpathQuery(rawData, "//*[@id[starts-with(.,'STDNT_ENRL_SSV1_CRSE_GRADE_OFF$')]]");
+    vector grade_points = xpathQuery(rawData, "//*[@id[starts-with(.,'STDNT_ENRL_SSV1_GRADE_POINTS$')]]");
+    string gpa = xpathQuery(rawData, "//*[@id='STATS_CUMS$12']")[0];
+
+    std::stringstream final_result ;
+    
+    final_result << "Term: " << term << "\n\n" ;
+    
+    for(size_t i = 0 ; i < coursename.size() ; i++ ){
+        final_result << coursename[i] <<"\n";
+        final_result<< "Units: " << units[i] << " Grading: " << gradings[i] << "\n";
+        final_result<< "Grade: " << grades[i] <<" Grade_points: " << grade_points[i] << "\n";
+        final_result<<"\n";
+    }
+
+    final_result << "Cumulative GPA: " << gpa << "\n";
+
+    return final_result.str();
+
 }

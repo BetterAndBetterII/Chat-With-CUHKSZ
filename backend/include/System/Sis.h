@@ -47,9 +47,13 @@ private:
     std::vector<std::string> xpathQuery(const std::string& xmlContent, const std::string& xpathExpr)const;
 
     std::string vector_toString(const std::vector<std::string>& vector)const;
+
     std::string course_parser(const std::string& courseinfo)const;
+
     void printTable(const std::vector<std::vector<std::string>>& Vector)const;
+
     std::string parse_ICSID(const std::string& text)const;
+
     std::string parse_ICStateNum(const std::string& text)const;
     
     //删除字符串前后多余空格和换行符
@@ -81,10 +85,21 @@ public:
     */
 
     std::string get_course(std::string course_code , std::string term="2410UG", std::string openOnly="Y");
-    /*
+    /*参数实例：
+     *course_code: CSC3002
+     *term: 2410UG(参考bb)
+     *onpenOnly: Y/N (只查询开放状态的课程)
      *返回课程信息
+     *!!有bug：不能返回全部内容
     */
     
+    std::string get_grades(std::string term);
+    /*参数格式实例：
+     *2023-24 Term 1
+     *2023-24 Term 2
+     *2023-24 Summer Session
+     *返回成绩
+    */
 };
 
 

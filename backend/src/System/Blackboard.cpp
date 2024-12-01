@@ -252,6 +252,7 @@ string BlackBoardSystem::get_commands()const{
 
 string BlackBoardSystem::get_course(const string& term)const{
     string rawData = getRequest("https://bb.cuhk.edu.cn/webapps/bb-enhance-BBLEARN/normal/mycourse/search"); 
+
     vector<string> crouse_name = xpathQuery(rawData, "//*[@id[starts-with(., 'listContainer_row:')]]/td[1]/span[2]");
     vector<string> crouse_instructor = xpathQuery(rawData, "//*[@id[starts-with(., 'listContainer_row:')]]/td[3]/span[2]");
     vector<string> crouse_term = xpathQuery(rawData, "//*[@id[starts-with(., 'listContainer_row:')]]/td[4]/span[2]");
@@ -469,6 +470,7 @@ string BlackBoardSystem::get_grades(const string& crouse)const{
     if(!id.empty()){
         string url ="https://bb.cuhk.edu.cn/webapps/bb-mygrades-BBLEARN/myGrades?course_id=" + id + "&stream_name=mygrades";
         string rawData = getRequest(url);
+
         vector<string> name = xpathQuery(rawData, "//div[@id='grades_wrapper']/div/div[@class='cell gradable']/span | //div[@id='grades_wrapper']/div/div[@class='cell gradable']/a ");
         vector<string> grades = xpathQuery(rawData, "//div[@id='grades_wrapper']/div/div[@class='cell grade']/span[1]");
         vector<string> grade_time = xpathQuery(rawData, "//div[@id='grades_wrapper']/div/div[@class='cell activity timestamp']/span[1]");
