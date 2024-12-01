@@ -1,42 +1,48 @@
 #include "../../include/Model/Model.h"
 
-// 函数：构建请求体
-std::string create_request_body(const std::string& model_choice, const std::string& user_input) {
-    //return std::format(R"({{"model": "{}", "messages": [{{"role": "user", "content": "{}"}}]}})",
-    //                   model_choice, user_input);
-    //不用format的写法
-    std::string json = 
-    R"({"model": ")" + model_choice + 
-    R"(", "messages": [{"role": "user", "content": ")" + user_input + 
-    R"("}]})";
+#include "../../include/System/Tools.h"
+Model::Model() {}
+Model::~Model() {}
 
-    return json;
+json Model::build_message(
+    std::string model,
+    std::string system_prompt,
+    const std::vector<json>& past_messages,
+    std::string new_user_content,
+    std::vector<Function> tools
+) {
+    std::vector<json> message = past_messages;
+    message.push_back({{"role", "system"}, {"content", system_prompt}});
+    message.push_back({{"role", "user"}, {"content", new_user_content}});
 
+    // 将 tools 转换为 json 数组
+    json tools_array = json::array();
+    for (const auto& tool : tools) {
+        tools_array.push_back(tool.to_json());
+    }
+
+    json data = {
+        {"model", model},
+        {"messages", message},
+        {"tools", tools_array}
+    };
+    return data;
 }
 
-std::string Model::get_response(const std::string &user_input) const {
-    // 使用create_request_body函数构造请求体
-    const std::string body = create_request_body(model_choice, user_input);
-
-    // API调用
-    cpr::Response r = Post(
+json Model::send_message(const json message) {
+    std::cout << "body: " << message.dump() << std::endl;
+    cpr::Response response = Post(
         cpr::Url{"https://api.nextapi.fun/v1/chat/completions"},
-        cpr::Header{{"Authorization", "Bearer ak-GZTdsRjD60WUwxUrtf07b76t8K1YSbsOPiu7q01Vj0DPB9Hy"}},
-        cpr::Body{body},
-        cpr::Header{{"Content-Type", "application/json"}}
+        cpr::Header{{"Authorization", "Bearer " + API_KEY}},
+        cpr::Body{message.dump()}
     );
-
-    // 检查响应状态
-    if (r.status_code == 200) {
-        // 解析JSON响应
-        try {
-            json response_json = json::parse(r.text);
-            // 提取内容字段
-            std::string content = response_json["choices"][0]["message"]["content"];
-            return content;
-        } catch (const json::exception &e) {
-            return "Error parsing JSON response: " + std::string(e.what());
+    std::cout << "response: " << response.text << std::endl;
+    if (response.status_code == 200) {
+        if (json::parse(response.text)["choices"][0]["message"].contains("tool_calls")) {
+            return json::parse(response.text)["choices"][0]["message"];
         }
+        return json::parse(response.text)["choices"][0]["message"];
     }
-    return "Error: " + std::to_string(r.status_code) + " - " + r.text;
+    std::cerr << "请求失败: " << response.status_code << std::endl;
+    return "";
 }

@@ -2,7 +2,7 @@
 // Created by Gary on 24-10-24.
 //
 #include <iostream>
-#include "../include/System/Blackboard.h"
+#include "../include/System/Email.h"
 //Test libcurl
 #include <curl/curl.h>
 //Test libxml
@@ -46,8 +46,8 @@ void test_libcurl(){
 
 }
 
-void test_blackboard(){
-    std::cout << "=====Testing BlackBoard=====" << std::endl;
+void test_email(){
+    std::cout << "=====Testing Email=====" << std::endl;
     std::cout << "---Testing Login---" << std::endl;
     //basic info input
     std::string username;
@@ -56,32 +56,11 @@ void test_blackboard(){
     std::cin >> username;
     std::cout << "Password:" << std::endl;
     std::cin >> password;
-    auto *bb = new BlackBoardSystem(username, password);
-    if(bb->login()){
-
-        std::cout << "---Testing show_command---" << std::endl;
-        std::cout << bb->get_commands() << std::endl;
-
-        std::cout << "---Testing get_course---" << std::endl;
-        std::cout << bb->get_course() << std::endl;
-
-        std::string crouse;
-        std::cout << "---Testing get_announcement---" << std::endl;
-        std::cout << "Crouse Name?(e.g. CSC3001)" <<std::endl;
-        std::cin >> crouse;
-        std::cout << bb->get_announcement(crouse) << std::endl;
-
-        std::cout << "---Testing get_assignments---" << std::endl;
-        std::cout << "Crouse Name?(e.g. CSC3001)" <<std::endl;
-        std::cin >> crouse;
-        std::cout << bb->get_assignment(crouse) << std::endl;   
-
-        std::cout << "---Testing get_grades---" << std::endl;
-        std::cout << "Crouse Name?(e.g. CSC3001)" <<std::endl;
-        std::cin >> crouse;
-        std::cout << bb->get_grades(crouse) << std::endl;
+    auto *email = new EmailSystem(username, password);
+    if(email->login()){
+        std::cout << email->send_email({username + "@link.cuhk.edu.cn"}, "Test", "This is a test email from Chat-With-CUHKSZ.") << std::endl;
     }
-    delete bb;
+    delete email;
 }
 
 int main() {
@@ -91,8 +70,8 @@ int main() {
     //Test Libxml
     test_libxml();
 
-    //Test bb class
-    test_blackboard();
+    //Test email class
+    test_email();
 
     return 0;
 }

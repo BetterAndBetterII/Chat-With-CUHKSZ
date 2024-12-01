@@ -1,21 +1,24 @@
-//
-// Created by yf on 11/13/24.
-//
 #ifndef MODEL_H
 #define MODEL_H
-
 #include <string>
-#include <cpr/cpr.h>
 #include <nlohmann/json.hpp>
-//#include <format>  // For C++20 and above
-
+#include <iostream>
+#include <cpr/cpr.h>
+class Function;
 using json = nlohmann::json;
-
 class Model {
-    std::string model_choice = "gpt-4o-mini";
 public:
-    // 返回响应内容的函数
-    [[nodiscard]] std::string get_response(const std::string &user_input) const;
+    Model();
+    ~Model();
+    json build_message(
+        std::string model,
+        std::string system_prompt,
+        const std::vector<json>& past_messages,
+        std::string new_user_content,
+        std::vector<Function> tools
+    );
+    json send_message(json message);
+private:
+    const std::string API_KEY = "ak-GZTdsRjD60WUwxUrtf07b76t8K1YSbsOPiu7q01Vj0DPB9Hy";
 };
-
-#endif // MODEL_H
+#endif

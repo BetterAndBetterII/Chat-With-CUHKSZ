@@ -30,10 +30,17 @@ target_include_directories(backend_lib
 # 将外部库链接到后端库
 target_link_libraries(backend_lib
         PUBLIC
-        cpr::cpr 
+        cpr::cpr
         nlohmann_json::nlohmann_json
         CURL::libcurl
         LibXml2::LibXml2
+)
+
+# ----------------- 部署 -----------------
+add_executable(backend src/Server/Server.cpp)
+target_link_libraries(backend
+        PRIVATE
+        backend_lib
 )
 
 # ----------------- 测试 -----------------
@@ -58,6 +65,20 @@ target_link_libraries(sis_test
         backend_lib
 )
 
+# _______ 测试Booking _______
+add_executable(booking_test test/test_booking.cpp)
+target_link_libraries(booking_test
+        PRIVATE
+        backend_lib
+)
+
+# _______ 测试Email _______
+add_executable(email_test test/test_email.cpp)
+target_link_libraries(email_test
+        PRIVATE
+        backend_lib
+)
+
 # _______ 测试Agent _______
 add_executable(agent_test test/test_agent.cpp)
 target_link_libraries(agent_test
@@ -68,6 +89,20 @@ target_link_libraries(agent_test
 # _______ 测试Knowledge _______
 add_executable(knowledge_test test/test_knowledge.cpp)
 target_link_libraries(knowledge_test
+        PRIVATE
+        backend_lib
+)
+
+# _______ 测试BackendServer _______
+add_executable(server_test src/Server/Server.cpp)
+target_link_libraries(server_test
+        PRIVATE
+        backend_lib
+)
+
+# _______ 测试CURL协议 _______
+add_executable(curl_protocol_test test/test_curl_protocol.cpp)
+target_link_libraries(curl_protocol_test
         PRIVATE
         backend_lib
 )

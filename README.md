@@ -1,4 +1,28 @@
-# Chat-With-CUHKSZ
+# ChatWithCUHKSZ
+
+## 快速开始
+
+1. 桌面版前端下载
+
+支持 Windows 和 Linux 平台：
+
+[Releases](https://github.com/BetterAndBetterII/Chat-With-CUHKSZ/releases/latest)
+
+针对linux平台，需要安装fuse：`sudo apt install libfuse2`
+
+（ubuntu24.04有一定不兼容fuse，参考 [Ubuntu 24.04安装fuse后重启无法进入桌面](https://liar.org.cn/Linux/3.html) ）
+
+2. 后端快速启动：
+
+```bash
+docker run -d --name chat-with-cuhksz-backend -p 8080:8080 ghcr.io/betterandbetterii/chat-with-cuhksz:latest
+```
+
+## 使用方法
+
+1. 进入程序后输入账号与密码登录
+
+2. 登录后即可开始使用
 
 ## 开发指南
 
@@ -43,3 +67,12 @@ target_link_libraries(backend_executable CURL::libcurl)
 - [ ZhangYuzhong ] Model 实现一个简单的大模型调用
 - [ LinYufeng ] Agent 实现简单自循环，实现随机动作（查询，执行，总结输出），实现历史记录存储
 - [ XUYifan] Knowledge 构思完成，实现一个简单的文本存储
+
+2. 第二阶段
+
+- [ ShenXuhuan] 登录界面，历史记录，(独立运行?)
+- [ LinWentao ] 历史记录管理（agent中分离），传递history给agent 前后端接口（历史记录，加载最后一次对话框，点击直接执行按钮，发送问题id）返回文本文件，
+- [ WenMing ] 后端完成 sis, libary
+- [ ZhangYuzhong ] 后端完成booking, email
+- [ LinYufeng ] Agent get用户最新问题，get history， 接口：各个文件函数的describe
+- [ XUYifan] Knowledge 多选关键词搜索，返回如前20个结果（关键词权重计分排序//加入agent进行排序）
