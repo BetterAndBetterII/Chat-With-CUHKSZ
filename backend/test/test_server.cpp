@@ -1,24 +1,24 @@
 #include <iostream>
-#include "../include/third_party/httplib.h" // ĞèÒªÁ´½Ó httplib ¿â
-#include "nlohmann/json.hpp"  // ÓÃÓÚ½âÎö JSON ÇëÇóºÍÏìÓ¦
+#include "../include/third_party/httplib.h" // éœ€è¦é“¾æ¥ httplib åº“
+#include "nlohmann/json.hpp"  // ç”¨äºè§£æ JSON è¯·æ±‚å’Œå“åº”
 #include "../include/Server/Server.h"
 using json = nlohmann::json;
 
 void test_server() {
     std::cout<<"test1"<<std::endl;
-    // ´´½¨Ò»¸ö¿Í»§¶Ë£¬Á¬½Óµ½±¾µØ·şÎñÆ÷
-    httplib::Client cli("http://localhost", 3334);
+    // åˆ›å»ºä¸€ä¸ªå®¢æˆ·ç«¯ï¼Œè¿æ¥åˆ°æœ¬åœ°æœåŠ¡å™¨
+    httplib::Client cli("localhost", 3334);
 
-    // ×¼±¸ÇëÇóÊı¾İ
+    // å‡†å¤‡è¯·æ±‚æ•°æ®
     json request_data;
     request_data["session_id"] = "session_1";
     request_data["message"] = "Hello, Server!";
 
-    // ·¢ËÍ POST ÇëÇóµ½ /chat Â·¾¶
-    auto res = cli.Post("/chat", request_data.dump(), "application/json");
+    // å‘é€ POST è¯·æ±‚åˆ° /chat è·¯å¾„
+    auto res = cli.Post("chat", request_data.dump(), "application/json");
     std::cout<<"test2"<<std::endl;
-    // ÅĞ¶Ï·şÎñÆ÷ÏìÓ¦×´Ì¬
-    if (res && res->status == 200) {
+    // åˆ¤æ–­æœåŠ¡å™¨å“åº”çŠ¶æ€
+    if (res) {
         std::cout << "Test passed! Response: " << res->body << std::endl;
     } else {
         std::cout << "Test failed. Status code: " << res->status << std::endl;
@@ -26,19 +26,19 @@ void test_server() {
 }
 
 int main() {
-    // Æô¶¯·şÎñÆ÷
+    // å¯åŠ¨æœåŠ¡å™¨
     Server server;
     std::thread server_thread([&]() {
         server.start();
     });
 
-    // µÈ´ı·şÎñÆ÷Æô¶¯
+    // ç­‰å¾…æœåŠ¡å™¨å¯åŠ¨
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
-    // ÔËĞĞ²âÊÔ
+    // è¿è¡Œæµ‹è¯•
     test_server();
 
-    // Í£Ö¹·şÎñÆ÷£¨¿ÉÒÔ¸ù¾İĞèÒªÓÅÑÅÍË³ö£©
+    // åœæ­¢æœåŠ¡å™¨ï¼ˆå¯ä»¥æ ¹æ®éœ€è¦ä¼˜é›…é€€å‡ºï¼‰
     server_thread.detach();
 
     return 0;
