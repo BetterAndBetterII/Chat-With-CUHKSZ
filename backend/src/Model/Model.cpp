@@ -1,6 +1,5 @@
 #include "../../include/Model/Model.h"
 
-#include "../../include/System/Tools.h"
 Model::Model() {}
 Model::~Model() {}
 
@@ -9,7 +8,7 @@ json Model::build_message(
     std::string system_prompt,
     const std::vector<json>& past_messages,
     std::string new_user_content,
-    std::vector<Function> tools
+    const std::vector<Function>& tools
 ) {
     std::vector<json> message = past_messages;
     message.push_back({{"role", "system"}, {"content", system_prompt}});
@@ -23,20 +22,22 @@ json Model::build_message(
 
     json data = {
         {"model", model},
-        {"messages", message},
-        {"tools", tools_array}
+        {"messages", message}
     };
+    if (!tools_array.empty()) {
+        data["tools"] = tools_array;
+    }
     return data;
 }
 
 json Model::send_message(const json message) {
-    std::cout << "body: " << message.dump() << std::endl;
+    // std::cout << "body: " << message.dump() << std::endl;
     cpr::Response response = Post(
         cpr::Url{"https://api.nextapi.fun/v1/chat/completions"},
         cpr::Header{{"Authorization", "Bearer " + API_KEY}},
         cpr::Body{message.dump()}
     );
-    std::cout << "response: " << response.text << std::endl;
+    // std::cout << "response: " << response.text << std::endl;
     if (response.status_code == 200) {
         if (json::parse(response.text)["choices"][0]["message"].contains("tool_calls")) {
             return json::parse(response.text)["choices"][0]["message"];
