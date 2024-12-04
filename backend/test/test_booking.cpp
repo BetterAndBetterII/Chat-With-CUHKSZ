@@ -60,7 +60,7 @@ void test_booking(){
     std::string reason = "test";
     std::string details = "test";
     std::string field_name = "badminton";
-    std::string start_time = "2024-11-25 18:00";
+    std::string start_time = "2024-11-25 18:00";  // %Y-%M-%D %HH-
     std::string end_time = "2024-11-25 19:00";
     auto *booking = new BookingSystem(username, password);
     if(booking->login()){
