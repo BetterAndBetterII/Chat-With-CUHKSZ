@@ -51,6 +51,20 @@ target_link_libraries(blackboard_test
         backend_lib
 )
 
+# _______ 测试libary _______
+add_executable(libary_test test/test_libary.cpp)
+target_link_libraries(libary_test
+        PRIVATE
+        backend_lib
+)
+
+# _______ 测试SIS _______
+add_executable(sis_test test/test_sis.cpp)
+target_link_libraries(sis_test
+        PRIVATE
+        backend_lib
+)
+
 # _______ 测试Booking _______
 add_executable(booking_test test/test_booking.cpp)
 target_link_libraries(booking_test
@@ -82,6 +96,13 @@ target_link_libraries(knowledge_test
 # _______ 测试BackendServer _______
 add_executable(server_test src/Server/Server.cpp)
 target_link_libraries(server_test
+        PRIVATE
+        backend_lib
+)
+
+# _______ 测试CURL协议 _______
+add_executable(curl_protocol_test test/test_curl_protocol.cpp)
+target_link_libraries(curl_protocol_test
         PRIVATE
         backend_lib
 )

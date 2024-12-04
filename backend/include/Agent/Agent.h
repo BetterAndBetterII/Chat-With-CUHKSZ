@@ -1,35 +1,30 @@
-//
-// Created by yf on 11/13/24.
-//
 #ifndef AGENT_H
 #define AGENT_H
-
 #include <string>
-#include <set>
 #include <nlohmann/json.hpp>
-#include <fstream>
-#include <iostream>
-#include "../../include/Model/Model.h"
+#include "../System/Tools.h"
+#include "../Model/Model.h"
 
+using json = nlohmann::json;
 class Agent {
-    std::ofstream log_file;  // 用于存储历史记录
-    std::ifstream history_file;  // 用于读取历史记录
+private:
+    int MAX_LOOP_COUNT = 3;
+    std::string EXIT_SIGNAL = "<exit>";
+    std::vector<json> conversation_history;
+    std::string system_prompt = "You are a chatbot that can call tools to help the user with tasks. If you or the toolcall result have answered user's question, you must summary what you have done with tools results and add " + EXIT_SIGNAL + " at end of the conversation.";
+
     Model model;
-    std::string filename;
-    nlohmann::json conversation_history;
-    std::set<std::string> system_list = {"teaching_system", "library_system", "homework_system"};
-
-    std::string system_agent(const std::string& user_input, const std::string& history) const;
-    std::string conversation_agent(const std::string& user_input, const std::string& history) const;
-    void history_file_manager(int number);
-    std::string history_string_maker();
-    void conversation_history_updater(const std::string& user_input, const std::string& response);
-    void log_file_saver();
-
+    Tools tools;
 public:
-    explicit Agent(int number = 0);
+    Agent();
     ~Agent();
-    std::string handler(const std::string& user_input);
-};
 
-#endif // AGENT_H
+    [[nodiscard]] std::vector<Function> get_tools() const;
+
+    void insert_memory(const std::string& message, const std::string& role);
+
+    std::string run(const std::string &message, bool enable_tools);
+
+    std::string run_until_done(const std::string &message);
+};
+#endif
