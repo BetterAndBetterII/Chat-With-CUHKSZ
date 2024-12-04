@@ -1,8 +1,8 @@
 //
 // Created by Gary on 24-11-24.
 
-#ifndef CHAT_WITH_CUHKSZ_BOOKING_H
-#define CHAT_WITH_CUHKSZ_BOOKING_H
+#ifndef CHAT_WITH_CUHKSZ_BLACKBOARD_H
+#define CHAT_WITH_CUHKSZ_BLACKBOARD_H
 
 #include <map>
 
@@ -163,7 +163,7 @@ public:
     //booker类
     Booker booker;
 
-    std::string set_booker(const std::string& telephone, const std::string& reason, const std::string& details);
+    void set_booker(const std::string& telephone, const std::string& reason, const std::string& details);
 
     [[nodiscard]] std::string get_available_time(const std::string& field_name, const std::string& date_string);
 
@@ -172,4 +172,4 @@ public:
 };
 
 
-#endif //CHAT_WITH_CUHKSZ_BOOKING_H
+#endif //CHAT_WITH_CUHKSZ_BLACKBOARD_H
