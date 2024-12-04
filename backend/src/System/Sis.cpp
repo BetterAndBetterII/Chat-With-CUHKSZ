@@ -355,7 +355,10 @@ string SisSystem::get_commands()const{
 }
 
 
-string SisSystem::get_schedule()const{
+string SisSystem::get_schedule(){
+    if (!login()) {
+        return "Invalid username or password!";
+    }
 
     string url = string("https://sis.cuhk.edu.cn/psc/csprd/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.SSR_SSENRL_SCHD_W.GBL?") +
     "FolderPath=PORTAL_ROOT_OBJECT.CO_EMPLOYEE_SELF_SERVICE.HCCC_ENROLLMENT.HC_SSR_SSENRL_SCHD_W_GBL"+
@@ -531,6 +534,10 @@ string SisSystem::parse_ICStateNum(const std::string& text)const{
 
 string SisSystem::get_course(string course_code, string term, string openOnly){
 
+    if (!login()) {
+        return "Invalid username or password!";
+    }
+
     //get ICSID
     string url=string("https://sis.cuhk.edu.cn/psc/csprd/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.CLASS_SEARCH.GBL?") + 
         "PORTALPARAM_PTCNAV=HC_CLASS_SEARCH&EOPP.SCNode=HRMS&EOPP.SCPortal=EMPLOYEE&EOPP.SCName=HCCC_SS_CATALOG&EOPP.SCLabel=Class%20Search%20%2f%20Browse%20Catalog&EOPP.SCPTfname=HCCC_SS_CATALOG&FolderPath=PORTAL_ROOT_OBJECT.CO_EMPLOYEE_SELF_SERVICE.HCCC_SS_CATALOG.HC_CLASS_SEARCH&IsFolder=false&PortalActualURL=https%3a%2f%2fsis.cuhk.edu.cn%2fpsc%2fcsprd%2fEMPLOYEE%2fHRMS%2fc%2fSA_LEARNER_SERVICES.CLASS_SEARCH.GBL&PortalContentURL=https%3a%2f%2fsis.cuhk.edu.cn%2fpsc%2fcsprd%2fEMPLOYEE%2fHRMS%2fc%2fSA_LEARNER_SERVICES.CLASS_SEARCH.GBL&PortalContentProvider=HRMS&PortalCRefLabel=Class%20Search&PortalRegistryName=EMPLOYEE&PortalServletURI=https%3a%2f%2fsis.cuhk.edu.cn%2fpsp%2fcsprd%2f&PortalURI=https%3a%2f%2fsis.cuhk.edu.cn%2fpsc%2fcsprd%2f&PortalHostNode=HRMS&NoCrumbs=yes&PortalKeyStruct=yes";
@@ -616,6 +623,10 @@ string SisSystem::get_course(string course_code, string term, string openOnly){
 }
 
 string SisSystem::get_grades(string term){
+
+    if (!login()) {
+        return "Invalid username or password!";
+    }
 
     //get ICSID
     string url=string("https://sis.cuhk.edu.cn/psc/csprd/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.SSR_SSENRL_GRADE.GBL?") + 

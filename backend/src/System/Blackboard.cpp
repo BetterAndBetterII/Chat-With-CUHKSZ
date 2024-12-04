@@ -253,7 +253,6 @@ string BlackBoardSystem::get_commands()const{
 
 
 std::string BlackBoardSystem::get_course(const std::string& term){
-    change_info(username, password);
     if (!login()) {
         return "Invalid username or password!";
     }
@@ -290,7 +289,10 @@ string BlackBoardSystem::get_course_id(const string& crouse)const{
     return "";
 }
 
-string BlackBoardSystem::get_announcement(const string& crouse, const int number )const{
+string BlackBoardSystem::get_announcement(const string& crouse, const int number ){
+    if (!login()) {
+        return "Invalid username or password!";
+    }
     string id = get_course_id(crouse);
     if(!id.empty()){
         string data ="method=search&viewChoice=3&editMode=false&tabAction=false&announcementId=&course_id=&context=mybb&internalHandle=my_announcements&searchSelect=" + id; //POST data
@@ -316,7 +318,10 @@ string BlackBoardSystem::get_announcement(const string& crouse, const int number
     return "";
 }
 
-string BlackBoardSystem::get_assignment(const string& crouse)const{
+string BlackBoardSystem::get_assignment(const string& crouse){
+    if (!login()) {
+        return "Invalid username or password!";
+    }
     string rawData = getRequest("https://bb.cuhk.edu.cn/webapps/bb-enhance-BBLEARN/normal/mycourse/search"); 
     vector<string> crouse_name = xpathQuery(rawData, "//*[@id[starts-with(., 'listContainer_row:')]]/td[1]/span[2]");
     vector<string> crouse_id = xpathQuery(rawData, "//*[@id[starts-with(., 'listContainer_row:')]]/th/a/@onclick");
@@ -470,7 +475,10 @@ bool BlackBoardSystem::missDue(const string& content, const string& pattern)cons
     
 }
 
-string BlackBoardSystem::get_grades(const string& crouse)const{
+string BlackBoardSystem::get_grades(const string& crouse){
+    if (!login()) {
+        return "Invalid username or password!";
+    }
     string id = get_course_id(crouse);
     if(!id.empty()){
         string url ="https://bb.cuhk.edu.cn/webapps/bb-mygrades-BBLEARN/myGrades?course_id=" + id + "&stream_name=mygrades";
