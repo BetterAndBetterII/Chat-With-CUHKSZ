@@ -12,6 +12,8 @@
 #include "Blackboard.h"
 #include "Booking.h"
 #include "Libary.h"
+#include "Sis.h"
+#include "Email.h"
 using json = nlohmann::json;
 class FunctionProperty
 {
@@ -122,12 +124,23 @@ class Tools
     BlackBoardSystem *bb;
     BookingSystem *booking;
     LibarySystem *library=new LibarySystem();
+    SisSystem *sis;
+    EmailSystem *email;
+
     // KnowledgeBase *knowledge;
 public:
     Tools(const std::string &_username, const std::string &_password)
         : bb(new BlackBoardSystem(_username, _password)),
-          booking(new BookingSystem(_username, _password)){}
-    ~Tools();
+          booking(new BookingSystem(_username, _password)),
+            sis(new SisSystem(_username, _password)),
+            email(new EmailSystem(_username, _password)) {}
+    ~Tools() {
+        delete bb;
+        delete booking;
+        delete library;
+        delete sis;
+        delete email;
+    };
     std::vector<Function> functions = {
         Function{
             "generate_image",
@@ -165,6 +178,30 @@ public:
                             }
                         },
                         {}
+            }
+        },
+        Function{
+            "get_assignment",
+            "Get the assignment of a class based on its class_id. Given the name of the class, you can get the class id from get_course function",
+            FunctionParameters{
+                            {
+                                FunctionProperty{
+                                    "class_id", "string", "The id of the class.",
+                                }
+                            },
+                            {}
+            }
+        },
+        Function{
+            "get_course_grades",
+            "Get the grades of a class based on its class_id. Given the name of the class, you can get the class id from get_course function",
+            FunctionParameters{
+                            {
+                                FunctionProperty{
+                                    "class_id", "string", "The id of the class.",
+                                }
+                            },
+                            {}
             }
         },
         Function{
@@ -228,6 +265,60 @@ public:
                                     },
                                 },
                                 {"Keyword","limit","tab"}
+            }
+        },
+        Function{
+            "get_schedule",
+            "get the schedule of the user",
+            FunctionParameters{
+                        {
+                            FunctionProperty{
+                                "placeholder", "string", "The placeholder of the parameter.",
+                            }
+                        },
+                        {}
+            }
+        },
+        Function{
+            "get_course",
+            "get the detail information of a course based on its class id",
+            FunctionParameters{
+                                {
+                                    FunctionProperty{
+                                        "class_id", "string", "The id of the class.",
+                                    }
+                                },
+                                {}
+            }
+        },
+        Function{
+            "get_term_grades",
+            "get the grade of the user based on the term",
+            FunctionParameters{
+                                {
+                                    FunctionProperty{
+                                        "term", "string", "The term for searching the grade e.g.2023-24 Term 2.",
+                                    }
+                                },
+                                {}
+            }
+        },
+        Function{
+            "send_email",
+            "send a email to other",
+            FunctionParameters{
+                                        {
+                                            FunctionProperty{
+                                                "recipient", "string", "The recipient of the email without Email suffix",
+                                            },
+                                            FunctionProperty{
+                                                "subject", "string", "The subject of the emial",
+                                            },
+                                            FunctionProperty{
+                                                "body", "string", "the main body of th email",
+                                            },
+                                        },
+                                        {"recipient","subject","body"}
             }
         },
         // Function{

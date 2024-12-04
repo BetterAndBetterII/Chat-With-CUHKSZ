@@ -19,7 +19,6 @@ void test_sis(){
     } else {
         std::cout << "Username:" << std::endl;
         std::getline(std::cin, username);
-        std::cin >> username;
     }
     if (env_password) {
         password = env_password;

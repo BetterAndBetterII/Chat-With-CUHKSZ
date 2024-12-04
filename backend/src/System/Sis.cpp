@@ -16,8 +16,8 @@ using std::vector;
 using std::cout;
 using std::endl;
 
-SisSystem::SisSystem(const string& username, const string& password) : curl_global_manager(){
-    //初始化变量
+SisSystem::SisSystem(const string& username, const string& password) : curl_global_manager() {
+    // 初始化变量
     this->command_list = {
         "get_schedule",
         "get_course",
@@ -25,14 +25,27 @@ SisSystem::SisSystem(const string& username, const string& password) : curl_glob
     };
     this->username = username;
     this->password = password;
-    this->sis_handle = curl_easy_init();
-    // 自定义 HTTP 请求头
-    this->headers = curl_slist_append(headers, "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36");
-    headers = curl_slist_append(headers, "Connection: close");
-    curl_easy_setopt(sis_handle, CURLOPT_HTTPHEADER, headers);
-    this->is_login = false;
 
+    // 确保 curl_easy_init 成功
+    this->sis_handle = curl_easy_init();
+    if (!this->sis_handle) {
+        std::cerr << "cURL initialization failed!" << std::endl;
+        // 处理初始化失败的情况
+    }
+
+    // 初始化 headers 为 nullptr
+    this->headers = nullptr;
+
+    // 自定义 HTTP 请求头
+    this->headers = curl_slist_append(this->headers, "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36");
+    this->headers = curl_slist_append(this->headers, "Connection: close");
+
+    // 设置 HTTP 请求头
+    curl_easy_setopt(this->sis_handle, CURLOPT_HTTPHEADER, this->headers);
+
+    this->is_login = false;
 }
+
 
 SisSystem::~SisSystem(){
     if(sis_handle){
