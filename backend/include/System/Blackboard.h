@@ -90,7 +90,7 @@ public:
      * 返回annoucement内容和发布者
     */
 
-    std::string get_course(const std::string& term="2410UG") const;
+    std::string get_course(const std::string& term="2410UG");
     /*参数：
      *term：学期（例如‘2410UG’）格式：24（年份）10（学期：上学期10下学期20暑课30）UG（本科生）
      *返回值：
