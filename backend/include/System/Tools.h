@@ -14,6 +14,7 @@
 #include "Libary.h"
 #include "Sis.h"
 #include "Email.h"
+#include "../Knowledge/KnowledgeBase.h"
 using json = nlohmann::json;
 class FunctionProperty
 {
@@ -126,8 +127,7 @@ class Tools
     LibarySystem *library=new LibarySystem();
     SisSystem *sis;
     EmailSystem *email;
-
-    // KnowledgeBase *knowledge;
+    KnowledgeBase *knowledge;
 public:
     Tools(const std::string &_username, const std::string &_password)
         : bb(new BlackBoardSystem(_username, _password)),
@@ -177,7 +177,7 @@ public:
                                 "class_id", "string", "The id of the class.",
                             }
                         },
-                        {}
+                        {"class_id"}
             }
         },
         Function{
@@ -189,7 +189,7 @@ public:
                                     "class_id", "string", "The id of the class.",
                                 }
                             },
-                            {}
+                            {"class_id"}
             }
         },
         Function{
@@ -201,7 +201,7 @@ public:
                                     "class_id", "string", "The id of the class.",
                                 }
                             },
-                            {}
+                            {"class_id"}
             }
         },
         Function{
@@ -213,7 +213,7 @@ public:
                                     "date", "string", "The date of the query with the format %Y-%m-%d",
                                 }
                             },
-                            {}
+                            {"date"}
             }
         },
         Function{
@@ -288,7 +288,7 @@ public:
                                         "class_id", "string", "The id of the class.",
                                     }
                                 },
-                                {}
+                                {"class_id"}
             }
         },
         Function{
@@ -300,7 +300,7 @@ public:
                                         "term", "string", "The term for searching the grade e.g.2023-24 Term 2.",
                                     }
                                 },
-                                {}
+                                {"term"}
             }
         },
         Function{
@@ -321,27 +321,25 @@ public:
                                         {"recipient","subject","body"}
             }
         },
-        // Function{
-        //     "getKnowledge",
-        //     "pass three key words as parameters to perform search in the knowledge base of  the university",
-        //     FunctionParameters{
-        //                             {
-        //                                 FunctionProperty{
-        //                                     "keyword_1", "string", "The most relevant key word.",
-        //                                 },
-        //                                 FunctionProperty{
-        //                                     "keyword_2", "string", "The second relevant key word",
-        //                                 },
-        //                                 FunctionProperty{
-        //                                     "keyword_3", "string", "The third relevant key word",
-        //                                 },
-        //                             },
-        //                             {}
-        //     }
-        // },
+        Function{
+            "getKnowledge",
+            "pass three key words as parameters to perform search in the knowledge base of  the university",
+            FunctionParameters{
+                                    {
+                                        FunctionProperty{
+                                            "keyword_1", "string", "The most relevant key word.",
+                                        },
+                                        FunctionProperty{
+                                            "keyword_2", "string", "The second relevant key word",
+                                        },
+                                        FunctionProperty{
+                                            "keyword_3", "string", "The third relevant key word",
+                                        },
+                                    },
+                                    {"keyword_1","keyword_2","keyword_3"}
+            }
+        },
     };
-
-
     std::string handle_tool_call(const std::string &tool_name, const json& arguments);
 };
 

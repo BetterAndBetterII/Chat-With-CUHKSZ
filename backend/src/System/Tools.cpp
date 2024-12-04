@@ -50,8 +50,9 @@ std::string Tools::handle_tool_call(const std::string& tool_name,  const json& a
         }
         return email->send_email(recipient_vector,std::string(json_arguments["subject"]),std::string(json_arguments["body"]));
     }
-    // if (tool_name=="getKnowledge") {
-    //     return knowledge->getKnowledge(std::string(arguments["keyword_1"]),std::string(arguments["keyword_2"]),std::string(arguments["keyword_3"]));
-    // }
+    if (tool_name=="getKnowledge") {
+        knowledge.loadAllFiles("../KnowledgeBase/phoenix_cuhksz_knowledge-main");
+        return knowledge->getKnowledge(std::string(arguments["keyword_1"]),std::string(arguments["keyword_2"]),std::string(arguments["keyword_3"]));
+    }
     return "Unknown tool!";
 }
