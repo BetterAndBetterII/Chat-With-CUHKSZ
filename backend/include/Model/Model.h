@@ -2,6 +2,7 @@
 #define MODEL_H
 #include <string>
 #include <nlohmann/json.hpp>
+#include "../System/Tools.h"
 #include <iostream>
 #include <cpr/cpr.h>
 class Function;
@@ -15,7 +16,7 @@ public:
         std::string system_prompt,
         const std::vector<json>& past_messages,
         std::string new_user_content,
-        std::vector<Function> tools
+        const std::vector<Function>& tools
     );
     json send_message(json message);
 private:
