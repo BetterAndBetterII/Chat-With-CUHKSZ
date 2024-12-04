@@ -34,7 +34,9 @@ public:
 
 
     //处理agent请求
-    void handleAgentRequest(const std::string& request, const std::vector<KnowledgeRecord>& records);
+    std::string getKnowledge(const std::string& keyword1,
+                             const std::string& keyword2,
+                             const std::string& keyword3);
 };
 
 #endif // CHAT_WITH_CUHKSZ_KNOWLEDGEBASE_H

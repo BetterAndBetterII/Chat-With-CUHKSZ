@@ -114,10 +114,15 @@ std::string KnowledgeBase::searchKnowledgeBase(const std::vector<KnowledgeRecord
 
 
 //处理agent的请求
-// void KnowledgeBase::handleAgentRequest(const std::string& request, const std::vector<KnowledgeRecord>& records) {
-//     std::string response = this->searchKnowledgeBase(records, request);
-//     std::cout << "Response to Agent: " << response << std::endl;
-// }
+std::string KnowledgeBase::getKnowledge(const std::string& keyword1,
+                                        const std::string& keyword2,
+                                        const std::string& keyword3) {
+     std::string response = this->searchKnowledgeBase(this->records,
+                                                      keyword1, 20,
+                                                      keyword2, 8,
+                                                      keyword3, 3);
+     return response;
+ }
 
 // int main() {
 //     KnowledgeBase KnowledgeBase;
