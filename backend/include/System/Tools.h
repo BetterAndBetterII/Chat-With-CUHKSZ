@@ -11,6 +11,7 @@
 
 #include "Blackboard.h"
 #include "Booking.h"
+#include "Libary.h"
 using json = nlohmann::json;
 class FunctionProperty
 {
@@ -120,6 +121,7 @@ class Tools
 {
     BlackBoardSystem *bb;
     BookingSystem *booking;
+    LibarySystem *library=new LibarySystem();
     // KnowledgeBase *knowledge;
 public:
     Tools(const std::string &_username, const std::string &_password)
@@ -210,25 +212,44 @@ public:
                             {"start_time", "end_time"}
             }
         },
+        Function{
+            "search_library",
+            "search for print_books, journals, articles, ebook in the library.",
+            FunctionParameters{
+                                {
+                                    FunctionProperty{
+                                        "Keyword", "string", "The keyword used for searching",
+                                    },
+                                    FunctionProperty{
+                                        "limit", "string", "The number of results the search should return",
+                                    },
+                                    FunctionProperty{
+                                        "tab", "string", "the tab of the resource","Everything",{"Everything","PrintBooks/Journals","Articles/eBooks"}
+                                    },
+                                },
+                                {"Keyword","limit","tab"}
+            }
+        },
         // Function{
         //     "getKnowledge",
         //     "pass three key words as parameters to perform search in the knowledge base of  the university",
         //     FunctionParameters{
-        //                         {
-        //                             FunctionProperty{
-        //                                 "keyword_1", "string", "The most relevant key word.",
+        //                             {
+        //                                 FunctionProperty{
+        //                                     "keyword_1", "string", "The most relevant key word.",
+        //                                 },
+        //                                 FunctionProperty{
+        //                                     "keyword_2", "string", "The second relevant key word",
+        //                                 },
+        //                                 FunctionProperty{
+        //                                     "keyword_3", "string", "The third relevant key word",
+        //                                 },
         //                             },
-        //                             FunctionProperty{
-        //                                 "keyword_2", "string", "The second relevant key word",
-        //                             },
-        //                             FunctionProperty{
-        //                                 "keyword_3", "string", "The third relevant key word",
-        //                             },
-        //                         },
-        //                         {}
+        //                             {}
         //     }
         // },
     };
+
 
     std::string handle_tool_call(const std::string &tool_name, const json& arguments);
 };

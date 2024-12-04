@@ -1,4 +1,5 @@
 #include "../../include/System/Tools.h"
+#include<iostream>
 std::string Tools::handle_tool_call(const std::string& tool_name,  const json& arguments)
 {
     json json_arguments = json::parse(std::string(arguments));
@@ -19,6 +20,9 @@ std::string Tools::handle_tool_call(const std::string& tool_name,  const json& a
     }
     if (tool_name == "book_field") {
         return booking->book_field("badminton",std::string(json_arguments["start_time"]),std::string(json_arguments["end_time"]));
+    }
+    if (tool_name=="search_library") {
+        return library->search(std::string(json_arguments["Keyword"]),std::stoi(std::string(json_arguments["limit"])),std::string(json_arguments["tab"]));
     }
     // if (tool_name=="getKnowledge") {
     //     return knowledge->getKnowledge(std::string(arguments["keyword_1"]),std::string(arguments["keyword_2"]),std::string(arguments["keyword_3"]));
