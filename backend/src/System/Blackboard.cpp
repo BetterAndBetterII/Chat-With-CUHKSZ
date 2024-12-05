@@ -5,10 +5,9 @@
 
 #include "../../include/System/Blackboard.h"
 #include <iostream> //std::cerr
-#include <sstream> 
-#include <cstring>
 #include <regex> //space_cutter()
 #include <chrono> //missDue() 
+#include <filesystem> //missDue()->get_time()
 
 using std::string;
 using std::vector;
@@ -79,17 +78,6 @@ bool BlackBoardSystem::login(){
 
 }
 
-string BlackBoardSystem::get_commands()const{
-
-    std::ostringstream result;
-    for(auto it = command_list.begin(); it != command_list.end(); ++it ){
-        result << *it;
-        if(std::next(it) != command_list.end()){
-            result << ", ";
-        }
-    }
-    return result.str();
-}
 
 
 
@@ -215,14 +203,6 @@ void BlackBoardSystem::recursive_search_assignments(const string& data, vector<s
             );
         }
     }
-}
-
-string BlackBoardSystem::vector_toString(const vector<string>& vector)const{
-    string result;
-    for(string element : vector){
-        result+=element+"\n";
-    }
-    return result;
 }
 
 string BlackBoardSystem::space_cutter(const string& str)const{

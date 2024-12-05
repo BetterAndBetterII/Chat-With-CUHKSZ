@@ -1,6 +1,7 @@
 //
 // Created by Gary on 24-10-24.
 // Complemented by Wen on 24-11-18.
+//
 
 #ifndef CHAT_WITH_CUHKSZ_BLACKBOARD_H
 #define CHAT_WITH_CUHKSZ_BLACKBOARD_H
@@ -10,8 +11,6 @@
 class BlackBoardSystem : public System{
 private:
 
-    std::set<std::string> command_list;
-
     //接受学期作为参数，默认值为”2410UG“ 
     std::string get_course_id(const std::string& crouse)const;
 
@@ -19,8 +18,6 @@ private:
 
     std::string parse_assignment_url(const std::string& url)const;
 
-    std::string vector_toString(const std::vector<std::string>& vector)const;
-    
     //删除字符串前后多余空格和换行符
     std::string space_cutter(const std::string& str)const;
 
@@ -36,9 +33,6 @@ public:
 
     //析构函数
     ~BlackBoardSystem();
-
-    //返回command_list
-    std::string get_commands() const;
 
     //登录
     bool login();

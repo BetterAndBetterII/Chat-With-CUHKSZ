@@ -1,8 +1,6 @@
 #include "../../include/System/System.h"
 #include <iostream> //std::cerr
-#include <sstream> 
-#include <fstream>
-#include <cstring>
+#include <cstring> //memcpy
 #include <filesystem> //destructor
 
 using std::string;
@@ -208,4 +206,16 @@ bool System::change_info(const string& username, const string& password){
     this->username = username;
     this->password = password;
     return true;
+}
+
+string System::get_commands()const{
+
+    std::ostringstream result;
+    for(auto it = command_list.begin(); it != command_list.end(); ++it ){
+        result << *it;
+        if(std::next(it) != command_list.end()){
+            result << ", ";
+        }
+    }
+    return result.str();
 }

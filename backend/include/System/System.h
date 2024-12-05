@@ -12,8 +12,9 @@ class System{
 protected:
     std::string username;
     std::string password;
-
     
+    std::set<std::string> command_list;
+
     bool is_login;
 
     //cookiefile存储libcurl生成的cookie文件的路径
@@ -44,7 +45,6 @@ protected:
     std::vector<std::string> xpathQuery(const std::string& xmlContent, const std::string& xpathExpr)const;
 
 public:
-
     
     // 构造函数
     System(const std::string& username, const std::string& password);
@@ -53,7 +53,7 @@ public:
     ~System();
 
     //返回command_list
-    virtual std::string get_commands() const=0;
+    std::string get_commands() const;
 
     //登录
     virtual bool login()=0;
@@ -62,8 +62,6 @@ public:
     bool change_info(const std::string& username, const std::string& password);
     //若未登录成功(is_login == false)，则修改账号密码并返回true，若已登录则不会修改账号密码，返回false
 
-    
 };
-
 
 #endif //CHAT_WITH_CUHKSZ_SYSTEM_H
