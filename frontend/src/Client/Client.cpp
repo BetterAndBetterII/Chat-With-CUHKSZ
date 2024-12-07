@@ -35,7 +35,21 @@ std::string Client::send_message(const std::string& session_id, const std::strin
 
     return "Error: " + (res ? std::to_string(res->status) : "No response");
 }
+std::string Client::get_chat_history(const std::string& session_id) {
+    auto res = http_client_.Get(("/history?session_id=" + session_id).c_str());
+    if (res && res->status == 200) {
+        return res->body;
+    }
+    return "Error: " + (res ? std::to_string(res->status) : "No response");
+}
 
+std::string Client::get_first_messages() {
+    auto res = http_client_.Get("/first_messages");
+    if (res && res->status == 200) {
+        return res->body;
+    }
+    return "Error: " + (res ? std::to_string(res->status) : "No response");
+}
 int main() {
     Client client("localhost", 8081);
 
@@ -43,23 +57,18 @@ int main() {
     std::string password = "pass123";
 
     if (client.login(username, password)) {
-      	std::cout << "Login Successfully" << std::endl;
+        std::cout << "Login Successfully" << std::endl;
         std::string session_id = "session_user123";
         std::string response = client.send_message(session_id, "Hello, Server!");
         std::cout << "Server response: " << response << std::endl;
 
         // 获取当前会话的历史记录
-        httplib::Client http_client("localhost", 8081);
-        auto res = http_client.Get(("/history?session_id=" + session_id).c_str());
-        if (res && res->status == 200) {
-            std::cout << "Chat history: " << res->body << std::endl;
-        }
+        std::string chat_history = client.get_chat_history(session_id);
+        std::cout << "Chat history: " << chat_history << std::endl;
 
         // 获取所有会话的第一条消息
-        res = http_client.Get("/first_messages");
-        if (res && res->status == 200) {
-            std::cout << "All first messages: " << res->body << std::endl;
-        }
+        std::string first_messages = client.get_first_messages();
+        std::cout << "All first messages: " << first_messages << std::endl;
     } else {
         std::cout << "Login failed!" << std::endl;
     }
