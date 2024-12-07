@@ -32,5 +32,7 @@ public:
 
     static std::string get_current_date();
 
+    bool is_valid_login();
+
 };
 #endif

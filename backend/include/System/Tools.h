@@ -231,6 +231,8 @@ public:
     };
 
     std::string handle_tool_call(const std::string &tool_name, const json& arguments);
+
+    bool is_valid_login();
 };
 
 #endif // TOOLS_H

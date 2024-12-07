@@ -8,13 +8,18 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QHBoxLayout>
+#include <QPixmap>
 #include <QFrame>
 #include <QScrollArea>
 #include <QMap>
 #include <QList>
 #include <QIcon>
 #include <QKeyEvent>
-
+#include <QUrl>
+#include <QDesktopServices>
+#include <QGridLayout>
+#include <QWidget>
+#include <QStackedWidget>
 class CustomTextEdit : public QTextEdit {
     Q_OBJECT
 
@@ -97,6 +102,179 @@ public:
     }
 };
 
+class WelcomeWindow : public QWidget {
+    Q_OBJECT
+
+public:
+    WelcomeWindow(QWidget *parent = nullptr) : QWidget(parent) {
+        setWindowTitle("Welcome to Chat_With_CUHKSZ!");
+        setFixedSize(1000, 750); // 窗口大小与图片比例匹配
+
+        QLinearGradient gradient(0, 0, 1, 1);
+        gradient.setColorAt(0, QColor(48, 48, 55)); // 背景渐变色，浅色
+        gradient.setColorAt(1, QColor(28, 28, 36)); // 背景渐变色，深色
+        QPalette palette;
+        palette.setBrush(QPalette::Window, gradient);
+        setPalette(palette);
+        // 主布局
+        QVBoxLayout *mainLayout = new QVBoxLayout(this);
+
+        // 顶部横幅布局
+        QHBoxLayout *topLayout = new QHBoxLayout();
+        QLabel *titleLabel = new QLabel("Welcome to Chat_With_CUHKSZ!", this);
+        titleLabel->setStyleSheet("font-size: 60px; font-weight: bold;color:white");
+        QLabel *profilePhotoLabel = new QLabel(this);
+        profilePhotoLabel->setPixmap(QPixmap(":/images/profile.jpg").scaled(60, 60, Qt::KeepAspectRatio)); // 假设图片路径
+        profilePhotoLabel->setStyleSheet("border: 1px solid black;");
+        profilePhotoLabel->setFixedSize(60, 60);
+        topLayout->addWidget(titleLabel);
+        topLayout->addStretch(); // 左对齐
+        topLayout->addWidget(profilePhotoLabel);
+
+            // 添加顶部横幅到主布局
+    mainLayout->addLayout(topLayout);
+
+    // 中部网格布局
+    QGridLayout *gridLayout = new QGridLayout();
+
+    // 按钮1: bb
+    QPushButton *buttonBB = new QPushButton("BB System", this);
+    buttonBB->setFixedSize(120, 120);
+    buttonBB->setStyleSheet("font-size: 16px; font-weight: bold; background-color: #444444; color: white; border-radius: 10px;");
+    gridLayout->addWidget(buttonBB, 0, 0);
+
+    // 按钮2: sis
+    QPushButton *buttonSIS = new QPushButton("SIS", this);
+    buttonSIS->setFixedSize(120, 120);
+    buttonSIS->setStyleSheet("font-size: 16px; font-weight: bold; background-color: #444444; color: white; border-radius: 10px;");
+    gridLayout->addWidget(buttonSIS, 0, 1);
+
+    // 按钮3: Chat with CUHKSZ
+    QPushButton *buttonChat = new QPushButton("Chat with CUHKSZ", this);
+    buttonChat->setFixedSize(360, 120);
+    buttonChat->setStyleSheet("font-size: 18px; font-weight: bold; background-color: #006699; color: white; border-radius: 10px;");
+    gridLayout->addWidget(buttonChat, 0, 2, 1, 2); // 跨两列
+
+    // 按钮4: Booking
+    QPushButton *buttonBooking = new QPushButton("Booking", this);
+    buttonBooking->setFixedSize(240, 60);
+    buttonBooking->setStyleSheet("font-size: 16px; font-weight: bold; background-color: #444444; color: white; border-radius: 10px;");
+    gridLayout->addWidget(buttonBooking, 1, 0, 1, 2); // 跨两列
+
+    // 按钮5: Off
+    QPushButton *buttonOfficial = new QPushButton("Official", this);
+    buttonOfficial->setFixedSize(120, 120);
+    buttonOfficial->setStyleSheet("font-size: 16px; background-color: #444444; color: white; border: 1px solid white; border-radius: 10px;");
+    gridLayout->addWidget(buttonOfficial, 1, 2);
+
+    // 按钮6: 语言切换按钮
+    QPushButton *buttonLanguage = new QPushButton("Language: ENGLISH", this);
+    buttonLanguage->setFixedSize(160, 80);
+    buttonLanguage->setStyleSheet("font-size: 16px; background-color: #444444; color: white; border-radius: 10px;");
+    gridLayout->addWidget(buttonLanguage, 1, 3);
+
+    // 按钮7: vpn
+    QPushButton *buttonVpn = new QPushButton("VPN", this);
+    buttonVpn->setFixedSize(120, 120);
+    buttonVpn->setStyleSheet("font-size: 16px; background-color: #444444; color: white; border: 1px solid white; border-radius: 10px;");
+    gridLayout->addWidget(buttonVpn, 2, 2);
+
+    // 按钮8: 空按钮
+    QPushButton *button4 = new QPushButton("Others", this);
+    button4->setFixedSize(120, 120);
+    button4->setStyleSheet("font-size: 16px; background-color: #444444; color: white; border: 1px solid white; border-radius: 10px;");
+    gridLayout->addWidget(button4, 2, 3);
+
+    // 添加中部布局到主布局
+    mainLayout->addLayout(gridLayout);
+
+    // 在 Booking 下方添加两行文字，紧贴 Booking 按钮
+    QLabel *bookingDescription1 = new QLabel("结合传统与现代", this);
+    QLabel *bookingDescription2 = new QLabel("融汇中国与西方", this);
+    bookingDescription1->setAlignment(Qt::AlignCenter);
+    bookingDescription2->setAlignment(Qt::AlignCenter);
+    bookingDescription1->setStyleSheet("font-size: 18px; font-family: KaiTi; font-style: italic; color: white;");
+    bookingDescription2->setStyleSheet("font-size: 18px; font-family: KaiTi; font-style: italic; color: white;");
+
+    // 添加文字布局
+    QVBoxLayout *bookingTextLayout = new QVBoxLayout();
+    bookingTextLayout->addWidget(bookingDescription1);
+    bookingTextLayout->addWidget(bookingDescription2);
+    bookingTextLayout->setSpacing(5); // 控制两行文字间的间距
+
+    // 将文字放置到button7的正左边
+    QHBoxLayout *textAndButtonLayout = new QHBoxLayout();
+    textAndButtonLayout->addWidget(bookingDescription1); // 先显示“结合传统与现代”
+    textAndButtonLayout->addStretch(); // 居中显示文字
+    textAndButtonLayout->addWidget(bookingDescription2); // 然后显示“融汇中国与西方”
+
+    // 将文字添加到grid布局里，位置紧贴booking按钮正下方
+    gridLayout->addLayout(textAndButtonLayout, 3, 0, 1, 4); // 放置在第3行，占据4列
+
+    // 底部栏布局
+    QHBoxLayout *bottomLayout = new QHBoxLayout();
+    bottomLayout->addStretch(); // 用于底部空白区域占位
+    mainLayout->addLayout(bottomLayout);
+
+    // 设置主布局
+    setLayout(mainLayout);
+
+    // 信号连接：点击 "Chat with CUHKSZ" 按钮时触发 startChat 信号
+    connect(buttonChat, &QPushButton::clicked, this, &WelcomeWindow::goToChatWindow);
+
+    // 信号连接：点击 "大学官网" 按钮时打开链接
+    connect(buttonOfficial, &QPushButton::clicked, this, []() {
+        QDesktopServices::openUrl(QUrl("https://www.cuhk.edu.cn"));
+    });
+
+    // 信号连接：bb 按钮跳转
+    connect(buttonBB, &QPushButton::clicked, this, []() {
+        QDesktopServices::openUrl(QUrl("https://bb.cuhk.edu.cn"));
+    });
+
+    // 信号连接：sis 按钮跳转
+    connect(buttonSIS, &QPushButton::clicked, this, []() {
+        QDesktopServices::openUrl(QUrl("https://sis.cuhk.edu.cn"));
+    });
+
+    // 信号连接：Booking 按钮跳转
+    connect(buttonBooking, &QPushButton::clicked, this, []() {
+        QDesktopServices::openUrl(QUrl("https://booking.cuhk.edu.cn"));
+    });
+
+    connect(buttonVpn, &QPushButton::clicked, this, []() {
+        QDesktopServices::openUrl(QUrl("https://vpn.cuhk.edu.cn"));
+    });
+
+    // 信号连接：切换语言按钮功能
+    connect(buttonLanguage, &QPushButton::clicked, this, [=]() {
+        if (buttonLanguage->text() == "Language: ENGLISH") {
+            // 切换到中文
+            buttonLanguage->setText("语言：中文");
+
+            // 更新其他按钮的文本
+            buttonBB->setText("在线教学平台");
+            buttonSIS->setText("学生信息系统");
+            buttonBooking->setText("在线预定平台");
+            buttonOfficial->setText("大学官网");
+
+        } else {
+            // 切换回英文
+            buttonLanguage->setText("Language: ENGLISH");
+
+            // 恢复其他按钮的文本
+            buttonBB->setText("BB System");
+            buttonSIS->setText("SIS");
+            buttonBooking->setText("Booking");
+            buttonOfficial->setText("Official");
+        }
+    });
+}
+
+signals:
+    void goToChatWindow();; // 自定义信号，用于通知主程序切换到聊天窗口
+};
+
 class ChatWindow : public QMainWindow {
     Q_OBJECT
 
@@ -105,6 +283,8 @@ public:
         // 创建主窗口布局
         auto *mainWidget = new QWidget(this);
         setCentralWidget(mainWidget);
+
+
 
         // 左侧导航栏：历史记录选择
         historyList = new QListWidget;
@@ -152,10 +332,16 @@ public:
         splitter->setStretchFactor(1, 3);
         splitter->setHandleWidth(2);
 
+        QPushButton *backButton = new QPushButton("Back", this);
+        backButton->setStyleSheet("background-color: #0078d7; color: white; font-size: 18px; border-radius: 10px;");
+        backButton->setFixedHeight(50);
+        connect(backButton, &QPushButton::clicked, this, &ChatWindow::backToWelcomeWindow);
+
         // 设置主布局
         auto *mainLayout = new QVBoxLayout(mainWidget);
         mainLayout->addWidget(splitter);
-
+        mainLayout->addWidget(backButton);
+        mainLayout->setAlignment(backButton, Qt::AlignLeft);
         // 会话历史记录保存
         currentSessionIndex = 0;  // 当前会话索引
         sessionHistory[currentSessionIndex] = QList<QString>();  // 新建一个空会话
@@ -243,17 +429,54 @@ public:
         QString message = messageInput->toPlainText().trimmed();
         if (!message.isEmpty()) {
             // 添加用户消息到当前会话
-            addMessage(chatList, message, "/home/yf/Desktop/Workplace/Group-project/Chat-With-CUHKSZ/frontend/resources/picture", true);
+            addMessage(chatList, message, "frontend/resources/picture", true);
             sessionHistory[currentSessionIndex].append("用户: " + message);
 
-            // 模拟 ChatGPT 回复
-            QString response = "这是 ChatGPT 的回复: " + message;
-            addMessage(chatList, response, ":../resources/picture/img_1.png", false);
-            sessionHistory[currentSessionIndex].append("ChatGPT: " + response);
+            // 发送消息到服务器
+            sendMessageToServer(message);
+
 
             messageInput->clear();
         }
     }
+    // 发送消息到后端服务器
+    void sendMessageToServer(const QString &message) {
+        QNetworkAccessManager* manager = new QNetworkAccessManager(this);
+
+        QUrl url("http://localhost:8081/chat");  // 后端服务器地址
+        QNetworkRequest request(url);
+        request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+        // 假设我们使用一个默认的 session_id
+        QString session_id = "some_session_id";  // 你可以替换为实际的会话ID
+
+        // 构造 JSON 请求体
+        QJsonObject json;
+        json["session_id"] = session_id;
+        json["message"] = message;
+
+        QJsonDocument doc(json);
+        QByteArray data = doc.toJson();
+
+        // 发送 POST 请求
+        QNetworkReply* reply = manager->post(request, data);
+
+        connect(reply, &QNetworkReply::finished, this, [=]() {
+            if (reply->error() == QNetworkReply::NoError) {
+                // 4. 处理服务器返回的结果并显示在界面上
+                QString response = reply->readAll();
+                addMessage(chatList, response, ":../resources/picture/img_1.png", false);
+                sessionHistory[currentSessionIndex].append("ChatGPT: " + response);
+            } else {
+                // 处理错误情况
+                addMessage(chatList, "无法获取回复，请稍后再试。", ":../resources/picture/img_1.png", false);
+                sessionHistory[currentSessionIndex].append("ChatGPT: 错误信息");
+            }
+            reply->deleteLater();
+        });
+    }
+    signals:
+        void backToWelcomeWindow(); // 信号用于切换回 WelcomeWindow
 
 private:
     QListWidget *historyList;
@@ -263,11 +486,42 @@ private:
     int currentSessionIndex;  // 当前会话索引
 };
 
+class MainWindow : public QMainWindow {
+    Q_OBJECT
+
+public:
+    MainWindow(QWidget *parent = nullptr) : QMainWindow(parent) {
+        auto *stackedWidget = new QStackedWidget(this);
+
+        // 创建 WelcomeWindow 和 ChatWindow
+        WelcomeWindow *welcomeWindow = new WelcomeWindow;
+        ChatWindow *chatWindow = new ChatWindow;
+
+        // 将窗口添加到 QStackedWidget 中
+        stackedWidget->addWidget(welcomeWindow);
+        stackedWidget->addWidget(chatWindow);
+
+        setCentralWidget(stackedWidget);
+
+        // 连接信号和槽，切换界面
+        connect(welcomeWindow, &WelcomeWindow::goToChatWindow, [stackedWidget, chatWindow]() {
+            stackedWidget->setCurrentWidget(chatWindow);
+        });
+
+        connect(chatWindow, &ChatWindow::backToWelcomeWindow, [stackedWidget, welcomeWindow]() {
+            stackedWidget->setCurrentWidget(welcomeWindow);
+        });
+
+        resize(1000, 750);
+    }
+};
+
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
-    ChatWindow window;
-    window.show();
+
+    MainWindow mainWindow;
+    mainWindow.show();
+
     return app.exec();
 }
-
 #include "main.moc"

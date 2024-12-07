@@ -92,3 +92,9 @@ target_link_libraries(curl_protocol_test
         PRIVATE
         backend_lib
 )
+
+add_executable(curl_protocol_test test/test_agent.cpp)
+target_link_libraries(curl_protocol_test
+        PRIVATE
+        backend_lib
+)
