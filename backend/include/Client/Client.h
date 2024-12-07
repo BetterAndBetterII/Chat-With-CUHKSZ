@@ -2,7 +2,7 @@
 #define CLIENT_H
 
 #include <string>
-
+#include "../../include/third_party/httplib.h"
 using json = nlohmann::json;
 
 class Client {

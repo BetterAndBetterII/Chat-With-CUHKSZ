@@ -1,8 +1,9 @@
 //
 // Created by 34011 on 24-12-4.
 //
-#include "client.h"
+#include "../include/Client/client.h"
 #include "../include/Server/Server.h"
+#include "../../include/third_party/httplib.h"
 #include <iostream>
 
 Client::Client(const std::string& host, int port)
