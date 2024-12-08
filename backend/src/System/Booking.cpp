@@ -558,6 +558,9 @@ std::string BookingSystem::book(
 }
 
 std::string BookingSystem::book_place(const std::string& field_name, const std::string& place_id, const std::string& start_time, const std::string& end_time){
+    if (!login()) {
+        return "Invalid username or password!";
+    }
     FieldEvent field_event = retrieve_field_info_day(field_name, start_time.substr(0, 10));
     const std::string res =  book(
         field_event,
@@ -572,6 +575,9 @@ std::string BookingSystem::book_place(const std::string& field_name, const std::
 }
 
 std::string BookingSystem::book_field(const std::string& field_name, const std::string& start_time, const std::string& end_time){
+    if (!login()) {
+        return "Invalid username or password!";
+    }
     FieldEvent field_event = retrieve_field_info_day(field_name, start_time.substr(0, 10));
     std::vector<std::string> places = field_event.is_available(start_time, end_time);
     if (places.empty()) {
