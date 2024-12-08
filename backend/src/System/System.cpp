@@ -30,7 +30,7 @@ System::~System(){
             if (std::filesystem::remove(filepath)) {
                 //cout << "CookieFile deleted successfully\n";
             } else {
-                cout << "CookieFile does not exist or could not be deleted\n";
+                //cout << "CookieFile does not exist or could not be deleted\n";
             }
         } catch (const std::filesystem::filesystem_error& e) {
             std::cerr << "Error: " << e.what() << "\n";

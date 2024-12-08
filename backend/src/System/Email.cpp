@@ -33,11 +33,6 @@ bool EmailSystem::login(){
         const char* smtp_url = str_url.c_str();
         curl_easy_setopt(handle, CURLOPT_URL, smtp_url);
 
-        // 启用自动cookie处理，指定cookie文件
-        cookiefile = username + "emailCookies.txt";
-        curl_easy_setopt(handle, CURLOPT_COOKIEJAR,  cookiefile.c_str());  // 保存cookies
-        curl_easy_setopt(handle, CURLOPT_COOKIEFILE, cookiefile.c_str()); // 发送保存的cookies
-
         //设置用户名和密码
         curl_easy_setopt(handle, CURLOPT_USERNAME, (username + std::string(EMAIL_POSTFIX)).c_str());
         curl_easy_setopt(handle, CURLOPT_PASSWORD, password.c_str());
