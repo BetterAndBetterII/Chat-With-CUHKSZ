@@ -13,13 +13,13 @@ json Model::build_message(
     std::vector<json> message = past_messages;
     message.push_back({{"role", "system"}, {"content", system_prompt}});
     message.push_back({{"role", "user"}, {"content", new_user_content}});
-    
+
     // 将 tools 转换为 json 数组
     json tools_array = json::array();
     for (const auto& tool : tools) {
         tools_array.push_back(tool.to_json());
     }
-    
+
     json data = {
         {"model", model},
         {"messages", message}

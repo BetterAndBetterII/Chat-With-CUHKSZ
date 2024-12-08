@@ -7,7 +7,7 @@ using json = nlohmann::json;
 void test_server() {
  //   std::cout<<"test1"<<std::endl;
     // 创建一个客户端，连接到本地服务器
-    httplib::Client cli("localhost", 8081);
+    httplib::Client cli("localhost", 8080);
 
     // 准备请求数据
     json request_data;
