@@ -14,7 +14,7 @@ void test_server() {
     request_data["session_id"] = "session_1";
     request_data["message"] = "Hello, Server!";
     request_data["username"] = "123090337";
-    request_data["password"] = "05211224Lu!";
+    request_data["password"] = "05211224Lu!!";
     // 发送 POST 请求到 /chat 路径
     auto res = cli.Post("/chat", request_data.dump(), "application/json");
 

@@ -9,6 +9,7 @@ Server::Server() = default;
 Server::~Server() = default;
 
 bool Server::login(const std::string& username, const std::string& password) {
+    std::cout<<"username"<<username<< "password"<<password<<std::endl;
     Agent agent(username, password);
     return agent.is_valid_login();
 }
@@ -55,7 +56,7 @@ std::string Server::get_chat_history(const std::string& session_id) {
 std::string Server::get_all_first_messages() {
     json res_json;
     for (const auto& [session_id, agent] : sessions) {
-        auto history = agent.get_history();
+        auto history = get_chat_history(session_id);
         if (!history.empty()) {
             res_json[session_id] = history.front(); // 获取每个会话的第一条消息
         }
@@ -80,18 +81,41 @@ std::string Server::handle_message(const std::string& session_id, const std::str
 
     return response;
 }
-
 void Server::start() {
     httplib::Server svr;
 
-    // POST 请求: 处理消息
+    // POST 请求: 登录
+    svr.Post("/login", [&](const httplib::Request& req, httplib::Response& res) {
+        const std::string& req_body = req.body;
+        try {
+            // 解析请求体
+            json req_json = json::parse(req_body.data(), req_body.data() + req_body.size());
+            std::string username = req_json["username"];
+            std::string password = req_json["password"];
+            std::cout<<"username"<<username<< "password"<<password<<std::endl;
+            // 处理登录
+            bool success = login(username, password);
+            if (success) {
+                res.status = 200;
+                res.set_content("Login successful", "text/plain");
+            } else {
+                res.status = 401;  // 未授权
+                res.set_content("Invalid username or password", "text/plain");
+            }
+        } catch (const json::exception& e) {
+            res.status = 400;
+            res.set_content("Invalid JSON format: " + std::string(e.what()), "text/plain");
+        }
+    });
+
+    // POST 请求: 处理聊天消息
     svr.Post("/chat", [&](const httplib::Request& req, httplib::Response& res) {
-        handle_post_request(req, res);
+        handle_post_request(req, res);  // 调用已定义的函数
     });
 
     // GET 请求: 获取历史记录或所有会话的第一条消息
     svr.Get("/chat", [&](const httplib::Request& req, httplib::Response& res) {
-        handle_get_request(req, res);
+        handle_get_request(req, res);  // 调用已定义的函数
     });
 
     // 启动服务器
