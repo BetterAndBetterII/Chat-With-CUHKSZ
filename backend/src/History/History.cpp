@@ -3,30 +3,30 @@
 #include <filesystem>
 
 History::History(int number) {
-    // È·±£ history ÎÄ¼þ¼Ð´æÔÚ
+    // ç¡®ä¿ history æ–‡ä»¶å¤¹å­˜åœ¨
     std::string history_folder = "frontend/resources/History";
     if (!std::filesystem::exists(history_folder)) {
         std::filesystem::create_directory(history_folder);
     }
 
     if (number != 0) {
-        // Í¨¹ýÖ¸¶¨±àºÅ¼ÓÔØÀúÊ·¼ÇÂ¼
+        // é€šè¿‡æŒ‡å®šç¼–å·åŠ è½½åŽ†å²è®°å½•
         filename = history_folder + "/conversation_log" + std::to_string(number) + ".json";
         history_file.open(filename);
         if (history_file.is_open()) {
             try {
                 history_file >> conversation_history;
             } catch (const nlohmann::json::parse_error& e) {
-                std::cerr << "½âÎöÀúÊ·¼ÇÂ¼ÎÄ¼þÊ§°Ü£¬³õÊ¼»¯Îª¿ÕÀúÊ·¼ÇÂ¼£º" << e.what() << std::endl;
+                std::cerr << "è§£æžåŽ†å²è®°å½•æ–‡ä»¶å¤±è´¥ï¼Œåˆå§‹åŒ–ä¸ºç©ºåŽ†å²è®°å½•ï¼š" << e.what() << std::endl;
                 conversation_history = nlohmann::json::object();
             }
             history_file.close();
         } else {
-            std::cerr << "ÎÞ·¨¶ÁÈ¡ÀúÊ·¼ÇÂ¼ÎÄ¼þ£¡ÎÄ¼þ¿ÉÄÜÎª¿Õ»ò²»´æÔÚ£¬³õÊ¼»¯Îª¿ÕÀúÊ·¼ÇÂ¼¡£" << std::endl;
+            std::cerr << "æ— æ³•è¯»å–åŽ†å²è®°å½•æ–‡ä»¶ï¼æ–‡ä»¶å¯èƒ½ä¸ºç©ºæˆ–ä¸å­˜åœ¨ï¼Œåˆå§‹åŒ–ä¸ºç©ºåŽ†å²è®°å½•ã€‚" << std::endl;
             conversation_history = nlohmann::json::object();
         }
     } else {
-        // ×Ô¶¯Ñ°ÕÒÏÂÒ»¸öÎ´Ê¹ÓÃµÄÈÕÖ¾ÎÄ¼þ±àºÅ
+        // è‡ªåŠ¨å¯»æ‰¾ä¸‹ä¸€ä¸ªæœªä½¿ç”¨çš„æ—¥å¿—æ–‡ä»¶ç¼–å·
         number = 1;
         do {
             filename = history_folder + "/conversation_log" + std::to_string(number) + ".json";
@@ -53,7 +53,7 @@ std::string History::get_history_string() const {
             history_str.append("(").append(role).append(": ").append(content).append(")\n");
         }
     } else {
-        std::cerr << "Î´ÕÒµ½¶Ô»°¼ÇÂ¼¡£" << std::endl;
+        std::cerr << "æœªæ‰¾åˆ°å¯¹è¯è®°å½•ã€‚" << std::endl;
     }
     return history_str;
 }
@@ -68,9 +68,9 @@ void History::update_history(const std::string& user_input, const std::string& r
 void History::save_log_file() {
     log_file.open(filename);
     if (!log_file.is_open()) {
-        std::cerr << "ÎÞ·¨´ò¿ªÈÕÖ¾ÎÄ¼þ£º" << filename << std::endl;
+        std::cerr << "æ— æ³•æ‰“å¼€æ—¥å¿—æ–‡ä»¶ï¼š" << filename << std::endl;
         return;
     }
-    log_file << conversation_history.dump(4);  // Ëõ½ø 4 ¸ñ±£´æ
+    log_file << conversation_history.dump(4);  // ç¼©è¿› 4 æ ¼ä¿å­˜
     log_file.close();
 }
