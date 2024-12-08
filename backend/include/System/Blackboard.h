@@ -82,7 +82,7 @@ public:
     bool change_info(const std::string& username, const std::string& password);
     //若未登录成功(is_login == false)，则修改账号密码并返回true，若已登录则不会修改账号密码，返回false
 
-    std::string get_announcement(const std::string& crouse, const int number = ELEM_TO_FIND ) const;
+    std::string get_announcement(const std::string& crouse, const int number = ELEM_TO_FIND );
     /*参数：
      *crouse: 课程名称（例如 'CSC3001') 
      *number: 返回的annoucements数量（按新到旧依次输出）默认值为3
@@ -99,7 +99,7 @@ public:
      *课程所属学期
     */
     
-    std::string get_assignment(const std::string& crouse="ALL") const;
+    std::string get_assignment(const std::string& crouse="ALL");
     /*参数：
      *crouse：课程名 默认为‘ALL’（但是推荐输入具体课程名）即返回所有课程（所有学期）的作业
      *返回值：  提交类作业    答题类作业
@@ -109,7 +109,7 @@ public:
      *         分数
     */
 
-    std::string get_grades(const std::string& crouse) const;
+    std::string get_grades(const std::string& crouse);
     /*参数：
      *crouse: 课程名称（例如 'CSC3001') 
      *number: 返回的annoucements数量（按新到旧依次输出）默认值为3

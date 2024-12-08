@@ -79,7 +79,7 @@ public:
     bool change_info(const std::string& username, const std::string& password);
     //若未登录成功(is_login == false)，则修改账号密码并返回true，若已登录则不会修改账号密码，返回false
 
-    std::string get_schedule()const;
+    std::string get_schedule();
     /*
      *返回课表
     */
