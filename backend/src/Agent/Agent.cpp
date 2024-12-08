@@ -55,6 +55,9 @@ std::string Agent::run(const std::string &message, const bool enable_tools) {
     return std::string(answer["content"]) + "\n\n" + EXIT_SIGNAL;
 }
 
+void Agent::get_history(json history) {
+    conversation_history.insert(conversation_history.end(), history);
+}
 std::string Agent::run_until_done(const std::string &message) {
     std::string output;
     int loop_count = 0;

@@ -127,7 +127,7 @@ class Tools
     LibarySystem *library=new LibarySystem();
     SisSystem *sis;
     EmailSystem *email;
-    KnowledgeBase *knowledge;
+    KnowledgeBase *knowledge=new KnowledgeBase;
 public:
     Tools(const std::string &_username, const std::string &_password)
         : bb(new BlackBoardSystem(_username, _password)),
@@ -305,25 +305,25 @@ public:
         },
         Function{
             "send_email",
-            "send a email to other",
+            "send a email to one or more recipients with identifier without domain",
             FunctionParameters{
-                                        {
-                                            FunctionProperty{
-                                                "recipient", "string", "The recipient of the email without Email suffix",
-                                            },
-                                            FunctionProperty{
-                                                "subject", "string", "The subject of the emial",
-                                            },
-                                            FunctionProperty{
-                                                "body", "string", "the main body of th email",
-                                            },
+                                    {
+                                        FunctionProperty{
+                                            "recipients", "string", "The recipients of the email without domain, separated by space. You should show the email to the user first before sending the email",
                                         },
-                                        {"recipient","subject","body"}
+                                        FunctionProperty{
+                                            "subject", "string", "The subject of the emial",
+                                        },
+                                        FunctionProperty{
+                                            "body", "string", "the main body of th email",
+                                        },
+                                    },
+                                    {"recipient","subject","body"}
             }
         },
         Function{
             "getKnowledge",
-            "pass three key words as parameters to perform search in the knowledge base of  the university",
+            "pass three key words as parameters to perform search in the knowledge base of CUHKSZ. You MUST search the knowledge base when the question is relevant to CUHKSZ",
             FunctionParameters{
                                     {
                                         FunctionProperty{

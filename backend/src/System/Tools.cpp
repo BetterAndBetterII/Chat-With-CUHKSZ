@@ -43,16 +43,19 @@ std::string Tools::handle_tool_call(const std::string& tool_name,  const json& a
         return sis->get_grades(std::string(json_arguments["term"]));
     }
     if (tool_name=="send_email") {
-        std::string recipient_string=std::string(json_arguments["recipient"])+"@link.cuhk.edu.cn";
+        std::string recipient_string=std::string(json_arguments["recipients"]);
         std::vector<std::string> recipient_vector;
-        for (char c : recipient_string) {
-            recipient_vector.push_back(std::string(1, c));
+        std::istringstream stream(recipient_string);
+        std::string parameter;
+        while (stream >> parameter) {
+            parameter += "@link.cuhk.edu.cn";
+            recipient_vector.push_back(parameter);
         }
         return email->send_email(recipient_vector,std::string(json_arguments["subject"]),std::string(json_arguments["body"]));
     }
     if (tool_name=="getKnowledge") {
-        knowledge.loadAllFiles("../KnowledgeBase/phoenix_cuhksz_knowledge-main");
-        return knowledge->getKnowledge(std::string(arguments["keyword_1"]),std::string(arguments["keyword_2"]),std::string(arguments["keyword_3"]));
+        knowledge->loadAllFiles("/home/yf/Workplace/Group_project/Chat-With-CUHKSZ/backend/KnowledgeBase/phoenix_cuhksz_knowledge-main");
+        return knowledge->getKnowledge(std::string(json_arguments["keyword_1"]),std::string(json_arguments["keyword_2"]),std::string(json_arguments["keyword_3"]));
     }
     return "Unknown tool!";
 }

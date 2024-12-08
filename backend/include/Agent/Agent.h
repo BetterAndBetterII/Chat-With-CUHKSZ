@@ -28,9 +28,10 @@ public:
 
     std::string run(const std::string &message, bool enable_tools);
 
+    void get_history(json history);
+
     std::string run_until_done(const std::string &message);
 
     static std::string get_current_date();
-
 };
 #endif
