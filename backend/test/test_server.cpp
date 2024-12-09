@@ -12,8 +12,8 @@ public:
     Client(const std::string& host, int port);
 
     bool login(const std::string& username, const std::string& password);
-    std::string send_message(int session_id, const std::string& message);
-    std::string get_chat_history(int session_id);
+    std::string send_message(const std::string& session_id, const std::string& message);
+    std::string get_chat_history(const std::string& session_id);
     std::string get_first_messages();
 
 private:
@@ -27,7 +27,7 @@ bool Client::login(const std::string& username, const std::string& password) {
     json req_json;
     req_json["username"] = username;
     req_json["password"] = password;
-
+  //  std::cout<<"test"<<std::endl;
     auto res = http_client_.Post("/login", req_json.dump(), "application/json");
     if (res && res->status == 200) {
         return true; // 根据服务器的实现，状态码200即登录成功
@@ -35,21 +35,22 @@ bool Client::login(const std::string& username, const std::string& password) {
     return false;
 }
 
-std::string Client::send_message(int session_id, const std::string& message) {
+std::string Client::send_message(const std::string& session_id, const std::string& message) {
     json req_json;
     req_json["session_id"] = session_id;
     req_json["message"] = message;
 //    std::cout<<session_id<<" "<<message<<std::endl;
+
     auto res = http_client_.Post("/chat", req_json.dump(), "application/json");
     if (res && res->status == 200) {
         return res->body;
     }
 
-    return "Error: " + (res ? std::to_string(res->status) : "No response");
+    return "Error:1 " + (res ? std::to_string(res->status) : "No response");
 }
 
-std::string Client::get_chat_history(int session_id) {
-    auto res = http_client_.Get(("/chat?session_id=" + std::to_string(session_id)).c_str());
+std::string Client::get_chat_history(const std::string&session_id) {
+    auto res = http_client_.Get(("/chat?session_id=" + session_id).c_str());
     if (res && res->status == 200) {
         return res->body;
     }
@@ -80,7 +81,7 @@ int main() {
 
     if (client.login(username, password)) {
   //      std::cout << "Login Successfully" << std::endl;
-        int session_id = 1;
+        const std::string& session_id = "1";
         std::string response = client.send_message(session_id, "Hello, Server!");
         std::cout << "Server response: " << response << std::endl;
 
@@ -97,7 +98,7 @@ int main() {
 
     server_thread.join();
     while (1) {
-        int session_id = 1;
+        const std::string& session_id = "1";
         std::string mes;
         std::cin>>mes;
         std::string response = client.send_message(session_id, mes);

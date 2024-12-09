@@ -18,6 +18,7 @@ void Server::handle_post_request(const httplib::Request& req, httplib::Response&
     json req_json;
     try {
         req_json = json::parse(req_body.data(), req_body.data() + req_body.size());
+        std::cout<<"test1"<<std::endl;
     } catch (const std::exception& e) {
         std::cerr << "Error parsing JSON: " << e.what() << std::endl;
         res.status = 400;  // Bad Request
@@ -27,7 +28,7 @@ void Server::handle_post_request(const httplib::Request& req, httplib::Response&
 
     std::string session_id = req_json["session_id"];
     std::string message = req_json["message"];
-//    std::cout<<session_id<<" "<<message<<std::endl;
+   // std::cout<<session_id<<" "<<message<<std::endl;
     // 处理消息并获取响应
     auto result = handle_message(session_id, message);
 
@@ -83,8 +84,9 @@ std::string Server::handle_message(const std::string& session_id, const std::str
 
     Agent& agent = sessions[session_id];
     History& history = histories[session_id];
-
+    std::cout<<message<<std::endl;
     std::string response = agent.run_until_done(message);
+    std::cout<<response<<std::endl;
     history.update_history(message, response);
 
     json res_json;
@@ -125,7 +127,7 @@ void Server::start() {
         handle_get_request(req, res);
     });
 
-    if (!svr.listen("0.0.0.0", 8081)) {
+    if (!svr.listen("localhost", 8081)) {
         std::cerr << "Error: Unable to start the server. Port may be in use." << std::endl;
     } else {
         std::cout << "Server started successfully on port 8081!" << std::endl;

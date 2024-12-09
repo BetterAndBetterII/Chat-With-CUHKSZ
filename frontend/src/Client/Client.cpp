@@ -14,7 +14,7 @@ bool Client::login(const std::string& username, const std::string& password) {
     json req_json;
     req_json["username"] = username;
     req_json["password"] = password;
-//  std::cout<<"test"<<std::endl;
+  std::cout<<"test"<<std::endl;
     auto res = http_client_.Post("/login", req_json.dump(), "application/json");
     if (res && res->status == 200) {
         auto res_json = json::parse(res->body);
