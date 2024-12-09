@@ -58,7 +58,6 @@ bool BlackBoardSystem::login(){
         //通过重定向次数判断是否成功登录
         long redirect_count;
         curl_easy_getinfo(handle, CURLINFO_REDIRECT_COUNT, &redirect_count);
-        std::cout<<username<<"   "<<password<<std::endl;
         if(res != CURLE_OK){
             std::cerr << "Login failed because:" << curl_easy_strerror(res) << endl;
         }

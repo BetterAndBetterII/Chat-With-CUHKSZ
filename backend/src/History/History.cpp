@@ -5,7 +5,7 @@
 
 History::History(int number) {
     std::string history_folder = std::string(HISTORY_FOLDER);
-
+    std::cout<<history_folder<<std::endl;
     ensure_history_folder_exists(history_folder);
 
     if (number != 0) {
@@ -57,6 +57,7 @@ void History::update_history(const std::string& user_input, const std::string& r
     nlohmann::json assistant_message = {{"role", "assistant"}, {"content", response}};
     conversation_history["messages"].push_back(user_message);
     conversation_history["messages"].push_back(assistant_message);
+    save_log_file();
 }
 
 void History::save_log_file() const {
@@ -66,6 +67,7 @@ void History::save_log_file() const {
         return;
     }
     log_file << conversation_history.dump(4); // Save with 4-space indentation
+    log_file.close();
 }
 
 void History::ensure_history_folder_exists(const std::string& folder) const {
