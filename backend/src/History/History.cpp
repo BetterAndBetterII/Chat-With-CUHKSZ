@@ -4,9 +4,7 @@
 #include <filesystem>
 
 History::History(int number) {
-   // std::string history_path = get_absolute_path("frontend/resources/History");
-    std::string history_folder = "D:\Code\c++\Visual Studio\Chat-With-CUHKSZ";
-   // ../../../../frontend/resources/History
+    std::string history_folder = std::string(HISTORY_FOLDER);
 
     ensure_history_folder_exists(history_folder);
 

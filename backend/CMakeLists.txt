@@ -8,6 +8,9 @@ find_package(nlohmann_json CONFIG REQUIRED)
 find_package(CURL CONFIG REQUIRED)
 find_package(LibXml2 CONFIG REQUIRED)
 
+# 设置HISTORY_FOLDER的环境变量
+set(HISTORY_FOLDER ${PROJECT_SOURCE_DIR}/history)
+
 # 查找源文件（不包含测试文件）
 file(GLOB_RECURSE BACKEND_SOURCES
         "src/*.cpp"
@@ -110,3 +113,5 @@ target_link_libraries(curl_agent_test
         PRIVATE
         backend_lib
 )
+
+add_definitions(-DHISTORY_FOLDER="${HISTORY_FOLDER}")
