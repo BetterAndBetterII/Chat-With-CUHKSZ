@@ -20,6 +20,20 @@
 #include <QGridLayout>
 #include <QWidget>
 #include <QStackedWidget>
+#include <QApplication>
+#include <QMainWindow>
+#include <QWidget>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QMessageBox>
+#include <QString>
+// #include "../include/Client/Client.h" // 根据 include 的实际路径
+#include "../include/third_party/httplib.h"
+#include <iostream>
+
 class CustomTextEdit : public QTextEdit {
     Q_OBJECT
 
@@ -150,7 +164,7 @@ public:
     gridLayout->addWidget(buttonSIS, 0, 1);
 
     // 按钮3: Chat with CUHKSZ
-    QPushButton *buttonChat = new QPushButton("Chat with CUHKSZ", this);
+    QPushButton *buttonChat = new QPushButton("Back to Chat!", this);
     buttonChat->setFixedSize(360, 120);
     buttonChat->setStyleSheet("font-size: 18px; font-weight: bold; background-color: #006699; color: white; border-radius: 10px;");
     gridLayout->addWidget(buttonChat, 0, 2, 1, 2); // 跨两列
@@ -332,9 +346,11 @@ public:
         splitter->setStretchFactor(1, 3);
         splitter->setHandleWidth(2);
 
-        QPushButton *backButton = new QPushButton("Back", this);
+        QPushButton *backButton = new QPushButton("Other Options", this);
         backButton->setStyleSheet("background-color: #0078d7; color: white; font-size: 18px; border-radius: 10px;");
         backButton->setFixedHeight(50);
+        connect(backButton, &QPushButton::clicked, this, &ChatWindow::backToWelcomeWindow);
+
         // 设置主布局
         auto *mainLayout = new QVBoxLayout(mainWidget);
         mainLayout->addWidget(splitter);
@@ -449,7 +465,6 @@ private:
     QMap<int, QList<QString>> sessionHistory;  // 保存每个会话的消息
     int currentSessionIndex;  // 当前会话索引
 };
-
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
@@ -467,32 +482,86 @@ public:
 
         setCentralWidget(stackedWidget);
 
-        // 连接信号和槽，切换界面
-        connect(welcomeWindow, &WelcomeWindow::goToChatWindow, [stackedWidget, chatWindow]() {
-            stackedWidget->setCurrentWidget(chatWindow);
-        });
+        // 默认显示 ChatWindow
+        stackedWidget->setCurrentWidget(chatWindow);
 
+        // 连接信号和槽，切换界面
         connect(chatWindow, &ChatWindow::backToWelcomeWindow, [stackedWidget, welcomeWindow]() {
             stackedWidget->setCurrentWidget(welcomeWindow);
+        });
+
+        connect(welcomeWindow, &WelcomeWindow::goToChatWindow, [stackedWidget, chatWindow]() {
+            stackedWidget->setCurrentWidget(chatWindow);
         });
 
         resize(1000, 750);
     }
 };
 
+class LoginWindow : public QWidget {
+    Q_OBJECT
+
+public:
+    explicit LoginWindow(QWidget *parent = nullptr) : QWidget(parent) {
+        setWindowTitle("Login");
+        setFixedSize(800, 400);
+
+        QVBoxLayout *mainLayout = new QVBoxLayout(this);
+
+        // 用户名输入
+        QHBoxLayout *usernameLayout = new QHBoxLayout();
+        QLabel *usernameLabel = new QLabel("Username:", this);
+        usernameEdit = new QLineEdit(this);
+        usernameLayout->addWidget(usernameLabel);
+        usernameLayout->addWidget(usernameEdit);
+
+        // 密码输入
+        QHBoxLayout *passwordLayout = new QHBoxLayout();
+        QLabel *passwordLabel = new QLabel("Password:", this);
+        passwordEdit = new QLineEdit(this);
+        passwordEdit->setEchoMode(QLineEdit::Password);  // 隐藏密码输入
+        passwordLayout->addWidget(passwordLabel);
+        passwordLayout->addWidget(passwordEdit);
+
+        // 登录按钮
+        loginButton = new QPushButton("Login", this);
+
+        mainLayout->addLayout(usernameLayout);
+        mainLayout->addLayout(passwordLayout);
+        mainLayout->addWidget(loginButton);
+
+        connect(loginButton, &QPushButton::clicked, this, &LoginWindow::validateLogin);
+    }
+
+    private slots:
+        void validateLogin() {
+        const QString correctUsername = "admin";
+        const QString correctPassword = "123456";
+
+        if (usernameEdit->text() == correctUsername && passwordEdit->text() == correctPassword) {
+            QMessageBox::information(this, "Login Successful", "Welcome!");
+            openMainWindow();
+        } else {
+            QMessageBox::warning(this, "Login Failed", "Invalid username or password.");
+        }
+    }
+    void openMainWindow() {
+        this->hide();  // 隐藏登录窗口
+        MainWindow *mainwindow = new MainWindow();
+        mainwindow->show();
+    }
+private:
+    QLineEdit *usernameEdit;
+    QLineEdit *passwordEdit;
+    QPushButton *loginButton;
+};
+
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
 
-    WelcomeWindow welcome;
-    ChatWindow chatWindow;
+    LoginWindow loginWindow;
+    loginWindow.show();
 
-    // 当 Welcome 窗口的按钮被点击时，切换到聊天窗口
-    QObject::connect(&welcome, &WelcomeWindow::goToChatWindow, [&]() {
-        welcome.hide();  // 隐藏欢迎界面
-        chatWindow.show();  // 显示聊天窗口
-    });
-
-    welcome.show();
     return app.exec();
 }
 #include "main.moc"
