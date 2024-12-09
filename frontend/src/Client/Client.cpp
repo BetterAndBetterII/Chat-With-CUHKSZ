@@ -10,7 +10,7 @@
 Client::Client(const std::string& host, int port)
     : http_client_(host, port) {}
 
-bool Client::login(const std::string& username, const std::string& password) {
+bool Client::login(const std::string& username, const std::string& password) {`
     json req_json;
     req_json["username"] = username;
     req_json["password"] = password;

@@ -4,7 +4,10 @@
 #include <filesystem>
 
 History::History(int number) {
-    std::string history_folder = "frontend/resources/History";
+   // std::string history_path = get_absolute_path("frontend/resources/History");
+    std::string history_folder = "D:\Code\c++\Visual Studio\Chat-With-CUHKSZ";
+   // ../../../../frontend/resources/History
+
     ensure_history_folder_exists(history_folder);
 
     if (number != 0) {
@@ -72,3 +75,8 @@ void History::ensure_history_folder_exists(const std::string& folder) const {
         std::filesystem::create_directory(folder);
     }
 }
+
+std::string History::get_absolute_path(const std::string& relative_path) {
+    return (std::filesystem::current_path() / relative_path).string();
+}
+

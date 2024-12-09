@@ -19,6 +19,7 @@ private:
     nlohmann::json conversation_history;
 
     void ensure_history_folder_exists(const std::string& folder) const;
+    std::string get_absolute_path(const std::string& relative_path);
 };
 
 #endif // HISTORY_H
