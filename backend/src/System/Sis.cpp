@@ -186,6 +186,11 @@ string SisSystem::get_schedule(){
                     table[row][table_index]="*";
                     table[row+1][table_index]="*";
                 }
+                if(xpathQuery(rawData, xpath.str()+"@rowspan")[0]=="4"){
+                    table[row][table_index]="*";
+                    table[row+1][table_index]="*";
+                    table[row+2][table_index]="*";
+                }
             }
             //时间格
             if(xpathQuery(rawData, xpath.str()+"@class")[0]=="SSSWEEKLYTIMEBACKGROUND"){
