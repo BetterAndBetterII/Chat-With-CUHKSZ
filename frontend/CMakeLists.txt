@@ -7,9 +7,9 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_AUTOMOC ON)
 
 # 查找并链接外部库
-#find_package(cpr CONFIG REQUIRED)
-#find_package(nlohmann_json CONFIG REQUIRED)
-##find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets)
+find_package(cpr CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
+find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets)
 # 查找源文件（不包含测试文件）
 file(GLOB_RECURSE FRONTEND_SOURCES
         "src/*.cpp"
@@ -32,13 +32,22 @@ target_link_libraries(frontend_lib
         Qt5::Core
         Qt5::Gui
         Qt5::Widgets
-        cpr::cpr
-        nlohmann_json::nlohmann_json
+#        cpr::cpr
+#        nlohmann_json::nlohmann_json
+)
+
+# ----------------- 部署 -----------------
+add_executable(frontend src/main.cpp
+)
+target_link_libraries(frontend
+        PRIVATE
+        frontend_lib
 )
 
 # ----------------- 测试 -----------------
 # _______ 测试前端 _______
-add_executable(frontend_test src/main.cpp)
+add_executable(frontend_test src/main.cpp
+)
 target_link_libraries(frontend_test
         PRIVATE
         frontend_lib

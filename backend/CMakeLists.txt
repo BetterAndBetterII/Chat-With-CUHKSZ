@@ -33,14 +33,49 @@ target_link_libraries(backend_lib
         PUBLIC
         cpr::cpr
         nlohmann_json::nlohmann_json
-        curl::curl
+        CURL::libcurl
         LibXml2::LibXml2
+)
+
+# ----------------- 部署 -----------------
+add_executable(backend test/test_server.cpp)
+target_link_libraries(backend
+        PRIVATE
+        backend_lib
 )
 
 # ----------------- 测试 -----------------
 # _______ 测试BB _______
-add_executable(backend_test test/test_blackboard.cpp)
-target_link_libraries(backend_test
+add_executable(blackboard_test test/test_blackboard.cpp)
+target_link_libraries(blackboard_test
+        PRIVATE
+        backend_lib
+)
+
+# _______ 测试libary _______
+add_executable(libary_test test/test_libary.cpp)
+target_link_libraries(libary_test
+        PRIVATE
+        backend_lib
+)
+
+# _______ 测试SIS _______
+add_executable(sis_test test/test_sis.cpp)
+target_link_libraries(sis_test
+        PRIVATE
+        backend_lib
+)
+
+# _______ 测试Booking _______
+add_executable(booking_test test/test_booking.cpp)
+target_link_libraries(booking_test
+        PRIVATE
+        backend_lib
+)
+
+# _______ 测试Email _______
+add_executable(email_test test/test_email.cpp)
+target_link_libraries(email_test
         PRIVATE
         backend_lib
 )
@@ -60,8 +95,15 @@ target_link_libraries(knowledge_test
 )
 
 # _______ 测试BackendServer _______
-add_executable(server_test src/Server/Server.cpp)
+add_executable(server_test test/test_server.cpp)
 target_link_libraries(server_test
+        PRIVATE
+        backend_lib
+)
+
+# _______ 测试CURL协议 _______
+add_executable(curl_protocol_test test/test_curl_protocol.cpp)
+target_link_libraries(curl_protocol_test
         PRIVATE
         backend_lib
 )

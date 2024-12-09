@@ -1,49 +1,78 @@
 #include "../../include/Agent/Agent.h"
-#include "../../include/History/History.h"
 
-Agent::Agent(const int number) : history_manager(number) {}
-
-Agent::~Agent() {}
-
-std::string Agent::system_agent(const std::string& user_input, const std::string& history) const {
-    const std::string input = "history: [" + history + "], current_input: [" + user_input + "]";
-    std::string prompt = R"(
-You are one of the best helper for students, you will be given the question from the student and the conversation history; Your job is to answer the question from students. You can select a system for help;
-)";
-    prompt += R"(
-; Here are the system you can choose: teaching_system, library_system, homework_system; teaching_system is for class schedule and class selection; homework_system is for homework; library_system is for books borrowing and the reservation for discussion room. Here is the conversation history and the current question from students:
-)" + input + R"(
-; You MUST reply the name of the system directly without any other words; If you can answer the question directly without the help of those system, you MUST answer no_need_help.
-)";
-    std::erase(prompt, '\n');
-    std::string response = model.get_response(prompt);
-    return response;
+Agent::Agent(const std::string& _username, const std::string& _password): tools(new Tools(_username, _password)) {
+    this->username = _username;
+    this->password = _password;
+    this->system_prompt = "Today is " + current_date + ". You are a chatbot that can call tools to help the user with tasks. "
+        + "If you or the toolcall result have answered user's question, you must summary what you have done with tools results and add " + EXIT_SIGNAL + " at end of the conversation. "
+        + "The username/school number of the user is " + username
+        + ". It will be useful when calling email tools.";
 }
 
-std::string Agent::conversation_agent(const std::string& user_input, const std::string& history) const {
-    std::string prompt = "history: [" + history + "], current_input: [" + user_input + "]";
-    std::erase(prompt, '\n');
-    std::string response = model.get_response(prompt);
-    return response;
+Agent::~Agent() = default;
+
+std::string Agent::get_current_date() {
+    time_t now = time(0);
+    tm *ltm = localtime(&now);
+    return std::to_string(1900 + ltm->tm_year) + "-" + std::to_string(1 + ltm->tm_mon) + "-" + std::to_string(ltm->tm_mday);
 }
 
-std::string Agent::handler(const std::string& user_input) {
-    const std::string history_str = history_manager.get_history_string();
-    std::string response = system_agent(user_input, history_str);
-    if (system_list.contains(response)) {
-        if (response == "teaching_system") {
-            std::cout << "call teaching_system" << std::endl;
-        }
-        if (response == "library_system") {
-            std::cout << "call library system" << std::endl;
-        }
-        if (response == "homework_system") {
-            std::cout << "call homework_system" << std::endl;
-        }
+std::vector<Function> Agent::get_tools() const
+{
+    return tools->functions;
+}
+
+void Agent::insert_memory(const std::string& message, const std::string& role) {
+    json user_message = {
+        {"role", role},
+        {"content", message}
+    };
+    conversation_history.insert(conversation_history.end(), user_message);
+}
+
+std::string Agent::run(const std::string &message, const bool enable_tools) {
+    std::vector<Function> function_tools = enable_tools ? get_tools() : std::vector<Function>();
+    json messages = model.build_message(
+        "gpt-4o",
+        system_prompt,
+        conversation_history,
+        message,
+        function_tools
+    );
+    json answer = model.send_message(messages);
+    // std::cout<<"answer: "<<answer<<std::endl;
+    if (answer["content"].is_null()) {
+        // **工具调用**
+        std::string tool_call = answer["tool_calls"][0]["function"]["name"];
+        json tool_arguments = answer["tool_calls"][0]["function"]["arguments"];
+        std::string tool_str = "<Tool Call>: " + tool_call + " with arguments: " + std::string(tool_arguments);
+        insert_memory(tool_str, "assistant");
+
+        std::cout<<tool_str<<std::endl;
+        std::string tool_result = "<Tool> Called " + tool_str + " <Result>: " + tools->handle_tool_call(tool_call, tool_arguments);
+        insert_memory(tool_result, "user");
+        return tool_result;
     }
-    else {
-        response = conversation_agent(user_input, history_str);
+    // **普通回答**
+    insert_memory(answer["content"], "assistant");
+    // std::cout<<"answer content: "<<answer["content"]<<std::endl;
+    return std::string(answer["content"]) + "\n\n" + EXIT_SIGNAL;
+}
+
+void Agent::get_history(json history) {
+    conversation_history.insert(conversation_history.end(), history);
+}
+std::string Agent::run_until_done(const std::string &message) {
+    std::string output;
+    int loop_count = 0;
+    while (loop_count < MAX_LOOP_COUNT) {
+        // std::cout<<"loop_count: "<<loop_count<<std::endl;
+        output = run(message, loop_count < MAX_LOOP_COUNT - 1);
+        insert_memory(output, "user");
+        if (output.find(EXIT_SIGNAL) != std::string::npos) {
+            break;
+        }
+        loop_count++;
     }
-    history_manager.update_history(user_input, response);
-    return response;
+    return output;
 }
