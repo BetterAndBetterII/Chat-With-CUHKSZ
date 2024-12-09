@@ -32,8 +32,12 @@ target_link_libraries(frontend_lib
         Qt5::Core
         Qt5::Gui
         Qt5::Widgets
-        ws2_32
 )
+
+# 如果是Windows系统，则需要链接ws2_32
+if (WIN32)
+    target_link_libraries(frontend_lib PUBLIC ws2_32)
+endif()
 
 # ----------------- 部署 -----------------
 add_executable(frontend src/main.cpp)
