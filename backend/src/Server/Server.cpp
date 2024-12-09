@@ -108,28 +108,33 @@ void Server::start() {
             bool success = login(username, password);
             if (success) {
                 res.status = 200;
+                std::cout<<"[POST] /login 200"<<std::endl;
                 res.set_content("Login successful", "text/plain");
             } else {
                 res.status = 401;
+                std::cout<<"[POST] /login 401"<<std::endl;
                 res.set_content("Invalid username or password", "text/plain");
             }
         } catch (const json::exception& e) {
             res.status = 400;
+            std::cout<<"[POST] /login 400"<<std::endl;
             res.set_content("Invalid JSON format: " + std::string(e.what()), "text/plain");
         }
     });
 
     svr.Post("/chat", [&](const httplib::Request& req, httplib::Response& res) {
         handle_post_request(req, res);
+        std::cout<<"[POST] /chat 200"<<std::endl;
     });
 
     svr.Get("/chat", [&](const httplib::Request& req, httplib::Response& res) {
         handle_get_request(req, res);
+        std::cout<<"[GET] /chat 200"<<std::endl;
     });
 
-    if (!svr.listen("localhost", 8081)) {
+    if (!svr.listen("localhost", 8080)) {
         std::cerr << "Error: Unable to start the server. Port may be in use." << std::endl;
     } else {
-        std::cout << "Server started successfully on port 8081!" << std::endl;
+        std::cout << "Server started successfully on port 8080!" << std::endl;
     }
 }

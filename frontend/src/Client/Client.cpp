@@ -60,10 +60,10 @@ int main() {
     // 等待服务器启动
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
-    Client client("localhost", 8081);
+    Client client("localhost", 8080);
 
-    std::string username = "123090337";
-    std::string password = "05211224Lu!!";
+    std::string username;
+    std::string password;
 
     if (client.login(username, password)) {
         std::cout << "Login Successfully" << std::endl;
