@@ -9,13 +9,13 @@ History::History(int number) {
                 history_file >> conversation_history;
             }
             catch (const nlohmann::json::parse_error& e) {
-                std::cerr << "½âÎöÀúÊ·¼ÇÂ¼ÎÄ¼þÊ§°Ü£¬³õÊ¼»¯Îª¿ÕÀúÊ·¼ÇÂ¼£º" << e.what() << std::endl;
+                std::cerr << "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê·ï¿½ï¿½Â¼ï¿½Ä¼ï¿½Ê§ï¿½Ü£ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½Ê·ï¿½ï¿½Â¼ï¿½ï¿½" << e.what() << std::endl;
                 conversation_history = nlohmann::json::object();
             }
             history_file.close();
         }
         else {
-            std::cerr << "ÎÞ·¨¶ÁÈ¡ÀúÊ·¼ÇÂ¼ÎÄ¼þ£¡ÎÄ¼þ¿ÉÄÜÎª¿Õ»ò²»´æÔÚ£¬³õÊ¼»¯Îª¿ÕÀúÊ·¼ÇÂ¼¡£" << std::endl;
+            std::cerr << "ï¿½Þ·ï¿½ï¿½ï¿½È¡ï¿½ï¿½Ê·ï¿½ï¿½Â¼ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½Õ»ò²»´ï¿½ï¿½Ú£ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½Ê·ï¿½ï¿½Â¼ï¿½ï¿½" << std::endl;
             conversation_history = nlohmann::json::object();
         }
     }
@@ -48,7 +48,7 @@ std::string History::get_history_string() const {
         }
     }
     else {
-        std::cerr << "Î´ÕÒµ½¶Ô»°¼ÇÂ¼¡£" << std::endl;
+        std::cerr << "Î´ï¿½Òµï¿½ï¿½Ô»ï¿½ï¿½ï¿½Â¼ï¿½ï¿½" << std::endl;
     }
     return history_str;
 }
@@ -68,7 +68,7 @@ void History::update_history(const std::string& user_input, const std::string& r
 void History::save_log_file() {
     log_file.open(filename);
     if (!log_file.is_open()) {
-        std::cerr << "ÎÞ·¨´ò¿ªÈÕÖ¾ÎÄ¼þ£¡" << std::endl;
+        std::cerr << "ï¿½Þ·ï¿½ï¿½ï¿½ï¿½ï¿½Ö¾ï¿½Ä¼ï¿½ï¿½ï¿½" << std::endl;
     }
     log_file << conversation_history.dump(4);
     log_file.close();
