@@ -8,7 +8,7 @@
 using json = nlohmann::json;
 class Agent {
 private:
-    int MAX_LOOP_COUNT = 3;
+    int MAX_LOOP_COUNT = 10;
     std::string EXIT_SIGNAL = "<exit>";
     std::vector<json> conversation_history;
     std::string current_date = get_current_date();
