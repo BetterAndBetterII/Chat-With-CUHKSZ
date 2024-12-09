@@ -26,7 +26,7 @@ target_include_directories(backend_lib
         PUBLIC
         ${PROJECT_SOURCE_DIR}/include
 )
-target_link_libraries(frontend PRIVATE ws2_32)
+
 # 将外部库链接到后端库
 target_link_libraries(backend_lib
         PUBLIC
@@ -102,12 +102,6 @@ target_link_libraries(server_test
 
 # _______ 测试CURL协议 _______
 add_executable(curl_protocol_test test/test_curl_protocol.cpp)
-target_link_libraries(curl_protocol_test
-        PRIVATE
-        backend_lib
-)
-
-add_executable(curl_protocol_test test/test_agent.cpp)
 target_link_libraries(curl_protocol_test
         PRIVATE
         backend_lib
