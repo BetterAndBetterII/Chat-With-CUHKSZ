@@ -554,3 +554,4 @@ backend/backend_build/
 /backend/vcpkg_installed/x64-linux/lib/pkgconfig/zlib.pc
 /backend/vcpkg_installed/vcpkg/info/zlib_1.3.1_x64-linux.list
 /cmake-build-debug-csc3002_cpp_night/
+/cmake-build-debug-remote-host/
