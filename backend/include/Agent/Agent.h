@@ -33,5 +33,8 @@ public:
     std::string run_until_done(const std::string &message);
 
     static std::string get_current_date();
+
+    bool is_valid_login();
+
 };
 #endif

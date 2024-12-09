@@ -16,7 +16,9 @@ std::string Agent::get_current_date() {
     tm *ltm = localtime(&now);
     return std::to_string(1900 + ltm->tm_year) + "-" + std::to_string(1 + ltm->tm_mon) + "-" + std::to_string(ltm->tm_mday);
 }
-
+bool Agent::is_valid_login() {
+    return tools->is_valid_login(username, password);
+}
 std::vector<Function> Agent::get_tools() const
 {
     return tools->functions;

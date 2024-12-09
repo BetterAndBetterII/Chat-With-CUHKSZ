@@ -1,7 +1,9 @@
 {
     "name": "chat-with-cusz",
     "version": "1.0.0",
-    "dependencies": [],
+    "dependencies": [
+        "nlohmann-json"
+    ],
     "vcpkg-configuration": {
         "default-registry": {
             "kind": "git",

@@ -1,56 +1,43 @@
+//
+// Created by 34011 on 24-12-4.
+//
+#include "../../include/Client/Client.h"
+//#include "../../include/Server/Server.h"
+#include "../../include/third_party/httplib.h"
 #include <iostream>
-#include "../include/third_party/httplib.h" // 需要链接 httplib 库
-#include "nlohmann/json.hpp"  // 用于解析 JSON 请求和响应
-#include "../include/Server/Server.h"
-using json = nlohmann::json;
-#include <iostream>
-#include <thread>
 #include "../../backend/include/Server/Server.h"
-
-class Client {
-public:
-    Client(const std::string& host, int port);
-
-    bool login(const std::string& username, const std::string& password);
-    std::string send_message(const std::string& session_id, const std::string& message);
-    std::string get_chat_history(const std::string& session_id);
-    std::string get_first_messages();
-
-private:
-    httplib::Client http_client_;
-};
 
 Client::Client(const std::string& host, int port)
     : http_client_(host, port) {}
 
-bool Client::login(const std::string& username, const std::string& password) {
+bool Client::login(const std::string& username, const std::string& password) {`
     json req_json;
     req_json["username"] = username;
     req_json["password"] = password;
-  //  std::cout<<"test"<<std::endl;
+  std::cout<<"test"<<std::endl;
     auto res = http_client_.Post("/login", req_json.dump(), "application/json");
     if (res && res->status == 200) {
-        return true; // 根据服务器的实现，状态码200即登录成功
+        auto res_json = json::parse(res->body);
+        return res_json.value("success", false);
     }
+
     return false;
 }
 
-std::string Client::send_message(const std::string& session_id, const std::string& message) {
+std::string Client::send_message(int session_id, const std::string& message) {
     json req_json;
     req_json["session_id"] = session_id;
     req_json["message"] = message;
-//    std::cout<<session_id<<" "<<message<<std::endl;
 
     auto res = http_client_.Post("/chat", req_json.dump(), "application/json");
     if (res && res->status == 200) {
         return res->body;
     }
 
-    return "Error:1 " + (res ? std::to_string(res->status) : "No response");
+    return "Error: " + (res ? std::to_string(res->status) : "No response");
 }
-
-std::string Client::get_chat_history(const std::string&session_id) {
-    auto res = http_client_.Get(("/chat?session_id=" + session_id).c_str());
+std::string Client::get_chat_history(int session_id) {
+    auto res = http_client_.Get(("/history?session_id=" + session_id).c_str());
     if (res && res->status == 200) {
         return res->body;
     }
@@ -58,13 +45,12 @@ std::string Client::get_chat_history(const std::string&session_id) {
 }
 
 std::string Client::get_first_messages() {
-    auto res = http_client_.Get("/chat");
+    auto res = http_client_.Get("/first_messages");
     if (res && res->status == 200) {
         return res->body;
     }
     return "Error: " + (res ? std::to_string(res->status) : "No response");
 }
-
 int main() {
     Server server;
     std::thread server_thread([&]() {
@@ -80,8 +66,8 @@ int main() {
     std::string password = "05211224Lu!!";
 
     if (client.login(username, password)) {
-  //      std::cout << "Login Successfully" << std::endl;
-        const std::string& session_id = "1";
+        std::cout << "Login Successfully" << std::endl;
+        std::string session_id = "1";
         std::string response = client.send_message(session_id, "Hello, Server!");
         std::cout << "Server response: " << response << std::endl;
 
@@ -96,14 +82,5 @@ int main() {
         std::cout << "Login failed!" << std::endl;
     }
 
-    server_thread.join();
-    while (1) {
-        const std::string& session_id = "1";
-        std::string mes;
-        std::cin>>mes;
-        std::string response = client.send_message(session_id, mes);
-        std::cout << "Server response: " << response << std::endl;
-
-    }
     return 0;
 }

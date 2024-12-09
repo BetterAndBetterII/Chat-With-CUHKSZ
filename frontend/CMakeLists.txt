@@ -15,7 +15,7 @@ file(GLOB_RECURSE FRONTEND_SOURCES
         "src/*.cpp"
 )
 
-# 创建后端库而不是可执行文件
+# 创建前端库而不是可执行文件
 add_library(frontend_lib
         ${FRONTEND_SOURCES}
 )
@@ -49,6 +49,12 @@ target_link_libraries(frontend
 add_executable(frontend_test src/main.cpp
 )
 target_link_libraries(frontend_test
+        PRIVATE
+        frontend_lib
+)
+
+add_executable(Client_test src/Client/Client.cpp)
+target_link_libraries(Client_test
         PRIVATE
         frontend_lib
 )
