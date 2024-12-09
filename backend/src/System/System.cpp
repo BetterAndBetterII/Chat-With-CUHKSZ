@@ -8,17 +8,18 @@ using std::vector;
 using std::cout;
 using std::endl;
 
-System::System(const string& username, const string& password) : curl_global_manager(){
+System::System(const string& username, const string& password) : headers(nullptr), curl_global_manager() {
     //初始化变量
     this->username = username;
     this->password = password;
     this->handle = curl_easy_init();
     // 自定义 HTTP 请求头
-    this->headers = curl_slist_append(headers, "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36");
+    this->headers = curl_slist_append(
+        headers,
+        "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36");
     headers = curl_slist_append(headers, "Connection: close");
     curl_easy_setopt(handle, CURLOPT_HTTPHEADER, headers);
     this->is_login = false;
-
 }
 
 System::~System(){
