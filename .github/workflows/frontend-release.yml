@@ -77,9 +77,18 @@ jobs:
       # 安装 Additional Tools
       - name: Install Additional Tools
         run: |
-          choco install -y git --installargs 'INSTALLDIR=C:\Program Files\Git' --no-progress
-          choco install -y python --version=3.11.0 --installargs 'INSTALLDIR=C:\Python311' --no-progress
-          choco install -y windows-sdk-10-version-2004-all --no-progress
+          if (-Not (Get-Command git -ErrorAction SilentlyContinue)) {
+            choco install -y git --installargs 'INSTALLDIR=C:\Program Files\Git' --no-progress
+          }
+          
+          if (-Not (Test-Path "C:\Python311\python.exe")) {
+            choco install -y python --version=3.11.0 --installargs 'INSTALLDIR=C:\Python311' --no-progress
+          }
+          
+          # Windows SDK 的检查比较特殊，需要检查注册表
+          if (-Not (Get-ItemProperty -Path "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Microsoft SDKs\Windows\v10.0" -ErrorAction SilentlyContinue)) {
+            choco install -y windows-sdk-10-version-2004-all --no-progress
+          }
 
       # 安装和缓存 vcpkg
       - name: Cache vcpkg
