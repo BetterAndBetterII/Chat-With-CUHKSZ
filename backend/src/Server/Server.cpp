@@ -132,7 +132,7 @@ void Server::start() {
         std::cout<<"[GET] /chat 200"<<std::endl;
     });
 
-    if (!svr.listen("localhost", 8080)) {
+    if (!svr.listen("0.0.0.0", 8080)) {
         std::cerr << "Error: Unable to start the server. Port may be in use." << std::endl;
     } else {
         std::cout << "Server started successfully on port 8080!" << std::endl;
