@@ -218,17 +218,17 @@ public:
         },
         Function{
             "set_badminton_field_booker",
-            "a function that MUST be call before calling book_badminton_field function. You must explicitly ask the user for the telephone number, reason and details before calling this function. After calling this function, you MUST call book_badminton_field function to book a field according to the requirement of the book_badminton_field function",
+            "a function that MUST be call before calling book_badminton_field function. After calling this function, you MUST call book_badminton_field function to book a field according to the requirement of the book_badminton_field function",
             FunctionParameters{
                             {
                                 FunctionProperty{
                                     "telephone_number", "string", "The telephone number of the user.",
                                 },
                                 FunctionProperty{
-                                    "reason", "string", "The reason for the reservation.",
+                                    "reason", "string", "The reason for the reservation, you can fill in by yourself.",
                                 },
                                 FunctionProperty{
-                                    "details", "string", "The detail of the reservation.",
+                                    "details", "string", "The detail of the reservation, you can fill in by yourself.",
                                 }
                             },
                             {"telephone_number", "reason", "details"}
@@ -236,7 +236,7 @@ public:
         },
         Function{
             "book_badminton_field",
-            "Book a badminton field. The booking period should NOT longer than 1 hour! You MUST call set_badminton_field_booker function before calling this function. You MUST call this function after calling set_badminton_field_booker function",
+            "Book a badminton field. The booking period should NOT longer than 1 hour! You can only book the field of today and tomorrow! You MUST call set_badminton_field_booker function before calling this function. You MUST call this function after calling set_badminton_field_booker function",
             FunctionParameters{
                             {
                                 FunctionProperty{
@@ -315,7 +315,7 @@ public:
                                             "subject", "string", "The subject of the email, you can determine by yourself",
                                         },
                                         FunctionProperty{
-                                            "body", "string", "the main body of th email, you can determine by yourself",
+                                            "body", "string", "the main body of th email, you can determine by yourself. You should use html format",
                                         },
                                     },
                                     {"recipient","subject","body"}
