@@ -1,50 +1,15 @@
 //
 // Created by Gary on 24-10-24.
 // Complemented by Wen on 24-11-18.
+//
 
 #ifndef CHAT_WITH_CUHKSZ_BLACKBOARD_H
 #define CHAT_WITH_CUHKSZ_BLACKBOARD_H
 
-#include "../../include/System/CurlGlobal.h"
-#include <curl/curl.h>
-#include <libxml/HTMLparser.h>
-#include <libxml/xpath.h> 
-#include <set>
-#include <vector>
+#include "../../include/System/System.h"
 
-class BlackBoardSystem{
+class BlackBoardSystem : public System{
 private:
-    std::string username;
-    std::string password;
-
-    std::set<std::string> command_list;
-    
-    bool is_login;
-
-
-    //cookiefile存储libcurl生成的cookie文件的路径
-    std::string cookiefile;
-
-    CURL* bb_handle;
-    //curlglobal类用于避免多次全局初始化
-    CurlGlobal curl_global_manager;
-
-    //Memory结构体用于存储请求返回的数据
-    struct Memory {
-    char* response;
-    size_t size;
-    };
-
-    //callback functions用于处理返回内容
-    static size_t ignore_calback(void *ptr, size_t size, size_t nmemb, void *userdata);
-    static size_t write_callback(char *data, size_t size, size_t nmemb, void *clientp);
-
-    //command helper functions
-    std::string getRequest(const std::string& url)const;
-
-    std::string postRequest(const std::string& url, const std::string& strdata)const;
-
-    std::vector<std::string> xpathQuery(const std::string& xmlContent, const std::string& xpathExpr)const;
 
     //接受学期作为参数，默认值为”2410UG“ 
     std::string get_course_id(const std::string& crouse)const;
@@ -53,14 +18,11 @@ private:
 
     std::string parse_assignment_url(const std::string& url)const;
 
-    std::string vector_toString(const std::vector<std::string>& vector)const;
-    
     //删除字符串前后多余空格和换行符
     std::string space_cutter(const std::string& str)const;
 
     //输入duedate和解析duedate的pattern判断due是否过期
     bool missDue(const std::string& content, const std::string& pattern)const;
-
 
 public:
 
@@ -72,15 +34,8 @@ public:
     //析构函数
     ~BlackBoardSystem();
 
-    //返回command_list
-    std::string get_commands() const;
-
     //登录
     bool login();
-
-    //初始化时若输入了错误的密码可以用change_info()来修改
-    bool change_info(const std::string& username, const std::string& password);
-    //若未登录成功(is_login == false)，则修改账号密码并返回true，若已登录则不会修改账号密码，返回false
 
     std::string get_announcement(const std::string& crouse, const int number = ELEM_TO_FIND );
     /*参数：
