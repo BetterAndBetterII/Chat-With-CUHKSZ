@@ -32,8 +32,8 @@ target_link_libraries(frontend_lib
         Qt5::Core
         Qt5::Gui
         Qt5::Widgets
-#        cpr::cpr
-#        nlohmann_json::nlohmann_json
+        cpr::cpr
+        nlohmann_json::nlohmann_json
 )
 
 # ----------------- 部署 -----------------

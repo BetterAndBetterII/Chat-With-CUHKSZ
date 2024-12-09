@@ -2,7 +2,8 @@
     "name": "chat-with-cusz",
     "version": "1.0.0",
     "dependencies": [
-        "nlohmann-json"
+        "nlohmann-json",
+        "cpr",
     ],
     "vcpkg-configuration": {
         "default-registry": {
