@@ -124,7 +124,7 @@ class Tools
 {
     BlackBoardSystem *bb;
     BookingSystem *booking;
-    LibarySystem *library=new LibarySystem();
+    LibarySystem *library;
     SisSystem *sis;
     EmailSystem *email;
     KnowledgeBase *knowledge=new KnowledgeBase();
@@ -133,7 +133,8 @@ public:
         : bb(new BlackBoardSystem(_username, _password)),
           booking(new BookingSystem(_username, _password)),
             sis(new SisSystem(_username, _password)),
-            email(new EmailSystem(_username, _password)) {}
+            email(new EmailSystem(_username, _password)),
+            library(new LibarySystem(_username, _password)){}
     ~Tools() {
         delete bb;
         delete booking;
