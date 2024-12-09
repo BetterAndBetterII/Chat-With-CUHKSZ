@@ -63,8 +63,18 @@ jobs:
       # 安装 CMake
       - name: Install CMake
         run: |
-          if (-Not (Test-Path "C:\tools\cmake")) {
+          $cmakeVersion = $null
+          try {
+            $cmakeVersion = (cmake --version | Select-String -Pattern '\d+\.\d+\.\d+').Matches[0].Value
+          } catch {
+            Write-Host "CMake not found or version check failed"
+          }
+          
+          if (-Not $cmakeVersion -or [version]$cmakeVersion -lt [version]"3.31.0") {
+            Write-Host "Installing CMake 3.31.0..."
             choco install cmake --installargs 'INSTALLDIR=C:\tools\cmake' -y --version=3.31.0
+          } else {
+            Write-Host "CMake $cmakeVersion is already installed"
           }
 
       # 安装 Ninja
