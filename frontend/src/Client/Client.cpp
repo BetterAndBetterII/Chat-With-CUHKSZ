@@ -1,10 +1,11 @@
 //
 // Created by 34011 on 24-12-4.
 //
-#include "../include/Client/client.h"
-#include "../include/Server/Server.h"
+#include "../../include/Client/Client.h"
+//#include "../../include/Server/Server.h"
 #include "../../include/third_party/httplib.h"
 #include <iostream>
+#include "../../backend/include/Server/Server.h"
 
 Client::Client(const std::string& host, int port)
     : http_client_(host, port) {}
@@ -13,7 +14,7 @@ bool Client::login(const std::string& username, const std::string& password) {
     json req_json;
     req_json["username"] = username;
     req_json["password"] = password;
-
+//  std::cout<<"test"<<std::endl;
     auto res = http_client_.Post("/login", req_json.dump(), "application/json");
     if (res && res->status == 200) {
         auto res_json = json::parse(res->body);
@@ -23,7 +24,7 @@ bool Client::login(const std::string& username, const std::string& password) {
     return false;
 }
 
-std::string Client::send_message(const std::string& session_id, const std::string& message) {
+std::string Client::send_message(int session_id, const std::string& message) {
     json req_json;
     req_json["session_id"] = session_id;
     req_json["message"] = message;
@@ -35,7 +36,7 @@ std::string Client::send_message(const std::string& session_id, const std::strin
 
     return "Error: " + (res ? std::to_string(res->status) : "No response");
 }
-std::string Client::get_chat_history(const std::string& session_id) {
+std::string Client::get_chat_history(int session_id) {
     auto res = http_client_.Get(("/history?session_id=" + session_id).c_str());
     if (res && res->status == 200) {
         return res->body;
@@ -51,14 +52,22 @@ std::string Client::get_first_messages() {
     return "Error: " + (res ? std::to_string(res->status) : "No response");
 }
 int main() {
+    Server server;
+    std::thread server_thread([&]() {
+        server.start();
+    });
+
+    // 等待服务器启动
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
     Client client("localhost", 8081);
 
-    std::string username = "user123";
-    std::string password = "pass123";
+    std::string username = "123090337";
+    std::string password = "05211224Lu!!";
 
     if (client.login(username, password)) {
         std::cout << "Login Successfully" << std::endl;
-        std::string session_id = "session_user123";
+        std::string session_id = "1";
         std::string response = client.send_message(session_id, "Hello, Server!");
         std::cout << "Server response: " << response << std::endl;
 

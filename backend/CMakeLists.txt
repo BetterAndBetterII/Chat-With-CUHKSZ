@@ -37,7 +37,7 @@ target_link_libraries(backend_lib
 )
 
 # ----------------- 部署 -----------------
-add_executable(backend test/test_server.cpp)
+add_executable(backend test)
 target_link_libraries(backend
         PRIVATE
         backend_lib
@@ -107,8 +107,8 @@ target_link_libraries(curl_protocol_test
         backend_lib
 )
 
-add_executable(curl_protocol_test test/test_agent.cpp)
-target_link_libraries(curl_protocol_test
+add_executable(curl_agent_test test/test_agent.cpp)
+target_link_libraries(curl_agent_test
         PRIVATE
         backend_lib
 )
