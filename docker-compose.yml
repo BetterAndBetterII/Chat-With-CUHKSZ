@@ -7,6 +7,8 @@ services:
     volumes:
       - linux-chatwifcusz:/opt/vcpkg
       - linux-cache:/var/cache
+    ports:
+      - 8080:8080
 volumes:
   linux-chatwifcusz:
     driver: local
