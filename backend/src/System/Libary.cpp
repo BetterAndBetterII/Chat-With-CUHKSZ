@@ -125,6 +125,6 @@ string LibarySystem::search(const std::string& keyword, const int& limit, const 
         }
         str_result+="\n";
     }
-
-    return str_result; 
+    // cout<<str_result<<endl;
+    return str_result;
 }

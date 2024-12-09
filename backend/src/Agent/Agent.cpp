@@ -3,6 +3,10 @@
 Agent::Agent(const std::string& _username, const std::string& _password): tools(new Tools(_username, _password)) {
     this->username = _username;
     this->password = _password;
+    this->system_prompt = "Today is " + current_date + ". You are a chatbot that can call tools to help the user with tasks. "
+        + "If you or the toolcall result have answered user's question, you must summary what you have done with tools results and add " + EXIT_SIGNAL + " at end of the conversation. "
+        + "The username/school number of the user is " + username
+        + ". It will be useful when calling email tools.";
 }
 
 Agent::~Agent() = default;
@@ -55,6 +59,9 @@ std::string Agent::run(const std::string &message, const bool enable_tools) {
     return std::string(answer["content"]) + "\n\n" + EXIT_SIGNAL;
 }
 
+void Agent::get_history(json history) {
+    conversation_history.insert(conversation_history.end(), history);
+}
 std::string Agent::run_until_done(const std::string &message) {
     std::string output;
     int loop_count = 0;

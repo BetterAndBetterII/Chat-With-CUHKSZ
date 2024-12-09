@@ -14,13 +14,11 @@ using std::cout;
 using std::endl;
 
 SisSystem::SisSystem(const string& username, const string& password) : System(username, password){
-    //初始化变量
     this->command_list = {
         "get_schedule",
         "get_course",
         "get_term_grades"
     };
-
 }
 
 SisSystem::~SisSystem(){}
