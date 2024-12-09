@@ -2,7 +2,6 @@
 #include "../include/Knowledge/KnowledgeBase.h"
 #include <iostream>
 #include <fstream>
-#include <algorithm>
 
 //通过KnowledgeBase对象加载知识库
 void KnowledgeBase::loadAllFiles(const std::string& basePath) {
@@ -48,81 +47,20 @@ std::vector<KnowledgeRecord> KnowledgeBase::parseFiles(const std::filesystem::pa
 }
 
 //检索知识库中的关键词
-std::string KnowledgeBase::searchKnowledgeBase(const std::vector<KnowledgeRecord>& records,
-                                               const std::string& keyword1, int weight1,
-                                               const std::string& keyword2, int weight2,
-                                               const std::string& keyword3, int weight3) {
-    std::vector<std::pair<int, KnowledgeRecord>> fileImportance;
-
-    // 遍历所有记录
+std::string KnowledgeBase::searchKnowledgeBase(const std::vector<KnowledgeRecord>& records, const std::string& keyword) {
     for (const auto& record : records) {
-        int importance = 0;
-
-        // 计算第一个关键词的重要度
-        int count1 = 0;
-        size_t pos = record.content.find(keyword1); // 使用 find 查找子字符串
-        while (pos != std::string::npos) {
-            ++count1; // 找到一次关键词，计数加一
-            pos = record.content.find(keyword1, pos + 1); // 查找下一个匹配项
-        }
-        importance += count1 * weight1;
-
-        // 计算第二个关键词的重要度
-        int count2 = 0;
-        pos = record.content.find(keyword2); // 使用 find 查找第二个关键词
-        while (pos != std::string::npos) {
-            ++count2;
-            pos = record.content.find(keyword2, pos + 1);
-        }
-        importance += count2 * weight2;
-
-        // 计算第三个关键词的重要度
-        int count3 = 0;
-        pos = record.content.find(keyword3); // 使用 find 查找第三个关键词
-        while (pos != std::string::npos) {
-            ++count3;
-            pos = record.content.find(keyword3, pos + 1);
-        }
-        importance += count3 * weight3;
-
-        // 存储计算出来的重要度和相应的记录
-        if (importance > 0) {
-            fileImportance.push_back({importance, record});
+        if (record.title.find(keyword) != std::string::npos || record.content.find(keyword) != std::string::npos) {
+            return record.content;
         }
     }
-
-    // 按照重要度排序，降序排列
-    std::sort(fileImportance.begin(), fileImportance.end(),
-              [](const std::pair<int, KnowledgeRecord>& a, const std::pair<int, KnowledgeRecord>& b) {
-                  return a.first > b.first;  // 降序排列
-              });
-
-    // 返回前三个文件的内容
-    std::string result;
-    for (int i = 0; i < 3 && i < fileImportance.size(); ++i) {
-        result += "Title: " + fileImportance[i].second.title + "\n";
-        result += "Content: " + fileImportance[i].second.content + "\n\n";
-    }
-
-    if (result.empty()) {
-        return "No matching record found.";
-    }
-
-    return result;
+    return "No matching record found.";
 }
 
-
-
 //处理agent的请求
-std::string KnowledgeBase::getKnowledge(const std::string& keyword1,
-                                        const std::string& keyword2,
-                                        const std::string& keyword3) {
-     std::string response = this->searchKnowledgeBase(this->records,
-                                                      keyword1, 20,
-                                                      keyword2, 8,
-                                                      keyword3, 3);
-     return response;
- }
+void KnowledgeBase::handleAgentRequest(const std::string& request, const std::vector<KnowledgeRecord>& records) {
+    std::string response = this->searchKnowledgeBase(records, request);
+    std::cout << "Response to Agent: " << response << std::endl;
+}
 
 // int main() {
 //     KnowledgeBase KnowledgeBase;

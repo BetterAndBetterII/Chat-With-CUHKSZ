@@ -27,16 +27,10 @@ public:
     std::vector<KnowledgeRecord> parseFiles(const std::filesystem::path& directoryPath, const std::string& filename);
 
     //检索文件内容
-    std::string searchKnowledgeBase(const std::vector<KnowledgeRecord>& records,
-                                    const std::string& keyword1, int weight1,
-                                    const std::string& keyword2, int weight2,
-                                    const std::string& keyword3, int weight3);
-
+    std::string searchKnowledgeBase(const std::vector<KnowledgeRecord>& records, const std::string& keyword);
 
     //处理agent请求
-    std::string getKnowledge(const std::string& keyword1,
-                             const std::string& keyword2,
-                             const std::string& keyword3);
+    void handleAgentRequest(const std::string& request, const std::vector<KnowledgeRecord>& records);
 };
 
 #endif // CHAT_WITH_CUHKSZ_KNOWLEDGEBASE_H
