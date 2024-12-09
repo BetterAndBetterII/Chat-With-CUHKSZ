@@ -30,8 +30,8 @@
 #include <QPushButton>
 #include <QMessageBox>
 #include <QString>
-// #include "../include/Client/Client.h" // 根据 include 的实际路径
-#include "../include/third_party/httplib.h"
+#include "../include/Client/Client.h" // 根据 include 的实际路径
+// #include "../include/third_party/httplib.h"
 #include <iostream>
 
 class CustomTextEdit : public QTextEdit {
