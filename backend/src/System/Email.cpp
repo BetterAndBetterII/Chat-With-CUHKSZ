@@ -196,7 +196,7 @@ std::string EmailSystem::create_message(const std::vector<std::string>& recipien
     email += "\r\n";
     email += "Subject: " + subject + "\r\n";
     email += "MIME-Version: 1.0\r\n";
-    email += "Content-Type: text/plain; charset=utf-8\r\n";
+    email += "Content-Type: text/html; charset=utf-8\r\n";
     email += "Content-Transfer-Encoding: 8bit\r\n";
     email += "Message-ID: <" + std::to_string(time(nullptr)) + username + std::string(EMAIL_POSTFIX) + ">\r\n";
     email += "\r\n";
