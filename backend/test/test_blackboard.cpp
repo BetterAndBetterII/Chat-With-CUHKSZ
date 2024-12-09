@@ -65,6 +65,9 @@ void test_blackboard(){
         std::cout << "---Testing get_course---" << std::endl;
         std::cout << bb->get_course() << std::endl;
 
+        std::cout << "---Testing get_name---" << std::endl;
+        std::cout << bb->get_name() << std::endl;
+
         std::string crouse;
         std::cout << "---Testing get_announcement---" << std::endl;
         std::cout << "Crouse Name?(e.g. CSC3001)" <<std::endl;

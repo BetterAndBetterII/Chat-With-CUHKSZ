@@ -11,6 +11,10 @@
 
 #include "Blackboard.h"
 #include "Booking.h"
+#include "Libary.h"
+#include "Sis.h"
+#include "Email.h"
+#include "../Knowledge/KnowledgeBase.h"
 using json = nlohmann::json;
 class FunctionProperty
 {
@@ -120,30 +124,41 @@ class Tools
 {
     BlackBoardSystem *bb;
     BookingSystem *booking;
-    // KnowledgeBase *knowledge;
+    LibarySystem *library=new LibarySystem();
+    SisSystem *sis;
+    EmailSystem *email;
+    KnowledgeBase *knowledge=new KnowledgeBase();
 public:
     Tools(const std::string &_username, const std::string &_password)
         : bb(new BlackBoardSystem(_username, _password)),
-          booking(new BookingSystem(_username, _password)){}
-    ~Tools();
+          booking(new BookingSystem(_username, _password)),
+            sis(new SisSystem(_username, _password)),
+            email(new EmailSystem(_username, _password)) {}
+    ~Tools() {
+        delete bb;
+        delete booking;
+        delete library;
+        delete sis;
+        delete email;
+    };
     std::vector<Function> functions = {
+        // Function{
+        //     "generate_image",
+        //     "Generate an image based on the provided description using DALL·E 3.",
+        //     FunctionParameters{
+        //         {
+        //             FunctionProperty{"prompt", "string", "A description of the image to generate."},
+        //             FunctionProperty{
+        //                 "size", "string", "The size of the image to generate.", "1024x1024",
+        //                 {"1024x1024", "1792x1024", "1024x1792"}
+        //             }
+        //         },
+        //         {"prompt"}
+        //     }
+        // },
         Function{
-            "generate_image",
-            "Generate an image based on the provided description using DALL·E 3.",
-            FunctionParameters{
-                {
-                    FunctionProperty{"prompt", "string", "A description of the image to generate."},
-                    FunctionProperty{
-                        "size", "string", "The size of the image to generate.", "1024x1024",
-                        {"1024x1024", "1792x1024", "1024x1792"}
-                    }
-                },
-                {"prompt"}
-            }
-        },
-        Function{
-            "get_course",
-            "Get the course of the user",
+            "get_course_list",
+            "Get the course list of the user",
             FunctionParameters{
                     {
                         FunctionProperty{
@@ -154,19 +169,43 @@ public:
             }
         },
         Function{
-            "get_announcement",
-            "Get the announcement of a class based on its class_id. Given the name of the class, you can get the class id from get_course function",
+            "get_course_announcement",
+            "Get the announcement of a course based on its course_id. Given the name of the course, you can get the course_id from the get_course_list function",
             FunctionParameters{
                         {
                             FunctionProperty{
-                                "class_id", "string", "The id of the class.",
+                                "course_id", "string", "The id of the course.",
                             }
                         },
-                        {}
+                        {"course_id"}
             }
         },
         Function{
-            "get_available_time",
+            "get_course_assignment",
+            "Get the assignment of a course based on its course_id. Given the name of the course, you can get the course_id from get_course_list function",
+            FunctionParameters{
+                            {
+                                FunctionProperty{
+                                    "course_id", "string", "The id of the class.",
+                                }
+                            },
+                            {"course_id"}
+            }
+        },
+        Function{
+            "get_course_grades",
+            "Get the grades of a course based on its course_id. Given the name of the course, you can get the course_id from get_course_list function",
+            FunctionParameters{
+                            {
+                                FunctionProperty{
+                                    "course_id", "string", "The id of the class.",
+                                }
+                            },
+                            {"course_id"}
+            }
+        },
+        Function{
+            "get_badminton_court_available_time",
             "Get the available time of the badminton court based on a date",
             FunctionParameters{
                             {
@@ -174,30 +213,30 @@ public:
                                     "date", "string", "The date of the query with the format %Y-%m-%d",
                                 }
                             },
-                            {}
+                            {"date"}
             }
         },
         Function{
-            "set_booker",
-            "a function that must be call before calling book_field function. You must explicitly ask user for the telephone number, reason and details before calling this function",
+            "set_badminton_field_booker",
+            "a function that MUST be call before calling book_badminton_field function. After calling this function, you MUST call book_badminton_field function to book a field according to the requirement of the book_badminton_field function",
             FunctionParameters{
                             {
                                 FunctionProperty{
                                     "telephone_number", "string", "The telephone number of the user.",
                                 },
                                 FunctionProperty{
-                                    "reason", "string", "The reason for the reservation.",
+                                    "reason", "string", "The reason for the reservation, you can fill in by yourself.",
                                 },
                                 FunctionProperty{
-                                    "details", "string", "The detail of the reservation.",
+                                    "details", "string", "The detail of the reservation, you can fill in by yourself.",
                                 }
                             },
                             {"telephone_number", "reason", "details"}
             }
         },
         Function{
-            "book_field",
-            "Book a badminton court. The booking period should NOT longer than 1 hour! You must call set_booker function before calling this function.",
+            "book_badminton_field",
+            "Book a badminton field. The booking period should NOT longer than 1 hour! You can only book the field of today and tomorrow! You MUST call set_badminton_field_booker function before calling this function. You MUST call this function after calling set_badminton_field_booker function",
             FunctionParameters{
                             {
                                 FunctionProperty{
@@ -210,26 +249,97 @@ public:
                             {"start_time", "end_time"}
             }
         },
-        // Function{
-        //     "getKnowledge",
-        //     "pass three key words as parameters to perform search in the knowledge base of  the university",
-        //     FunctionParameters{
-        //                         {
-        //                             FunctionProperty{
-        //                                 "keyword_1", "string", "The most relevant key word.",
-        //                             },
-        //                             FunctionProperty{
-        //                                 "keyword_2", "string", "The second relevant key word",
-        //                             },
-        //                             FunctionProperty{
-        //                                 "keyword_3", "string", "The third relevant key word",
-        //                             },
-        //                         },
-        //                         {}
-        //     }
-        // },
+        Function{
+            "search_library_resource",
+            "search for print_books, journals, articles, ebook in the library.",
+            FunctionParameters{
+                                {
+                                    FunctionProperty{
+                                        "Keyword", "string", "The keyword used for searching",
+                                    },
+                                    FunctionProperty{
+                                        "limit", "string", "The number of results the search should return, you can determine by yourself",
+                                    },
+                                    FunctionProperty{
+                                        "tab", "string", "the tab of the resource, you can determine by yourself","Everything",{"Everything","PrintBooks/Journals","Articles/eBooks"}
+                                    },
+                                },
+                                {"Keyword","limit","tab"}
+            }
+        },
+        Function{
+            "get_schedule",
+            "get the schedule of the user",
+            FunctionParameters{
+                        {
+                            FunctionProperty{
+                                "placeholder", "string", "The placeholder of the parameter.",
+                            }
+                        },
+                        {}
+            }
+        },
+        Function{
+            "get_course_information",
+            "get the detail information of a course based on its course_id. Given the name of the course, you can get the course_id from the get_course_list function",
+            FunctionParameters{
+                                {
+                                    FunctionProperty{
+                                        "course_id", "string", "The id of the course.",
+                                    }
+                                },
+                                {"course_id"}
+            }
+        },
+        Function{
+            "get_term_grades",
+            "get the grade of the user based on the term",
+            FunctionParameters{
+                                {
+                                    FunctionProperty{
+                                        "term", "string", "The term for searching the grade e.g.2023-24 Term 2.",
+                                    }
+                                },
+                                {"term"}
+            }
+        },
+        Function{
+            "send_email",
+            "send a email to one or more recipients with identifier without domain. You should show the email to the user first before sending the email. If the email is not formal style, you can use emoji to prettify the email, and add one in the beginning of subject.",
+            FunctionParameters{
+                                    {
+                                        FunctionProperty{
+                                            "recipients", "string", "The recipients of the email without domain, separated by space. IF you do NOT know the recipient, you MUST ask the user for that. You MUST NOT leave it blank and MUST NOT represent it as your_email. Specially, the user's self email is the username of the user.",
+                                        },
+                                        FunctionProperty{
+                                            "subject", "string", "The subject of the email, you can determine by yourself",
+                                        },
+                                        FunctionProperty{
+                                            "body", "string", "the main body of th email, you can determine by yourself. You should use html format",
+                                        },
+                                    },
+                                    {"recipient","subject","body"}
+            }
+        },
+        Function{
+            "getKnowledge",
+            "pass three key words as parameters to perform search in the knowledge base of CUHKSZ(港中深，香港中文大学深圳）, which is the university of the user. You MUST search the knowledge base when the question is relevant to CUHKSZ, such as getting information or introducing about the professor or the campus. You MUST use Chinese as key word except for searching for the information of a foreign professor. Some name of the Chinese professor is in pinyin so you MUST identify them and translate them into Chinese character. For example, you MUST transfer Rui Huang to 黄锐",
+            FunctionParameters{
+                                    {
+                                        FunctionProperty{
+                                            "keyword_1", "string", "The most relevant key word. IF you are asking for the information of a professor, his or her name should be the most relevant keyword",
+                                        },
+                                        FunctionProperty{
+                                            "keyword_2", "string", "The second relevant key word",
+                                        },
+                                        FunctionProperty{
+                                            "keyword_3", "string", "The third relevant key word",
+                                        },
+                                    },
+                                    {"keyword_1","keyword_2","keyword_3"}
+            }
+        },
     };
-
     std::string handle_tool_call(const std::string &tool_name, const json& arguments);
 
     bool is_valid_login(const std::string& username, const std::string& password);

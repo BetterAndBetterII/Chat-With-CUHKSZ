@@ -1,11 +1,7 @@
 {
   "name" : "chat-with-cusz",
   "version" : "1.0.0",
-  "dependencies" : [ {
-    "name" : "curl",
-    "default-features" : false,
-    "features" : [ "ssl", "http2" ]
-  }, "nlohmann-json", "libxml2", "openssl", {
+  "dependencies" : [ "curl", "nlohmann-json", "libxml2", "openssl", {
     "name" : "cpr",
     "version>=" : "1.11.0"
   } ],
