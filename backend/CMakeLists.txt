@@ -13,10 +13,6 @@ file(GLOB_RECURSE BACKEND_SOURCES
         "src/*.cpp"
 )
 
-# 自动查找并添加所有 include 目录
-file(GLOB_RECURSE INCLUDE_DIRS "include/*" "third_party/*")
-set(INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/include ${INCLUDE_DIRS})
-
 # 创建后端库而不是可执行文件
 add_library(backend_lib
         ${BACKEND_SOURCES}
@@ -25,7 +21,8 @@ add_library(backend_lib
 # 设置包含目录
 target_include_directories(backend_lib
         PUBLIC
-        ${INCLUDE_DIRS}
+        ${PROJECT_SOURCE_DIR}/include
+        ${PROJECT_SOURCE_DIR}/third_party
 )
 
 # 将外部库链接到后端库
