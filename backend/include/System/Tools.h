@@ -305,7 +305,7 @@ public:
         },
         Function{
             "send_email",
-            "send a email to one or more recipients with identifier without domain. You should show the email to the user first before sending the email. You MUST ask for user's email without domain when you are asked to send a email to his or her. But if you have asked the user, you MUST NOT ask again",
+            "send a email to one or more recipients with identifier without domain. You should show the email to the user first before sending the email. If the email is not formal style, you can use emoji to prettify the email, and add one in the beginning of subject.",
             FunctionParameters{
                                     {
                                         FunctionProperty{
