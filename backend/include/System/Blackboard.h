@@ -73,6 +73,9 @@ public:
      * 分数
      * 批改日期
     */
+
+    std::string get_name();
+    //返回姓名
 };
 
 

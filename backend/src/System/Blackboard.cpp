@@ -20,7 +20,8 @@ BlackBoardSystem::BlackBoardSystem(const string& username, const string& passwor
         "get_course",
         "get_annoucement",
         "get_assignment",
-        "get_grades"
+        "get_grades",
+        "get_name"
     };
 
 }
@@ -322,4 +323,17 @@ string BlackBoardSystem::get_grades(const string& crouse){
         return total_result.str();
     }
     return "";
+}
+
+string BlackBoardSystem::get_name(){
+    if (!login()) {
+        return "Invalid username or password!";
+    }
+
+    string url ="https://bb.cuhk.edu.cn/webapps/portal/execute/tabs/tabAction?tab_tab_group_id=_1_1";
+    string rawData = getRequest(url);
+
+    string name = xpathQuery(rawData, "//*[@id='global-nav-link']/text()")[0];
+
+    return name;
 }
