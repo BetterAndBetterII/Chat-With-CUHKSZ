@@ -197,8 +197,10 @@ std::string EmailSystem::create_message(const std::vector<std::string>& recipien
     email += "Subject: " + subject + "\r\n";
     email += "MIME-Version: 1.0\r\n";
     email += "Content-Type: text/plain; charset=utf-8\r\n";
+    email += "Content-Transfer-Encoding: 8bit\r\n";
     email += "Message-ID: <" + std::to_string(time(nullptr)) + username + std::string(EMAIL_POSTFIX) + ">\r\n";
     email += "\r\n";
+    // body中可以包含html标记，如 <h1>标题</h1><p>这是正文</p>
     email += body;
     return email;
 }

@@ -309,7 +309,7 @@ public:
             FunctionParameters{
                                     {
                                         FunctionProperty{
-                                            "recipients", "string", "The recipients of the email without domain, separated by space. IF you do NOT know the recipient, you MUST ask the user for that. You MUST NOT leave it blank and MUST NOT represent it as your_email.",
+                                            "recipients", "string", "The recipients of the email without domain, separated by space. IF you do NOT know the recipient, you MUST ask the user for that. You MUST NOT leave it blank and MUST NOT represent it as your_email. Specially, the user's self email is the username of the user.",
                                         },
                                         FunctionProperty{
                                             "subject", "string", "The subject of the email, you can determine by yourself",

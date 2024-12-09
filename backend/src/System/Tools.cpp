@@ -3,9 +3,9 @@
 std::string Tools::handle_tool_call(const std::string& tool_name,  const json& arguments)
 {
     json json_arguments = json::parse(std::string(arguments));
-    if (tool_name == "generate_image"){
-        return "Image generated!";
-    }
+    // if (tool_name == "generate_image"){
+    //     return "Image generated!";
+    // }
     if (tool_name == "get_course_list") {
         return bb->get_course();
     }

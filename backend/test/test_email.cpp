@@ -64,8 +64,9 @@ void test_email(){
     std::cout << "Password:" << std::endl;
     std::cin >> password;
     auto *email = new EmailSystem(username, password);
+    std::string html_body = "<h1>标题</h1><h2>This is a test email from Chat-With-CUHKSZ.</h2><p>正文的样式</p>";
     if(email->login()){
-        std::cout << email->send_email({username + "@link.cuhk.edu.cn"}, "Test", "This is a test email from Chat-With-CUHKSZ.") << std::endl;
+        std::cout << email->send_email({username + "@link.cuhk.edu.cn"}, "Test", html_body) << std::endl;
     }
     delete email;
 }
