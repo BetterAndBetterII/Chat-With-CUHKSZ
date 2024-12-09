@@ -6,7 +6,9 @@
 
 void test_libary(){
     std::cout << "=====Testing Libary=====" << std::endl;
-    auto *libary = new LibarySystem();
+    std::string username = "hello";
+    std::string password = "world";
+    auto *libary = new LibarySystem(username, password);
     std::cout << "---Testing getCommand---" << std::endl;
     std::cout << libary->get_commands() << std::endl;
     std::cout << "---Testing Search---" << std::endl;
