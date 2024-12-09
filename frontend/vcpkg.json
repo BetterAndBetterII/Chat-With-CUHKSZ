@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "dependencies": [
         "nlohmann-json",
-        "cpr",
+        "cpr"
     ],
     "vcpkg-configuration": {
         "default-registry": {
