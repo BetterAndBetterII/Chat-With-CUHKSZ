@@ -87,8 +87,9 @@ class WelcomeWindow : public QWidget {
 
 public:
     WelcomeWindow(QWidget *parent = nullptr) : QWidget(parent) {
-        setWindowTitle("Welcome to Chat_With_CUHKSZ!");
+        setWindowTitle("Welcome to Chat With CUHKSZ!");
         setFixedSize(1000, 750); // 窗口大小与图片比例匹配
+        setWindowFlags(Qt::Window | Qt::MSWindowsFixedSizeDialogHint);  // 设置窗口不可调整大小
 
         QLinearGradient gradient(0, 0, 1, 1);
         gradient.setColorAt(0, QColor(48, 48, 55)); // 背景渐变色，浅色
@@ -102,17 +103,13 @@ public:
 
         // 顶部横幅布局
         QHBoxLayout *topLayout = new QHBoxLayout();
-        QLabel *titleLabel = new QLabel("Welcome to Chat_With_CUHKSZ!", this);
-        titleLabel->setStyleSheet("font-size: 60px; font-weight: bold;color:white");
-        QLabel *profilePhotoLabel = new QLabel(this);
-        profilePhotoLabel->setPixmap(QPixmap(":/img/chat.gif").scaled(60, 60, Qt::KeepAspectRatio)); // 假设图片路径
-        profilePhotoLabel->setStyleSheet("border: 1px solid black;");
-        profilePhotoLabel->setFixedSize(60, 60);
+        QLabel *titleLabel = new QLabel("Welcome to Chat With CUHKSZ!", this);
+        titleLabel->setStyleSheet("font-size: 40px; font-weight: bold; color: #aaaaaa; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);");
+        topLayout->addStretch(); // 添加左侧弹性空间
         topLayout->addWidget(titleLabel);
-        topLayout->addStretch(); // 左对齐
-        topLayout->addWidget(profilePhotoLabel);
+        topLayout->addStretch(); // 添加右侧弹性空间
 
-            // 添加顶部横幅到主布局
+        // 添加顶部横幅到主布局
         mainLayout->addLayout(topLayout);
 
         // 中部网格布局
@@ -173,12 +170,12 @@ public:
         mainLayout->addLayout(gridLayout);
 
         // 在 Booking 下方添加两行文字，紧贴 Booking 按钮
-        QLabel *bookingDescription1 = new QLabel("结合传统与现代", this);
-        QLabel *bookingDescription2 = new QLabel("融汇中国与西方", this);
+        QLabel *bookingDescription1 = new QLabel("Combining Tradition with Modernity", this);
+        QLabel *bookingDescription2 = new QLabel("Bridging China and the West", this);
         bookingDescription1->setAlignment(Qt::AlignCenter);
         bookingDescription2->setAlignment(Qt::AlignCenter);
-        bookingDescription1->setStyleSheet("font-size: 24px; font-family: KaiTi; font-style: italic; color: black;");
-        bookingDescription2->setStyleSheet("font-size: 24px; font-family: KaiTi; font-style: italic; color: black;");
+        bookingDescription1->setStyleSheet("font-size: 10px; font-family: KaiTi; font-style: italic; color: black;");
+        bookingDescription2->setStyleSheet("font-size: 10px; font-family: KaiTi; font-style: italic; color: black;");
 
         // // 添加文字布局
         // QVBoxLayout *bookingTextLayout = new QVBoxLayout();
@@ -242,6 +239,10 @@ public:
                 buttonBooking->setText("在线预定平台");
                 buttonOfficial->setText("大学官网");
 
+                bookingDescription1->setText("结合传统与现代");
+                bookingDescription2->setText("融汇中国与西方");
+                bookingDescription1->setStyleSheet("font-size: 24px; font-family: KaiTi; font-style: italic; color: black;");
+                bookingDescription2->setStyleSheet("font-size: 24px; font-family: KaiTi; font-style: italic; color: black;");
             } else {
                 // 切换回英文
                 buttonLanguage->setText("Language: ENGLISH");
@@ -251,6 +252,11 @@ public:
                 buttonSIS->setText("SIS");
                 buttonBooking->setText("Booking");
                 buttonOfficial->setText("Official");
+
+                bookingDescription1->setText("Combining Tradition with Modernity");
+                bookingDescription2->setText("Bridging China and the West");
+                bookingDescription1->setStyleSheet("font-size: 10px; font-family: Arial; font-style: italic; color: black;");
+                bookingDescription2->setStyleSheet("font-size: 10px; font-family: Arial; font-style: italic; color: black;");
             }
         });
     }
@@ -259,12 +265,15 @@ protected:
     {
         Q_UNUSED(event);
         QPainter painter(this);
-        painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);//消锯齿
-        painter.setPen(Qt::NoPen);
-        painter.setBrush(QBrush(Qt::gray));
-        QPixmap mPixmap = QPixmap(":/img/welcome.png");
-        QPixmap scaledPixmap = mPixmap.scaled( 1000, 750, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        painter.drawPixmap(QRect(0, 0, 1000, 750), scaledPixmap);
+        painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform); // 消锯齿
+        QPixmap originalPixmap(":/img/welcome2.png");
+        QSize windowSize(1024, 750);
+        QSize targetSize = originalPixmap.size();
+        targetSize.scale(windowSize, Qt::KeepAspectRatio);
+        int x = (windowSize.width() - targetSize.width()) / 2;
+        int y = (windowSize.height() - targetSize.height()) / 2;
+        QPixmap scaledPixmap = originalPixmap.scaled(targetSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        painter.drawPixmap(x, y, scaledPixmap);
     }
 signals:
     void goToChatWindow();; // 自定义信号，用于通知主程序切换到聊天窗口
@@ -281,6 +290,7 @@ public:
         setCentralWidget(mainWidget);
         setWindowTitle("ChatWindow");
         setFixedSize(1000,750);
+        setWindowFlags(Qt::Window | Qt::MSWindowsFixedSizeDialogHint);  // 设置窗口不可调整大小
         // 左侧导航栏：历史记录选择
         historyList = new QListWidget;
         // historyList->setStyleSheet("QListWidget { background-color: #ffffff; border: none; padding: 10px; }"
@@ -534,22 +544,6 @@ public:
         }
     }
 
-    // 发送消息的方法
-    /*void sendMessage() {
-        QString message = messageInput->toPlainText().trimmed();
-        if (!message.isEmpty()) {
-            // 添加用户消息到当前会话
-            addMessage(chatList, message, "/home/yf/Desktop/Workplace/Group-project/Chat-With-CUHKSZ/frontend/resources/picture", true);
-            sessionHistory[currentSessionIndex].append("用户: " + message);
-
-            // 模拟 ChatGPT 回复
-            QString response =  message;
-            addMessage(chatList, response, ":../resources/picture/img_1.png", false);
-            sessionHistory[currentSessionIndex].append("Chat_with_CUHKSZ: " + response);
-
-            messageInput->clear();
-        }
-    }*/
     void sendMessage() {
         QString message = messageInput->toPlainText().trimmed();
         if (!message.isEmpty()) {
