@@ -34,8 +34,12 @@ std::string Client::send_message(const std::string& session_id, const std::strin
     if (res && res->status == 200) {
         return res->body;
     }
+    if (res)
+    {
+        std::cout << res->body << std::endl;
+    }
 
-    return "Error:1 " + (res ? std::to_string(res->status) : "No response");
+    return "Error: " + (res ? std::to_string(res->status) : "No response");
 }
 std::string Client::get_chat_history(const std::string& session_id) {
     auto res = http_client_.Get(("/chat?session_id=" + bind_to_username(session_id)).c_str());
