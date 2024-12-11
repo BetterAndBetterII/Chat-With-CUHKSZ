@@ -366,10 +366,24 @@ public:
         chatList = new QListWidget;
         chatList->setFixedSize(850, 650);
         chatList->setStyleSheet("background-color: #f9f9f9; border: none; padding: 10px;");
+        // 添加欢迎消息标签
+        welcomeLabel = new QLabel("What can I help you with?", chatList);
+        welcomeLabel->setAlignment(Qt::AlignCenter);
+        welcomeLabel->setStyleSheet(
+            "QLabel {"
+            "   font-size: 24px;"
+            "   color: #666666;"
+            "   font-weight: bold;"
+            "   background: transparent;"
+            "}"
+        );
+        welcomeLabel->setFixedSize(850, 650);
+        welcomeLabel->show();  // 初始时隐藏
         //设置为列表显示模式
         chatList->setViewMode(QListView::ListMode);
         //屏蔽水平滑动条
         chatList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        chatList->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         //设置为像素滚动
         chatList->setHorizontalScrollMode(QListWidget::ScrollPerPixel);
         //设置鼠标左键拖动
@@ -461,17 +475,15 @@ public:
 
         // 添加 New Chat 按钮的功能
         connect(newChatButton, &QPushButton::clicked, this, [this]() {
-            // 清空当前聊天内容
             chatList->clear();
             messageInput->clear();
-
+            updateWelcomeLabel();  // 添加这一行
             session_id = QUuid::createUuid().toString(QUuid::WithoutBraces).toStdString();
             // 创建新的会话
-            currentSessionIndex = std::max(0, historyList->count() - 1);
+            currentSessionIndex = historyList->count();
         });
 
         setWindowTitle("Chat_With_CUHKSZ >_<");
-        resize(1000, 700);
 
         // 设置样式表
         setStyleSheet(R"(
@@ -537,6 +549,7 @@ public:
     }
     // 添加消息到聊天窗口
     void addMessage(QListWidget *chatList, const QString &message, bool isUser) {
+        welcomeLabel->hide();  // 添加这一行
         QString messageText = message;
         // 移除最后的"<exit>"
         if (messageText.endsWith("\n\n<exit>") && messageText.length() > 6) {
@@ -569,9 +582,8 @@ public:
 
     // 加载指定会话的聊天记录
     void loadChatHistory(int index) {
-        // clear chat list
-        chatList->clear();  
-
+        chatList->clear();
+        updateWelcomeLabel();  // 添加这一行
         session_id = chathistory_index_to_session_id[index];
         std::string json_str = client->get_chat_history(session_id);
         
@@ -646,6 +658,14 @@ private slots:
         QMessageBox::warning(this, "Error", error);
     }
 
+    void updateWelcomeLabel() {
+        if (chatList->count() == 0) {
+            welcomeLabel->show();
+        } else {
+            welcomeLabel->hide();
+        }
+    }
+
 private:
     QListWidget *historyList;
     QListWidget *chatList;
@@ -653,8 +673,9 @@ private:
     CustomTextEdit *messageInput;  // 将 messageInput 改为自定义的 CustomTextEdit，以便多行输入和处理 Enter 键
     QMap<int, QList<QString>> sessionHistory;  // 保存每个会话的消息
     Client *client;             // 指向 Client 的指针
-    std::string session_id;     // 会话 ID
+    std::string session_id = QUuid::createUuid().toString(QUuid::WithoutBraces).toStdString();  // 当前会话 ID
     int currentSessionIndex;  // 当前会话索引
+    QLabel *welcomeLabel;  // 添加这一行到private部分
 };
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -686,7 +707,7 @@ public:
             stackedWidget->setCurrentWidget(chatWindow);
         });  // 切换到聊天窗口
 
-        resize(1200, 900);
+        setFixedSize(1200, 900);
     }
 
 private:
@@ -700,7 +721,6 @@ class ServerSettingsDialog : public QDialog {
 public:
     ServerSettingsDialog(QWidget *parent = nullptr) : QDialog(parent) {
         setWindowTitle("Server Settings");
-        setFixedSize(400, 200);
         setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
 
         auto *mainLayout = new QVBoxLayout(this);
@@ -769,6 +789,7 @@ public:
         mainLayout->addLayout(portLayout);
         mainLayout->addSpacing(20);
         mainLayout->addLayout(buttonLayout);
+        setFixedSize(400, 200);
         
         // 连接信号
         connect(confirmButton, &QPushButton::clicked, this, &ServerSettingsDialog::accept);
@@ -791,7 +812,6 @@ public:
     explicit LoginWindow(Client *client, QWidget *parent = nullptr)
         : QWidget(parent), client(client) {  // 使用传入的 Client 指针
         setWindowTitle("Login");
-        setFixedSize(1200, 900);
         setWindowFlags(Qt::Window | Qt::MSWindowsFixedSizeDialogHint);
 
         auto *mainLayout = new QVBoxLayout(this);
@@ -902,6 +922,8 @@ public:
         QString labelStyle = "QLabel { color: white; font-size: 14px; font-weight: bold; }";
         usernameLabel->setStyleSheet(labelStyle);
         passwordLabel->setStyleSheet(labelStyle);
+
+        setFixedSize(1200, 900);
 
         connect(loginButton, &QPushButton::clicked, this, &LoginWindow::validateLogin);
     }
