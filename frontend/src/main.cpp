@@ -46,6 +46,7 @@
 #include <QMessageBox>
 #include <QUuid>
 #include <QTimer>
+#include <QRegularExpression>
 
 class CustomTextEdit : public QTextEdit {
     Q_OBJECT
@@ -552,9 +553,7 @@ public:
         welcomeLabel->hide();  // 添加这一行
         QString messageText = message;
         // 移除最后的"<exit>"
-        if (messageText.endsWith("\n\n<exit>") && messageText.length() > 6) {
-            messageText.remove(messageText.length() - 6, 6);
-        }
+        messageText.remove(QRegularExpression("\\n*<exit>$"));
 
         QNChatMessage* messageW = new QNChatMessage(chatList);
         QListWidgetItem* item = new QListWidgetItem(chatList);
