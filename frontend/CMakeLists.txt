@@ -3,6 +3,9 @@ project(Chat_With_CUHKSZ_Frontend)
 
 set(CMAKE_CXX_STANDARD 20)
 
+#自动找.qrc文件
+set(CMAKE_AUTORCC ON)
+
 # 启用 Qt 的自动 MOC 功能
 set(CMAKE_AUTOMOC ON)
 
@@ -40,7 +43,10 @@ if (WIN32)
 endif()
 
 # ----------------- 部署 -----------------
-add_executable(frontend src/main.cpp)
+add_executable(frontend src/main.cpp
+        src/logo.rc
+        src/resources.qrc
+)
 target_link_libraries(frontend
         PRIVATE
         frontend_lib
