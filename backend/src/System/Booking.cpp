@@ -191,6 +191,10 @@ FieldEvent BookingSystem::retrieve_field_info_day(const std::string& field_name,
 }
 
 std::string BookingSystem::get_available_time(const std::string& field_name, const std::string& date_string){
+    if (!login())
+    {
+        return "Invalid username or password!";
+    }
     FieldEvent field_event = retrieve_field_info_day(field_name, date_string);
     // 遍历早上7点到晚上10点的时间段
     std::map<std::string, std::vector<std::string>> available_time;

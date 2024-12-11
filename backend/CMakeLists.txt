@@ -36,11 +36,6 @@ target_link_libraries(backend_lib
         LibXml2::LibXml2
 )
 
-# 如果是Windows系统，则需要链接ws2_32
-if (WIN32)
-    target_link_libraries(backend_lib PUBLIC ws2_32)
-endif()
-
 # ----------------- 部署 -----------------
 add_executable(backend main.cpp)
 target_link_libraries(backend
