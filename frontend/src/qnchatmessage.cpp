@@ -29,8 +29,8 @@ QNChatMessage::QNChatMessage(QWidget *parent) : QWidget(parent)
 //    te_font.setLetterSpacing(QFont::PercentageSpacing, 100);          //300%,100为默认  //设置字间距%
 //    te_font.setLetterSpacing(QFont::AbsoluteSpacing, 0);             //设置字间距为3像素 //设置字间距像素值
     this->setFont(te_font);
-    m_leftPixmap = QPixmap(":/img/CustomerCopy.png");
-    m_rightPixmap = QPixmap(":/img/CustomerService.png");
+    m_leftPixmap = QPixmap(":/img/CustomerService.png");
+    m_rightPixmap = QPixmap(":/img/CustomerCopy.png");
     m_loadingMovie = new QMovie(this);
     m_loadingMovie->setFileName(":/img/loading4.gif");
     m_loading = new QLabel(this);
@@ -47,12 +47,10 @@ void QNChatMessage::setTextSuccess()
     m_isSending = true;
 }
 
-void QNChatMessage::setText(QString text, QString time, QSize allSize, QNChatMessage::User_Type userType)
+void QNChatMessage::setText(QString text, QSize allSize, QNChatMessage::User_Type userType)
 {
     m_msg = text;
     m_userType = userType;
-    m_time = time;
-    m_curTime = QDateTime::fromTime_t(time.toInt()).toString("hh:mm");
     m_allSize = allSize;
     if(userType == User_Me) {
         if(!m_isSending) {
@@ -230,18 +228,5 @@ void QNChatMessage::paintEvent(QPaintEvent *event)
         option.setWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
         painter.setFont(this->font());
         painter.drawText(m_textRightRect,m_msg,option);
-    }  else if(m_userType == User_Type::User_Time) { // 时间
-        QPen penText;
-        penText.setColor(QColor(153,153,153));
-        painter.setPen(penText);
-        QTextOption option(Qt::AlignCenter);
-        option.setWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
-        QFont te_font = this->font();
-        te_font.setFamily("MicrosoftYaHei");
-        te_font.setPointSize(10);
-        painter.setFont(te_font);
-        int w = this->width();
-        int h = this->height();
-        painter.drawText(this->rect(),m_curTime,option);
     }
 }

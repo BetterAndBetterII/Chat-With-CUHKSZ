@@ -53,7 +53,7 @@ std::string Server::get_chat_history(const std::string& session_id) {
     if (it != histories.end()) {
         json res_json;
         res_json["session_id"] = session_id;
-        res_json["history"] = it->second.get_history_string();
+        res_json["history"] = json::parse(it->second.get_history_string());
         return res_json.dump();
     }
     return "{\"error\": \"No history available for session ID: " + session_id + "\"}";
@@ -63,14 +63,11 @@ std::string Server::get_all_first_messages() {
     json res_json;
     for (const auto& [session_id, history] : histories) {
         std::string history_str = history.get_history_string();
-        if (!history_str.empty()) {
-            // 提取历史记录的第一条消息
-            size_t pos = history_str.find('\n'); // 第一条消息到换行符的位置
-            if (pos != std::string::npos) {
-                res_json[session_id] = history_str.substr(0, pos);
-            } else {
-                res_json[session_id] = history_str;
-            }
+        // 解析为json::array
+        json history_json = json::parse(history_str);
+        // 提取历史记录的第一条消息
+        if (!history_json.empty() && history_json[0].contains("content")) {
+            res_json[session_id] = history_json[0]["content"];
         }
     }
     return res_json.dump();

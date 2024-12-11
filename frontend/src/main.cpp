@@ -39,6 +39,8 @@
 #include <iostream>
 #include <QApplication>
 #include "qnchatmessage.h"
+#include <QJsonDocument>
+#include <QJsonObject>
 
 class CustomTextEdit : public QTextEdit {
     Q_OBJECT
@@ -87,7 +89,7 @@ class WelcomeWindow : public QWidget {
 
 public:
     WelcomeWindow(QWidget *parent = nullptr) : QWidget(parent) {
-        setWindowTitle("Welcome to Chat With CUHKSZ!");
+        setWindowTitle("Settings");
         setFixedSize(1000, 750); // 窗口大小与图片比例匹配
         setWindowFlags(Qt::Window | Qt::MSWindowsFixedSizeDialogHint);  // 设置窗口不可调整大小
 
@@ -103,8 +105,8 @@ public:
 
         // 顶部横幅布局
         QHBoxLayout *topLayout = new QHBoxLayout();
-        QLabel *titleLabel = new QLabel("Welcome to Chat With CUHKSZ!", this);
-        titleLabel->setStyleSheet("font-size: 40px; font-weight: bold; color: #aaaaaa; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);");
+        QLabel *titleLabel = new QLabel("Chat With CUHKSZ", this);
+        titleLabel->setStyleSheet("font-size: 40px; font-weight: bold; color: #dddddd; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);");
         topLayout->addStretch(); // 添加左侧弹性空间
         topLayout->addWidget(titleLabel);
         topLayout->addStretch(); // 添加右侧弹性空间
@@ -341,7 +343,7 @@ public:
         // 输入区域布局
         messageInput->setLayout(vbLayout);
 
-        QPushButton *backButton = new QPushButton("Other Options", this);
+        QPushButton *backButton = new QPushButton("Settings", this);
         backButton->setStyleSheet("background-color: #0078d7; color: white; font-size: 18px; border-radius: 10px;");
         backButton->setFixedSize(120,40);
         connect(backButton, &QPushButton::clicked, this, &ChatWindow::backToWelcomeWindow);
@@ -349,7 +351,12 @@ public:
         // 主聊天布局
         auto *chatLayout = new QVBoxLayout;
         auto *titleHBoxLayout = new QHBoxLayout;
-        titleHBoxLayout->addWidget(new QLabel("Chat with me @_@"));
+        QPushButton *newChatButton = new QPushButton("New Chat", this);
+        newChatButton->setStyleSheet("background-color: #0078d7; color: white; font-size: 18px; border-radius: 10px;");
+        newChatButton->setFixedSize(120,40);
+
+        titleHBoxLayout->addWidget(newChatButton);
+        titleHBoxLayout->addWidget(new QLabel("AI Agent Based on ChatGPT-4o"));
         titleHBoxLayout->addStretch();
         titleHBoxLayout->addWidget(backButton);
         chatLayout->addLayout(titleHBoxLayout);
@@ -376,33 +383,10 @@ public:
         // mainLayout->setAlignment(backButton, Qt::AlignLeft);
 
         // 获取历史记录第一行并更新列表
-        initializeHistoryList();
+        updateHistoryList();
 
         // 会话历史记录保存
         currentSessionIndex = 0;  // 当前会话索引
-        // sessionHistory[currentSessionIndex] = QList<QString>();  // 新建一个空会话
-
-        // 添加多个初始的历史记录
-        addNewHistoryItem("Text 1");
-        addNewHistoryItem("Text 2");
-        addNewHistoryItem("Text 3");
-        addNewHistoryItem("Text 4");
-        addNewHistoryItem("Text 5");
-
-        // 初始化每个会话的聊天记录（仅模拟）
-        sessionHistory[0] = QList<QString> { "User: What is Chat with CUHKSZ？", "Chat_With_CUHKSZ: I am a chatbot always ready to help！ I know a lot about CUHKSZ haha.","User: haha!"};
-        sessionHistory[1] = QList<QString> { "User: heihei", "Chat_With_CUHKSZ:haha" };
-        sessionHistory[2] = QList<QString> { "User: miaomiao", "Chat_With_CUHKSZ: wangwang" };
-        sessionHistory[3] = QList<QString> { "User: gaga", "Chat_With_CUHKSZ:gugu" };
-        sessionHistory[4] = QList<QString> { "User: sing!", "Chat_With_CUHKSZ:LALALA~" };
-
-        //测试
-        // for (int i= 0; i<2;i++)
-        // {
-        //     QString message = sessionHistory[1][i];
-        //     bool isUser = message.startsWith("User:");
-        //     addMessage(chatList, message, "", isUser);
-        // }
 
         // 连接发送按钮功能
         connect(sendButton, &QPushButton::clicked, this, [this]() {
@@ -417,7 +401,18 @@ public:
         // 当点击历史记录时加载相应的会话
         connect(historyList, &QListWidget::itemClicked, this, [this](QListWidgetItem *item) {
             int index = historyList->row(item);
-            loadSession(index );
+            loadChatHistory(index);
+        });
+
+        // 添加 New Chat 按钮的功能
+        connect(newChatButton, &QPushButton::clicked, this, [this]() {
+            // 清空当前聊天内容
+            chatList->clear();
+            messageInput->clear();
+            
+            // 创建新的会话
+            currentSessionIndex = sessionHistory.size();
+            sessionHistory[currentSessionIndex] = QList<QString>();
         });
 
         setWindowTitle("Chat_With_CUHKSZ >_<");
@@ -438,15 +433,27 @@ public:
         )");
     }
 
-    // 获取历史记录并初始化左侧导航栏
-    void initializeHistoryList() {
-        std::string firstMessages = client->get_first_messages();
-        if (firstMessages.find("Error:") == std::string::npos)
-        {
-            QStringList messages = QString::fromStdString(firstMessages).split("\n");
+    // MAP: chathistory_index: session_id
+    QMap<int, std::string> chathistory_index_to_session_id;
 
-            for (const QString &message : messages) {
-                addNewHistoryItem(message.trimmed());
+    // 获取历史记录并初始化左侧导航栏
+    // 加载会话记录的标题（第一条消息）
+    void updateHistoryList() {
+        // clear history list
+        historyList->clear();
+
+        // 获取历史消息的第一条记录
+        std::string firstMessage = client->get_first_messages();
+        if (firstMessage != "null") {
+            // json format: key: username/sessionid, value: "firstmessage"
+            auto json_data = QJsonDocument::fromJson(QString::fromStdString(firstMessage).toUtf8());
+            QJsonObject jsonObj = json_data.object();  // 转换为 QJsonObject
+            
+            for (auto it = jsonObj.begin(); it != jsonObj.end(); ++it) {
+                QString key = it.key();
+                QString value = it.value().toString();
+                addNewHistoryItem(value);
+                chathistory_index_to_session_id[historyList->count() - 1] = key.toStdString();
             }
         }
     }
@@ -455,49 +462,21 @@ public:
         QListWidgetItem *item = new QListWidgetItem(title);
         historyList->addItem(item);
     }
-    void dealMessageTime(QString curMsgTime)
+    void dealMessage(QNChatMessage *messageW, QListWidgetItem *item, QString text, QNChatMessage::User_Type type)
     {
-        bool isShowTime = false;
-        if(chatList->count() > 0) {
-            QListWidgetItem* lastItem = chatList->item(chatList->count() - 1);
-            QNChatMessage* messageW = (QNChatMessage*)chatList->itemWidget(lastItem);
-            int lastTime = messageW->time().toInt();
-            int curTime = curMsgTime.toInt();
-            qDebug() << "curTime lastTime:" << curTime - lastTime;
-            isShowTime = ((curTime - lastTime) > 60); // 两个消息相差一分钟
-            //        isShowTime = true;
-        } else {
-            isShowTime = true;
-        }
-        if(isShowTime) {
-            QNChatMessage* messageTime = new QNChatMessage(chatList);
-            QListWidgetItem* itemTime = new QListWidgetItem(chatList);
-
-            QSize size = QSize(this->width(), 40);
-            messageTime->resize(size);
-            itemTime->setSizeHint(size);
-            messageTime->setText(curMsgTime, curMsgTime, size, QNChatMessage::User_Time);
-            chatList->setItemWidget(itemTime, messageTime);
-        }
-    }
-    void dealMessage(QNChatMessage *messageW, QListWidgetItem *item, QString text, QString time,  QNChatMessage::User_Type type)
-    {
+        // 计算消息的实际大小
         QSize size = messageW->fontRect(text);
         messageW->setFixedWidth(this->width());
         item->setSizeHint(size);
-        messageW->setText(text, time, size, type);
+        messageW->setText(text, size, type);
         chatList->setItemWidget(item, messageW);
     }
     // 添加消息到聊天窗口
-    void addMessage(QListWidget *chatList, const QString &message, const QString &avatarPath, bool isUser) {
-        QString time = QString::number(QDateTime::currentDateTime().toTime_t()); //时间戳
-        qDebug() << "addMessage" << message << time << chatList->count();
-        dealMessageTime(time);
+    void addMessage(QListWidget *chatList, const QString &message, bool isUser) {
         QNChatMessage* messageW = new QNChatMessage(chatList);
         QListWidgetItem* item = new QListWidgetItem(chatList);
-        dealMessage( messageW, item, message, time, isUser?QNChatMessage::User_Me:QNChatMessage::User_She);
+        dealMessage( messageW, item, message, isUser?QNChatMessage::User_Me:QNChatMessage::User_She);
         messageW->setTextSuccess();
-
     }
 
     void resizeEvent(QResizeEvent *event)
@@ -514,33 +493,42 @@ public:
             QNChatMessage* messageW = (QNChatMessage*)chatList->itemWidget(chatList->item(i));
             QListWidgetItem* item = chatList->item(i);
 
-            dealMessage(messageW, item, messageW->text(), messageW->time(), messageW->userType());
+            dealMessage(messageW, item, messageW->text(), messageW->userType());
         }
     }
 
-    // 加载指定会话的所有消息
-    void loadSession(int index) {
-        if (sessionHistory.contains(index)) {
-            chatList->clear();  // 清空当前聊天列表
+    // 加载指定会话的聊天记录
+    void loadChatHistory(int index) {
+        // clear chat list
+        chatList->clear();  
 
-            // 获取历史消息的第一条记录
-            // std::string firstMessage = client->get_first_messages();
-            // QString firstMessageQString = QString::fromStdString(firstMessage);
-
-            // 添加服务器返回的第一条历史记录（模拟）
-            // addMessage(chatList, firstMessageQString, ":/img/img_1.png", false);
-            addMessage(chatList, "firstMessageQString", ":/img/img_1.png", false);
-
-            // 加载当前会话的其他消息
-            const QList<QString> &messages = sessionHistory[index];
-            for (const QString &message : messages) {
-                // 判断是用户还是ChatGPT消息
-                bool isUser = message.startsWith("User:");
-                QString avatarPath = isUser ? ":/img/img.png" : ":/img/img_1.png";
-                addMessage(chatList, message, avatarPath, isUser);
+        std::string session_id = chathistory_index_to_session_id[index];
+        std::string json_str = client->get_chat_history(session_id);
+        
+        if (json_str != "null") {
+            try {
+                // 解析JSON
+                auto json_obj = json::parse(json_str);
+                
+                // 检查history是否为数组
+                if (json_obj["history"].is_array()) {
+                    auto chat_history = json_obj["history"];
+                    
+                    for (const auto& message : chat_history) {
+                        // 假设每个消息对象包含role和content字段
+                        if (message.contains("role") && message.contains("content")) {
+                            std::string role = message["role"];
+                            std::string content = message["content"];
+                            QString content_qstr = QString::fromStdString(content);
+                            
+                            addMessage(chatList, content_qstr, role == "user");
+                        }
+                    }
+                }
+            } catch (const json::exception& e) {
+                std::cerr << "JSON parsing error: " << e.what() << std::endl;
+                // 可以在这里添加用户提示
             }
-
-            currentSessionIndex = index;  // 更新当前会话索引
         }
     }
 
@@ -548,15 +536,19 @@ public:
         QString message = messageInput->toPlainText().trimmed();
         if (!message.isEmpty()) {
             // 添加用户消息到当前会话
-            addMessage(chatList, message, ":/img/CustomerCopy.png", true);
+            addMessage(chatList, message, true);
 
             // 使用 Client 的 send_message 方法获取回复
             std::string response = client->send_message(session_id, message.toStdString());
+            json response_json = json::parse(response);
+            std::string response_content = response_json["response"];
 
             // 添加服务器返回的回复
-            addMessage(chatList, QString::fromStdString(response), ":/img/CustomerService.png", false);
+            addMessage(chatList, QString::fromStdString(response_content), false);
 
             messageInput->clear();
+
+            updateHistoryList();
         }
     }
 
@@ -750,9 +742,10 @@ private slots:
 
     void openMainWindow() {
         this->hide();  // 隐藏登录窗口
-        auto *mainwindow = new MainWindow(client);
+        // auto *mainwindow = new MainWindow(client);
+        auto *chatWindow = new ChatWindow(client);
         std::cout << "Login success" << std::endl;
-        mainwindow->show();
+        chatWindow->show();
     }
 protected:
     void paintEvent(QPaintEvent *event)
@@ -781,27 +774,27 @@ int main(int argc, char *argv[]) {
 
 
     // 模拟登录
-    std::string username = "123090490";
-    std::string password = "SXH2005sxh@ZL";
+    // std::string username = "123090490";
+    // std::string password = "SXH2005sxh@ZL";
 
-    if (client.login(username, password)) {
-        std::cout << "Login successfully!" << std::endl;
+    // if (client.login(username, password)) {
+    //     std::cout << "Login successfully!" << std::endl;
 
-        // 发送消息
-        std::string session_id = "session_user123";
-        // std::string response = client.send_message(session_id, "Hello, Server!");
-        // std::cout << "Server response: " << response << std::endl;
+    //     // 发送消息
+    //     std::string session_id = "session_user123";
+    //     std::string response = client.send_message(session_id, "Hello, Server!");
+    //     std::cout << "Server response: " << response << std::endl;
 
-        // 获取聊天记录
-        std::string chat_history = client.get_chat_history(session_id);
-        std::cout << "Chat history: " << chat_history << std::endl;
+    //     // 获取聊天记录
+    //     std::string chat_history = client.get_chat_history(session_id);
+    //     std::cout << "Chat history: " << chat_history << std::endl;
 
-        // 获取所有会话的第一条消息
-        std::string first_messages = client.get_first_messages();
-        std::cout << "All first messages: " << first_messages << std::endl;
-    } else {
-        std::cout << "Login failed!" << std::endl;
-    }
+    //     // 获取所有会话的第一条消息
+    //     std::string first_messages = client.get_first_messages();
+    //     std::cout << "All first messages: " << first_messages << std::endl;
+    // } else {
+    //     std::cout << "Login failed!" << std::endl;
+    // }
 
     return app.exec();
 }

@@ -41,11 +41,14 @@ History::History(int number) {
 std::string History::get_history_string() const {
     std::string history_str;
     if (conversation_history.contains("messages")) {
+        json history_json = json::array();
         for (const auto& message : conversation_history["messages"]) {
             std::string role = message["role"];
             std::string content = message["content"];
-            history_str.append("(").append(role).append(": ").append(content).append(")\n");
+            json message_json = {{"role", role}, {"content", content}};
+            history_json.push_back(message_json);
         }
+        history_str = history_json.dump();
     } else {
         std::cerr << "No conversation history found." << std::endl;
     }
