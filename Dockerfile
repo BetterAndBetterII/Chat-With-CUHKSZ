@@ -59,7 +59,10 @@ COPY CMakeLists.txt .
 COPY backend ./backend
 COPY frontend ./frontend
 
-# 配置 CMake
+# 设置环境变量
+ENV HOME=/app
+
+# 配置 CMake，环境变量 HOME 为 /app
 RUN cmake -B build \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake \

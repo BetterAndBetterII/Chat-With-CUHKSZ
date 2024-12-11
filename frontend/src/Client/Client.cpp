@@ -20,8 +20,11 @@ bool Client::login(const std::string& username, const std::string& password) {
     req_json["password"] = password;
     //std::cout<<"test"<<std::endl;
     auto res = http_client_.Post("/login", req_json.dump(), "application/json");
-
-    return (res && res->status == 200);
+    if (res && res->status == 200) {
+        std::cout<<"Login"<<res->body<<std::endl;
+        return true;
+    }
+    return false;
 }
 
 std::string Client::send_message(const std::string& session_id, const std::string& message) {
@@ -31,6 +34,7 @@ std::string Client::send_message(const std::string& session_id, const std::strin
 
     auto res = http_client_.Post("/chat", req_json.dump(), "application/json");
     if (res && res->status == 200) {
+        std::cout<<"Send Message: "<<session_id<<" "<<message<<" \nResponse: "<<res->body<<std::endl;
         return res->body;
     }
 
@@ -39,6 +43,7 @@ std::string Client::send_message(const std::string& session_id, const std::strin
 std::string Client::get_chat_history(const std::string& session_id) {
     auto res = http_client_.Get(("/chat?session_id=" + bind_to_username(session_id)).c_str());
     if (res && res->status == 200) {
+        std::cout<<"Get Chat History: "<<session_id<<" \nResponse: "<<res->body<<std::endl;
         return res->body;
     }
     return "Error: " + (res ? std::to_string(res->status) : "No response");
@@ -47,12 +52,19 @@ std::string Client::get_chat_history(const std::string& session_id) {
 std::string Client::get_first_messages() {
     auto res = http_client_.Get("/chat");
     if (res && res->status == 200) {
+        // {
+        //     "123090848/767": "(user: HI!)"
+        // }
+        std::cout<<"Get First Messages: \nResponse: "<<res->body<<std::endl;
         return res->body;
     }
     return "Error: " + (res ? std::to_string(res->status) : "No response");
 }
 
 std::string Client::bind_to_username(const std::string& session_id){
-    std::cout << "Client: bind " << session_id << " to username-> " << username+"/"+session_id <<std::endl;
-    return username+"/"+session_id;
+    if (session_id.find("/") == -1) {
+        std::cout << "Client: bind " << session_id << " to username-> " << username+"/"+session_id <<std::endl;
+        return username + "/" + session_id;
+    }
+    return session_id;
 }

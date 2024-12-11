@@ -123,7 +123,14 @@ void Server::start() {
     });
 
     svr.Post("/chat", [&](const httplib::Request& req, httplib::Response& res) {
-        handle_post_request(req, res);
+        try
+        {
+            handle_post_request(req, res);
+        } catch (const std::exception& e) {
+            res.status = 500;
+            std::cout << "[POST] /chat 500 Internal server error: " << e.what() << std::endl;
+            res.set_content("Internal server error: " + std::string(e.what()), "text/plain");
+        }
         std::cout<<"[POST] /chat 200"<<std::endl;
     });
 
