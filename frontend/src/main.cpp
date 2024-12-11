@@ -706,7 +706,7 @@ private slots:
         QString password = passwordEdit->text();
 
         // 调用 Client 的 login 方法
-        if (/*client->login(username.toStdString(), password.toStdString())||*/true) {
+        if (client->login(username.toStdString(), password.toStdString())) {
             QMessageBox::information(this, "Login Successful", "Welcome!");
             openMainWindow();
         } else {

@@ -441,8 +441,9 @@ std::map<std::string, std::string> BookingSystem::_get_info(
     return _parse_info(response);
 }
 
-void BookingSystem::set_booker(const std::string& telephone, const std::string& reason, const std::string& details) {
+std::string BookingSystem::set_booker(const std::string& telephone, const std::string& reason, const std::string& details) {
     booker = Booker(telephone, reason, details);
+    return "Booker information set successfully";
 }
 
 std::string BookingSystem::book(
