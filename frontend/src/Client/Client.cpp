@@ -14,10 +14,10 @@ bool Client::login(const std::string& username, const std::string& password) {
     req_json["username"] = username;
     req_json["password"] = password;
 
-    auto res = http_client_.Post("/login", req_json.dump(), "application/json");
+    httplib::Result res = http_client_.Post("/login", req_json.dump(), "application/json");
     if (res && res->status == 200) {
-        auto res_json = json::parse(res->body);
-        return res_json.value("success", false);
+        auto message = res->body;
+        return message.find("Login successful") != -1;
     }
     return false;
 }
@@ -30,7 +30,7 @@ std::string Client::send_message(const std::string& session_id, const std::strin
 
     auto res = http_client_.Post("/chat", req_json.dump(), "application/json");
     if (res && res->status == 200) {
-        return res->body;
+        return json::parse(res->body).value("response", "");
     }
     return "Error: " + (res ? std::to_string(res->status) : "No response");
 }

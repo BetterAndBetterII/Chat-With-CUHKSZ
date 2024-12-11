@@ -665,12 +665,12 @@ public:
         setWindowTitle("Login");
         setFixedSize(800, 400);
 
-        QVBoxLayout *mainLayout = new QVBoxLayout(this);
+        auto *mainLayout = new QVBoxLayout(this);
         // mainLayout->setMargin(150);
         mainLayout->setContentsMargins(200, 100, 200, 150 );
         // 用户名输入
-        QHBoxLayout *usernameLayout = new QHBoxLayout();
-        QLabel *usernameLabel = new QLabel("Username:", this);
+        auto *usernameLayout = new QHBoxLayout();
+        auto *usernameLabel = new QLabel("Username:", this);
         QPalette pe;
         pe.setColor(QPalette::WindowText,Qt::white);
         usernameLabel->setPalette(pe);
@@ -716,7 +716,8 @@ private slots:
 
     void openMainWindow() {
         this->hide();  // 隐藏登录窗口
-        MainWindow *mainwindow = new MainWindow(client);
+        auto *mainwindow = new MainWindow(client);
+        std::cout << "Login success" << std::endl;
         mainwindow->show();
     }
 protected:
@@ -740,7 +741,7 @@ private:
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
-    Client client("night.betterspace.top", 8081);
+    Client client("night.betterspace.top", 8080);
     LoginWindow loginWindow(&client);
     loginWindow.show();
 
@@ -749,24 +750,24 @@ int main(int argc, char *argv[]) {
     std::string username = "123090490";
     std::string password = "SXH2005sxh@ZL";
 
-    // if (client.login(username, password)) {
-    //     std::cout << "Login successfully!" << std::endl;
-    //
-    //     // 发送消息
-    //     std::string session_id = "session_user123";
-    //     std::string response = client.send_message(session_id, "Hello, Server!");
-    //     std::cout << "Server response: " << response << std::endl;
-    //
-    //     // 获取聊天记录
-    //     std::string chat_history = client.get_chat_history(session_id);
-    //     std::cout << "Chat history: " << chat_history << std::endl;
-    //
-    //     // 获取所有会话的第一条消息
-    //     std::string first_messages = client.get_first_messages();
-    //     std::cout << "All first messages: " << first_messages << std::endl;
-    // } else {
-    //     std::cout << "Login failed!" << std::endl;
-    // }
+    if (client.login(username, password)) {
+        std::cout << "Login successfully!" << std::endl;
+
+        // 发送消息
+        std::string session_id = "session_user123";
+        std::string response = client.send_message(session_id, "Hello, Server!");
+        std::cout << "Server response: " << response << std::endl;
+
+        // 获取聊天记录
+        std::string chat_history = client.get_chat_history(session_id);
+        std::cout << "Chat history: " << chat_history << std::endl;
+
+        // 获取所有会话的第一条消息
+        std::string first_messages = client.get_first_messages();
+        std::cout << "All first messages: " << first_messages << std::endl;
+    } else {
+        std::cout << "Login failed!" << std::endl;
+    }
 
     return app.exec();
 }
