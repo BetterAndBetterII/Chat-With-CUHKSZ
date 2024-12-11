@@ -60,6 +60,9 @@ std::string Tools::handle_tool_call(const std::string& tool_name,  const json& a
     return "Unknown tool!";
 }
 bool Tools::is_valid_login(const std::string& username, const std::string& password) {
-    BlackBoardSystem bb(username, password);
-    return bb.login();
+    return bb->login();
+}
+
+std::string Tools::get_name(const std::string& username, const std::string& password) {
+    return bb->get_name();
 }

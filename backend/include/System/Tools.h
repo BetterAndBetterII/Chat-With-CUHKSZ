@@ -344,6 +344,8 @@ public:
     std::string handle_tool_call(const std::string &tool_name, const json& arguments);
 
     bool is_valid_login(const std::string& username, const std::string& password);
+
+    std::string get_name(const std::string& username, const std::string& password);
 };
 
 #endif // TOOLS_H

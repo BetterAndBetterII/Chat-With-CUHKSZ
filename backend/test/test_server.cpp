@@ -7,40 +7,29 @@ using json = nlohmann::json;
 #include <thread>
 #include "../../backend/include/Server/Server.h"
 
-class Client {
-public:
-    Client(const std::string& host, int port);
-
-    bool login(const std::string& username, const std::string& password);
-    std::string send_message(const std::string& session_id, const std::string& message);
-    std::string get_chat_history(const std::string& session_id);
-    std::string get_first_messages();
-
-private:
-    httplib::Client http_client_;
-};
-
+#include "../../frontend/include/Client/Client.h"
 Client::Client(const std::string& host, int port)
     : http_client_(host, port) {}
 
 bool Client::login(const std::string& username, const std::string& password) {
+
+    //存储username用于session的用户分类
+    this->username = username;
+
     json req_json;
     req_json["username"] = username;
     req_json["password"] = password;
-  //  std::cout<<"test"<<std::endl;
+    //std::cout<<"test"<<std::endl;
     auto res = http_client_.Post("/login", req_json.dump(), "application/json");
-    if (res && res->status == 200) {
-        return true; // 根据服务器的实现，状态码200即登录成功
-    }
-    return false;
+
+    return (res && res->status == 200);
 }
 
 std::string Client::send_message(const std::string& session_id, const std::string& message) {
     json req_json;
-    req_json["session_id"] = session_id;
+    req_json["session_id"] = bind_to_username(session_id);
     req_json["message"] = message;
-//    std::cout<<session_id<<" "<<message<<std::endl;
-
+    
     auto res = http_client_.Post("/chat", req_json.dump(), "application/json");
     if (res && res->status == 200) {
         return res->body;
@@ -48,9 +37,8 @@ std::string Client::send_message(const std::string& session_id, const std::strin
 
     return "Error:1 " + (res ? std::to_string(res->status) : "No response");
 }
-
-std::string Client::get_chat_history(const std::string&session_id) {
-    auto res = http_client_.Get(("/chat?session_id=" + session_id).c_str());
+std::string Client::get_chat_history(const std::string& session_id) {
+    auto res = http_client_.Get(("/chat?session_id=" + bind_to_username(session_id)).c_str());
     if (res && res->status == 200) {
         return res->body;
     }
@@ -65,10 +53,15 @@ std::string Client::get_first_messages() {
     return "Error: " + (res ? std::to_string(res->status) : "No response");
 }
 
+std::string Client::bind_to_username(const std::string& session_id){
+    std::cout << "Client: bind " << session_id << " to username-> " << username+"/"+session_id <<std::endl;
+    return username+"/"+session_id;
+}
+
 int main() {
     Server server;
     std::thread server_thread([&]() {
-        server.start();
+      //server.start();
     });
 
     // 等待服务器启动
@@ -76,34 +69,57 @@ int main() {
 
     Client client("localhost", 8080);
 
-    std::string username = "123090848";
-    std::string password = "1n";
+    //basic info input
+    std::string username = "";
+    std::string password = "";
+    const char* env_username = std::getenv("STUDENT_USERNAME");
+    const char* env_password = std::getenv("STUDENT_PASSWORD");
+    if (env_username) {
+        username = env_username;
+    } else {
+        std::cout << "Username:" << std::endl;
+        std::getline(std::cin, username);
+    }
+    if (env_password) {
+        password = env_password;
+    } else {
+        std::cout << "Password:" << std::endl;
+        std::getline(std::cin, password);
+    }
+
+    std::string session_id;
+    std::string message;
 
     if (client.login(username, password)) {
-  //      std::cout << "Login Successfully" << std::endl;
-        const std::string& session_id = "1";
-        std::string response = client.send_message(session_id, "Hello, Server!");
-        std::cout << "Server response: " << response << std::endl;
+        std::cout << "Login success!" << std::endl;
+        std::cout << "----Test send message----" << std::endl;
+        std::cout << "Session_id?" << std::endl;
+        std::getline(std::cin, session_id);
+        std::cout << "message?" << std::endl;
+        std::getline(std::cin, message);
+        std::string response = client.send_message(session_id, message);
+        std::cout << "Server response: \n" << response << std::endl;
 
         // 获取当前会话的历史记录
+        std::cout << "----Test get history----" << std::endl;
         std::string chat_history = client.get_chat_history(session_id);
-        std::cout << "Chat history: " << chat_history << std::endl;
+        std::cout << "Chat history: \n" << chat_history << std::endl;
 
         // 获取所有会话的第一条消息
+        std::cout << "----Test get first message----" << std::endl;
         std::string first_messages = client.get_first_messages();
-        std::cout << "All first messages: " << first_messages << std::endl;
+        std::cout << "All first messages: \n" << first_messages << std::endl;
     } else {
         std::cout << "Login failed!" << std::endl;
     }
 
-    server_thread.join();
     while (1) {
-        const std::string& session_id = "1";
-        std::string mes;
-        std::cin>>mes;
-        std::string response = client.send_message(session_id, mes);
-        std::cout << "Server response: " << response << std::endl;
+        std::cout << "message?" << std::endl;
+        std::getline(std::cin, message);
+        std::string response = client.send_message(session_id, message);
+        std::cout << "Server response: \n" << response << std::endl;
 
     }
+
     return 0;
 }
