@@ -37,7 +37,7 @@ std::string Client::send_message(const std::string& session_id, const std::strin
 
 // 获取聊天记录功能
 std::string Client::get_chat_history(const std::string& session_id) {
-    auto res = http_client_.Get(("/history?session_id=" + session_id).c_str());
+    auto res = http_client_.Get("/chat?session_id=" + session_id);
     if (res && res->status == 200) {
         return res->body;
     }

@@ -755,8 +755,8 @@ int main(int argc, char *argv[]) {
 
         // 发送消息
         std::string session_id = "session_user123";
-        std::string response = client.send_message(session_id, "Hello, Server!");
-        std::cout << "Server response: " << response << std::endl;
+        // std::string response = client.send_message(session_id, "Hello, Server!");
+        // std::cout << "Server response: " << response << std::endl;
 
         // 获取聊天记录
         std::string chat_history = client.get_chat_history(session_id);
