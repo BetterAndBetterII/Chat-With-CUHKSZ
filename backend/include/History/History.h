@@ -9,7 +9,7 @@ using json = nlohmann::json;
 
 class History {
 public:
-    explicit History(int number = 0);
+    explicit History(std::string session_id="000000/0");
     ~History() = default;
 
     std::string get_history_string() const;

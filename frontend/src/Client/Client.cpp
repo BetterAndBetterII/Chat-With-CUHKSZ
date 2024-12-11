@@ -41,7 +41,7 @@ std::string Client::send_message(const std::string& session_id, const std::strin
 std::string Client::get_chat_history(const std::string& session_id) {
     auto res = http_client_.Get(("/chat?session_id=" + bind_to_username(session_id)).c_str());
     if (res && res->status == 200) {
-        std::cout<<"Server: Get Chat History: "<<session_id<<" \nResponse: "<<res->body<<std::endl;
+        std::cout<<"Client: Get Chat History: "<<session_id<<" \nResponse: "<<res->body<<std::endl;
         return res->body;
     }
     return "Error: " + (res ? std::to_string(res->status) : "No response");
@@ -53,7 +53,7 @@ std::string Client::get_first_messages() {
         // {
         //     "123090848/767": "(user: HI!)"
         // }
-        std::cout<<"Get First Messages: \nResponse: "<<res->body<<std::endl;
+        std::cout<<"Client: Get First Messages: \nResponse: "<<res->body<<std::endl;
         return res->body;
     }
     return "Error: " + (res ? std::to_string(res->status) : "No response");

@@ -22,7 +22,7 @@ void Server::handle_post_request(const httplib::Request& req, httplib::Response&
     json req_json;
     try {
         req_json = json::parse(req_body.data(), req_body.data() + req_body.size());
-     //   std::cout<<"test1"<<std::endl;
+        //std::cout<<"test1"<<std::endl;
     } catch (const std::exception& e) {
         std::cerr << "Error parsing JSON: " << e.what() << std::endl;
         res.status = 400;  // Bad Request
@@ -88,15 +88,14 @@ std::string Server::handle_message(const std::string& session_id, const std::str
     if (sessions.find(session_id) == sessions.end()) {
         std::string username = session_id.substr(0,session_id.find('/'));
         sessions.emplace(session_id, Agent(username, user_password[username]));
-        //TODO
-        histories.emplace(session_id, History(std::stoi(session_id)));
+        histories.emplace(session_id, History(session_id));
     }
 
     Agent& agent = sessions[session_id];
     History& history = histories[session_id];
-  //  std::cout<<message<<std::endl;
+    //std::cout<<message<<std::endl;
     std::string response = agent.run_until_done(message);
- //   std::cout<<response<<std::endl;
+    //std::cout<<response<<std::endl;
     history.update_history(message, response);
 
     json res_json;

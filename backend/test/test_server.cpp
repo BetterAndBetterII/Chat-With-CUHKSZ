@@ -45,7 +45,7 @@ std::string Client::send_message(const std::string& session_id, const std::strin
 std::string Client::get_chat_history(const std::string& session_id) {
     auto res = http_client_.Get(("/chat?session_id=" + bind_to_username(session_id)).c_str());
     if (res && res->status == 200) {
-        std::cout<<"Server: Get Chat History: "<<session_id<<" \nResponse: "<<res->body<<std::endl;
+        std::cout<<"Client: Get Chat History: "<<session_id<<" \nResponse: "<<res->body<<std::endl;
         return res->body;
     }
     return "Error: " + (res ? std::to_string(res->status) : "No response");
@@ -57,7 +57,7 @@ std::string Client::get_first_messages() {
         // {
         //     "123090848/767": "(user: HI!)"
         // }
-        std::cout<<"Get First Messages: \nResponse: "<<res->body<<std::endl;
+        std::cout<<"Client: Get First Messages: \nResponse: "<<res->body<<std::endl;
         return res->body;
     }
     return "Error: " + (res ? std::to_string(res->status) : "No response");
@@ -73,6 +73,7 @@ std::string Client::bind_to_username(const std::string& session_id){
 
 
 int main() {
+    std::cout << "Make sure 8080 port is free for test to creat server!" << std::endl;
     Server server;
     std::thread server_thread([&]() {
       server.start();
@@ -126,6 +127,23 @@ int main() {
         // 获取当前会话的历史记录
         std::cout << "----Test get history----" << std::endl;
         std::string chat_history = client.get_chat_history(session_id);
+        std::cout << "Client: Chat history: \n" << chat_history << std::endl;
+
+        std::cout << "----Test send message----" << std::endl;
+        i = 2;
+        while (i--) {
+            std::cout << "Session_id?" << std::endl;
+            std::getline(std::cin, session_id);
+            std::cout << "message?" << std::endl;
+            std::getline(std::cin, message);
+            std::string response = client.send_message(session_id, message);
+            std::cout << "Server response: \n" << response << std::endl;
+
+        }
+
+        // 获取当前会话的历史记录
+        std::cout << "----Test get history----" << std::endl;
+        chat_history = client.get_chat_history(session_id);
         std::cout << "Client: Chat history: \n" << chat_history << std::endl;
 
     } else {
