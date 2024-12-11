@@ -2,13 +2,14 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <string>
 
-History::History(int number) {
+History::History(std::string session_id) {
     std::string history_folder = std::string(HISTORY_FOLDER);
-    std::cout<<history_folder<<std::endl;
+    std::cout<< "History: Constructor: history floder: " << history_folder<<std::endl;
     ensure_history_folder_exists(history_folder);
 
-    if (number != 0) {
+    /*if (number != 0) {
         // Load specified log file
         filename = history_folder + "/conversation_log" + std::to_string(number) + ".json";
         std::ifstream history_file(filename);
@@ -34,6 +35,20 @@ History::History(int number) {
                 break;
             }
         } while (true);
+        conversation_history = nlohmann::json::object();
+    }*/
+    //注意把"123090613/1"变成"123090613_1"防止被看作文件目录
+    filename = history_folder + "/conversation_log_" + session_id.replace(9,1,"_") + ".json";
+    std::ifstream history_file(filename);
+    if (history_file.is_open()) {
+        try {
+            history_file >> conversation_history;
+        } catch (const nlohmann::json::parse_error& e) {
+            std::cerr << "Failed to parse history file, initializing as empty history: " << e.what() << std::endl;
+            conversation_history = nlohmann::json::object();
+        }
+    } else {
+        std::cerr << "Cannot read history file! Initializing as empty history." << std::endl;
         conversation_history = nlohmann::json::object();
     }
 }

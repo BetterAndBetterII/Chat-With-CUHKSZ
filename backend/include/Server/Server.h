@@ -22,10 +22,11 @@ public:
 
     std::string handle_message(const std::string& session_id, const std::string& message);
     std::string get_chat_history(const std::string& session_id);
-    std::string get_all_first_messages();
+    std::string get_all_first_messages(const std::string& username);
 private:
     std::unordered_map<std::string, Agent> sessions;
     std::unordered_map<std::string, History> histories;
+    std::unordered_map<std::string, std::string> user_password;
 
 };
 

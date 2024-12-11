@@ -10,6 +10,10 @@ Server::~Server() = default;
 
 bool Server::login(const std::string& username, const std::string& password) {
     Agent agent(username, password);
+    //存储密码用于后续请求
+    if(agent.is_valid_login()){
+        user_password[username]=password;
+    }
     return agent.is_valid_login();
 }
 
@@ -18,7 +22,7 @@ void Server::handle_post_request(const httplib::Request& req, httplib::Response&
     json req_json;
     try {
         req_json = json::parse(req_body.data(), req_body.data() + req_body.size());
-     //   std::cout<<"test1"<<std::endl;
+        //std::cout<<"test1"<<std::endl;
     } catch (const std::exception& e) {
         std::cerr << "Error parsing JSON: " << e.what() << std::endl;
         res.status = 400;  // Bad Request
@@ -40,10 +44,14 @@ void Server::handle_post_request(const httplib::Request& req, httplib::Response&
 void Server::handle_get_request(const httplib::Request& req, httplib::Response& res) {
     if (req.has_param("session_id")) {
         std::string session_id = req.get_param_value("session_id");
+        std::cout << "Server: handle get request: /chat?session_id=" << session_id << std::endl;
         auto history = get_chat_history(session_id);
         res.set_content(history, "application/json");
-    } else {
-        auto all_first_messages = get_all_first_messages();
+    } 
+    else if(req.has_param("username")){
+        std::string username = req.get_param_value("username");
+        std::cout << "Server: handle get request: /chat?username=" << username << std::endl;
+        auto all_first_messages = get_all_first_messages(username);
         res.set_content(all_first_messages, "application/json");
     }
 }
@@ -59,15 +67,18 @@ std::string Server::get_chat_history(const std::string& session_id) {
     return "{\"error\": \"No history available for session ID: " + session_id + "\"}";
 }
 
-std::string Server::get_all_first_messages() {
+std::string Server::get_all_first_messages(const std::string& username) {
     json res_json;
     for (const auto& [session_id, history] : histories) {
-        std::string history_str = history.get_history_string();
-        // 解析为json::array
-        json history_json = json::parse(history_str);
-        // 提取历史记录的第一条消息
-        if (!history_json.empty() && history_json[0].contains("content")) {
-            res_json[session_id] = history_json[0]["content"];
+        if(session_id.find(username)==0){
+            std::cout << "Server: get_all_first_message: find one session for "<< username <<std::endl;
+            std::string history_str = history.get_history_string();
+            // 解析为json::array
+            json history_json = json::parse(history_str);
+            // 提取历史记录的第一条消息
+            if (!history_json.empty() && history_json[0].contains("content")) {
+                res_json[session_id] = history_json[0]["content"];
+            }
         }
     }
     return res_json.dump();
@@ -75,15 +86,16 @@ std::string Server::get_all_first_messages() {
 
 std::string Server::handle_message(const std::string& session_id, const std::string& message) {
     if (sessions.find(session_id) == sessions.end()) {
-        sessions.emplace(session_id, Agent("default_username", "default_password"));
-        histories.emplace(session_id, History(std::stoi(session_id)));
+        std::string username = session_id.substr(0,session_id.find('/'));
+        sessions.emplace(session_id, Agent(username, user_password[username]));
+        histories.emplace(session_id, History(session_id));
     }
 
     Agent& agent = sessions[session_id];
     History& history = histories[session_id];
-  //  std::cout<<message<<std::endl;
+    //std::cout<<message<<std::endl;
     std::string response = agent.run_until_done(message);
- //   std::cout<<response<<std::endl;
+    //std::cout<<response<<std::endl;
     history.update_history(message, response);
 
     json res_json;
