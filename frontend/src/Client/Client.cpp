@@ -10,23 +10,23 @@
 Client::Client(const std::string& host, int port)
     : http_client_(host, port) {}
 
-bool Client::login(const std::string& username, const std::string& password) {`
+bool Client::login(const std::string& username, const std::string& password) {
+
+    //存储username用于session的用户分类
+    this->username = username;
+
     json req_json;
     req_json["username"] = username;
     req_json["password"] = password;
-  std::cout<<"test"<<std::endl;
+    //std::cout<<"test"<<std::endl;
     auto res = http_client_.Post("/login", req_json.dump(), "application/json");
-    if (res && res->status == 200) {
-        auto res_json = json::parse(res->body);
-        return res_json.value("success", false);
-    }
 
-    return false;
+    return (res && res->status == 200);
 }
 
-std::string Client::send_message(int session_id, const std::string& message) {
+std::string Client::send_message(const std::string& session_id, const std::string& message) {
     json req_json;
-    req_json["session_id"] = session_id;
+    req_json["session_id"] = bind_to_username(session_id);
     req_json["message"] = message;
 
     auto res = http_client_.Post("/chat", req_json.dump(), "application/json");
@@ -34,10 +34,10 @@ std::string Client::send_message(int session_id, const std::string& message) {
         return res->body;
     }
 
-    return "Error: " + (res ? std::to_string(res->status) : "No response");
+    return "Error:1 " + (res ? std::to_string(res->status) : "No response");
 }
-std::string Client::get_chat_history(int session_id) {
-    auto res = http_client_.Get(("/history?session_id=" + session_id).c_str());
+std::string Client::get_chat_history(const std::string& session_id) {
+    auto res = http_client_.Get(("/chat?session_id=" + bind_to_username(session_id)).c_str());
     if (res && res->status == 200) {
         return res->body;
     }
@@ -45,42 +45,14 @@ std::string Client::get_chat_history(int session_id) {
 }
 
 std::string Client::get_first_messages() {
-    auto res = http_client_.Get("/first_messages");
+    auto res = http_client_.Get("/chat");
     if (res && res->status == 200) {
         return res->body;
     }
     return "Error: " + (res ? std::to_string(res->status) : "No response");
 }
-int main() {
-    Server server;
-    std::thread server_thread([&]() {
-        server.start();
-    });
 
-    // 等待服务器启动
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-
-    Client client("localhost", 8080);
-
-    std::string username;
-    std::string password;
-
-    if (client.login(username, password)) {
-        std::cout << "Login Successfully" << std::endl;
-        std::string session_id = "1";
-        std::string response = client.send_message(session_id, "Hello, Server!");
-        std::cout << "Server response: " << response << std::endl;
-
-        // 获取当前会话的历史记录
-        std::string chat_history = client.get_chat_history(session_id);
-        std::cout << "Chat history: " << chat_history << std::endl;
-
-        // 获取所有会话的第一条消息
-        std::string first_messages = client.get_first_messages();
-        std::cout << "All first messages: " << first_messages << std::endl;
-    } else {
-        std::cout << "Login failed!" << std::endl;
-    }
-
-    return 0;
+std::string Client::bind_to_username(const std::string& session_id){
+    std::cout << "Client: bind " << session_id << " to username-> " << username+"/"+session_id <<std::endl;
+    return username+"/"+session_id;
 }

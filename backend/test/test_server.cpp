@@ -61,7 +61,7 @@ std::string Client::bind_to_username(const std::string& session_id){
 int main() {
     Server server;
     std::thread server_thread([&]() {
-        server.start();
+      //server.start();
     });
 
     // 等待服务器启动
@@ -87,29 +87,37 @@ int main() {
         std::getline(std::cin, password);
     }
 
+    std::string session_id;
+    std::string message;
+
     if (client.login(username, password)) {
-        std::cout << "Test send message" << std::endl;
-        const std::string& session_id = "1";
-        std::string response = client.send_message(session_id, "Hello, Server!");
-        std::cout << "Server response: " << response << std::endl;
+        std::cout << "Login success!" << std::endl;
+        std::cout << "----Test send message----" << std::endl;
+        std::cout << "Session_id?" << std::endl;
+        std::getline(std::cin, session_id);
+        std::cout << "message?" << std::endl;
+        std::getline(std::cin, message);
+        std::string response = client.send_message(session_id, message);
+        std::cout << "Server response: \n" << response << std::endl;
 
         // 获取当前会话的历史记录
+        std::cout << "----Test get history----" << std::endl;
         std::string chat_history = client.get_chat_history(session_id);
-        std::cout << "Chat history: " << chat_history << std::endl;
+        std::cout << "Chat history: \n" << chat_history << std::endl;
 
         // 获取所有会话的第一条消息
+        std::cout << "----Test get first message----" << std::endl;
         std::string first_messages = client.get_first_messages();
-        std::cout << "All first messages: " << first_messages << std::endl;
+        std::cout << "All first messages: \n" << first_messages << std::endl;
     } else {
         std::cout << "Login failed!" << std::endl;
     }
 
     while (1) {
-        const std::string& session_id = "1";
-        std::string mes;
-        std::getline(std::cin, mes);
-        std::string response = client.send_message(session_id, mes);
-        std::cout << "Server response: " << response << std::endl;
+        std::cout << "message?" << std::endl;
+        std::getline(std::cin, message);
+        std::string response = client.send_message(session_id, message);
+        std::cout << "Server response: \n" << response << std::endl;
 
     }
 
