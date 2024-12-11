@@ -36,5 +36,7 @@ public:
 
     bool is_valid_login();
 
+    std::string get_name() ;
+
 };
 #endif
