@@ -2,10 +2,8 @@
 // Created by 34011 on 24-12-4.
 //
 #include "../../include/Client/Client.h"
-//#include "../../include/Server/Server.h"
 #include "../../include/third_party/httplib.h"
 #include <iostream>
-#include "../../backend/include/Server/Server.h"
 
 Client::Client(const std::string& host, int port)
     : http_client_(host, port) {}
