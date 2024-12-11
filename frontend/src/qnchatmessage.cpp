@@ -21,6 +21,13 @@
 QNChatMessage::QNChatMessage(QWidget *parent) : QWidget(parent)
 {
     this->setFixedSize(parent->width(),parent->height());
+    
+    // 分别设置垂直和水平滚动条为隐藏
+    this->setStyleSheet(
+        "QScrollBar:vertical {width:0px;}"
+        "QScrollBar:horizontal {height:0px;}"
+    );
+    
     QFont te_font = this->font();
     te_font.setFamily("MicrosoftYaHei");
     te_font.setPointSize(12);

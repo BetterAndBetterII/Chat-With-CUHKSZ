@@ -41,6 +41,10 @@
 #include "qnchatmessage.h"
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QtConcurrent/QtConcurrent>
+#include <QFuture>
+#include <QMessageBox>
+#include <QUuid>
 
 class CustomTextEdit : public QTextEdit {
     Q_OBJECT
@@ -409,10 +413,10 @@ public:
             // 清空当前聊天内容
             chatList->clear();
             messageInput->clear();
-            
+
+            session_id = QUuid::createUuid().toString(QUuid::WithoutBraces).toStdString();
             // 创建新的会话
-            currentSessionIndex = sessionHistory.size();
-            sessionHistory[currentSessionIndex] = QList<QString>();
+            currentSessionIndex = std::max(0, historyList->count() - 1);
         });
 
         setWindowTitle("Chat_With_CUHKSZ >_<");
@@ -431,6 +435,15 @@ public:
                 padding: 10px 0;
             }
         )");
+
+        // 添加信号连接
+        connect(this, &ChatWindow::messageReceived, 
+                this, &ChatWindow::handleReceivedMessage, 
+                Qt::QueuedConnection);
+        
+        connect(this, &ChatWindow::errorOccurred,
+                this, &ChatWindow::handleError,
+                Qt::QueuedConnection);
     }
 
     // MAP: chathistory_index: session_id
@@ -465,7 +478,7 @@ public:
     void dealMessage(QNChatMessage *messageW, QListWidgetItem *item, QString text, QNChatMessage::User_Type type)
     {
         // 计算消息的实际大小
-        QSize size = messageW->fontRect(text);
+        QSize size = messageW->fontRect(text + "  ");
         messageW->setFixedWidth(this->width());
         item->setSizeHint(size);
         messageW->setText(text, size, type);
@@ -473,9 +486,15 @@ public:
     }
     // 添加消息到聊天窗口
     void addMessage(QListWidget *chatList, const QString &message, bool isUser) {
+        QString messageText = message;
+        // 移除最后的"<exit>"
+        if (messageText.endsWith("\n\n<exit>") && messageText.length() > 6) {
+            messageText.remove(messageText.length() - 6, 6);
+        }
+
         QNChatMessage* messageW = new QNChatMessage(chatList);
         QListWidgetItem* item = new QListWidgetItem(chatList);
-        dealMessage( messageW, item, message, isUser?QNChatMessage::User_Me:QNChatMessage::User_She);
+        dealMessage(messageW, item, messageText, isUser ? QNChatMessage::User_Me : QNChatMessage::User_She);
         messageW->setTextSuccess();
     }
 
@@ -502,7 +521,7 @@ public:
         // clear chat list
         chatList->clear();  
 
-        std::string session_id = chathistory_index_to_session_id[index];
+        session_id = chathistory_index_to_session_id[index];
         std::string json_str = client->get_chat_history(session_id);
         
         if (json_str != "null") {
@@ -532,28 +551,49 @@ public:
         }
     }
 
+    void sendMessageAsync(const QString &message) {
+        // 添加用户消息到当前会话
+        addMessage(chatList, message, true);
+        messageInput->clear();
+
+        // 创建新线程处理网络请求
+        QFuture<void> future = QtConcurrent::run([this, message]() {
+            try {
+                // 在新线程中发送消息
+                std::string response = client->send_message(session_id, message.toStdString());
+                json response_json = json::parse(response);
+                std::string response_content = response_json["response"];
+
+                // 使用信号将响应发送回主线程
+                emit messageReceived(QString::fromStdString(response_content));
+            } catch (const std::exception& e) {
+                emit errorOccurred(QString("Error: %1").arg(e.what()));
+            }
+        });
+    }
+
     void sendMessage() {
         QString message = messageInput->toPlainText().trimmed();
         if (!message.isEmpty()) {
-            // 添加用户消息到当前会话
-            addMessage(chatList, message, true);
-
-            // 使用 Client 的 send_message 方法获取回复
-            std::string response = client->send_message(session_id, message.toStdString());
-            json response_json = json::parse(response);
-            std::string response_content = response_json["response"];
-
-            // 添加服务器返回的回复
-            addMessage(chatList, QString::fromStdString(response_content), false);
-
-            messageInput->clear();
-
-            updateHistoryList();
+            sendMessageAsync(message);
         }
     }
 
     signals:
         void backToWelcomeWindow(); // 信号用于切换回 WelcomeWindow
+        void messageReceived(const QString &message);
+        void errorOccurred(const QString &error);
+
+private slots:
+    void handleReceivedMessage(const QString &response) {
+        // 在主线程中更新UI
+        addMessage(chatList, response, false);
+        updateHistoryList();
+    }
+    
+    void handleError(const QString &error) {
+        QMessageBox::warning(this, "Error", error);
+    }
 
 private:
     QListWidget *historyList;
@@ -584,16 +624,16 @@ public:
         setCentralWidget(stackedWidget);
 
         // 默认显示 WelcomeWindow
-        stackedWidget->setCurrentWidget(welcomeWindow);
+        stackedWidget->setCurrentWidget(chatWindow);
 
         // 连接信号和槽，切换界面
         connect(chatWindow, &ChatWindow::backToWelcomeWindow, [stackedWidget, welcomeWindow]() {
             stackedWidget->setCurrentWidget(welcomeWindow);
-        });
+        });  // 切换到欢迎窗口
 
         connect(welcomeWindow, &WelcomeWindow::goToChatWindow, [stackedWidget, chatWindow]() {
             stackedWidget->setCurrentWidget(chatWindow);
-        });
+        });  // 切换到聊天窗口
 
         resize(1000, 750);
     }
@@ -742,10 +782,8 @@ private slots:
 
     void openMainWindow() {
         this->hide();  // 隐藏登录窗口
-        // auto *mainwindow = new MainWindow(client);
-        auto *chatWindow = new ChatWindow(client);
-        std::cout << "Login success" << std::endl;
-        chatWindow->show();
+        auto *mainWindow = new MainWindow(client);
+        mainWindow->show();
     }
 protected:
     void paintEvent(QPaintEvent *event)
