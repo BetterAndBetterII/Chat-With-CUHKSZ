@@ -1,8 +1,8 @@
 //
 // Created by Gary on 24-11-24.
 
-#ifndef CHAT_WITH_CUHKSZ_BLACKBOARD_H
-#define CHAT_WITH_CUHKSZ_BLACKBOARD_H
+#ifndef CHAT_WITH_CUHKSZ_BOOKING_H
+#define CHAT_WITH_CUHKSZ_BOOKING_H
 
 #include "../../include/System/System.h"
 #include <map>
@@ -117,4 +117,4 @@ public:
 };
 
 
-#endif //CHAT_WITH_CUHKSZ_BLACKBOARD_H
+#endif //CHAT_WITH_CUHKSZ_BOOKING_H
