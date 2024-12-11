@@ -2,6 +2,9 @@ name: Build and Release ChatWithCUHKSZ Desktop
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - deploy/action
 
 env:
   BUILD_TYPE: Release
@@ -89,10 +92,6 @@ jobs:
         run: |
           if (-Not (Get-Command git -ErrorAction SilentlyContinue)) {
             choco install -y git --installargs 'INSTALLDIR=C:\Program Files\Git' --no-progress
-          }
-          
-          if (-Not (Test-Path "C:\Python311\python.exe")) {
-            choco install -y python --version=3.11.0 --installargs 'INSTALLDIR=C:\Python311' --no-progress
           }
           
           # Windows SDK 的检查比较特殊，需要检查注册表
