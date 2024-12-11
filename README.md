@@ -15,6 +15,7 @@
 2. 后端快速启动：
 
 ```bash
+docker pull ghcr.io/betterandbetterii/chat-with-cuhksz:latest
 docker run -d --name chat-with-cuhksz-backend -p 8080:8080 ghcr.io/betterandbetterii/chat-with-cuhksz:latest
 ```
 

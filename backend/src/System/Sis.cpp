@@ -1,161 +1,27 @@
 //
 // Created by Wen on 24-11-27.
 //
+
 #include "../../include/System/Sis.h"
 #include <iostream> //std::cerr
-#include <sstream> 
-#include <fstream>
-#include <cstring>
-#include <regex> //space_cutter()
-#include <chrono> //missDue() 
+#include <regex> //get_grades() course_parser()
 #include <filesystem> //destructor
-#include <random>
+#include <random> //login()
 
 using std::string;
 using std::vector;
 using std::cout;
 using std::endl;
 
-SisSystem::SisSystem(const string& username, const string& password) : curl_global_manager(){
-    //初始化变量
+SisSystem::SisSystem(const string& username, const string& password) : System(username, password){
     this->command_list = {
         "get_schedule",
         "get_course",
         "get_term_grades"
     };
-    this->username = username;
-    this->password = password;
-    this->sis_handle = curl_easy_init();
-    // 自定义 HTTP 请求头
-    this->headers = curl_slist_append(headers, "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36");
-    headers = curl_slist_append(headers, "Connection: close");
-    curl_easy_setopt(sis_handle, CURLOPT_HTTPHEADER, headers);
-    this->is_login = false;
-
 }
 
-SisSystem::~SisSystem(){
-    if(sis_handle){
-        curl_easy_cleanup(sis_handle);
-        curl_slist_free_all(headers); // 释放 headers
-        //delete siscookie.txt
-            std::filesystem::path filepath = cookiefile;  // bbCookies.txt路径
-            try {
-            if (std::filesystem::remove(filepath)) {
-                //cout << "CookieFile deleted successfully\n";
-            } else {
-                cout << "CookieFile does not exist or could not be deleted\n";
-            }
-            } catch (const std::filesystem::filesystem_error& e) {
-            std::cerr << "Error: " << e.what() << "\n";
-            }  
-        //调试：检测sis_handle是否清除
-        //cout << "sis_handle cleaned up" << endl;
-    }
-}
-
-//callback functions implementation
-size_t SisSystem::ignore_calback(void *ptr, size_t size, size_t nmemb, void *userdata) {
-    return size * nmemb;  // 只是返回数据大小，忽略响应体
-}
-
-size_t SisSystem::write_callback(char *data, size_t size, size_t nmemb, void *clientp)
-{
-  size_t realsize = size * nmemb;
-  struct Memory *mem =(struct Memory *)clientp;
- 
-  char *ptr = (char*)realloc(mem->response, mem->size + realsize + 1);
-  if(!ptr)
-    return 0;  /* out of memory */
- 
-  mem->response = ptr;
-  memcpy(&(mem->response[mem->size]), data, realsize);
-  mem->size += realsize;
-  mem->response[mem->size] = 0;
- 
-  return realsize;
-}
-
-size_t SisSystem::header_callback(char *ptr, size_t size, size_t nmemb, void *userdata) {
-    // 计算头部的大小
-    size_t header_size = size * nmemb;
-    // 打印响应头
-    cout << "---Response Header----" << endl;
-    printf("%.*s", (int)header_size, ptr);
-    return header_size; // 返回处理的字节数
-}
-
-size_t SisSystem::debug_callback(CURL *handle, curl_infotype type, char *data, size_t size, void *userptr) {
-    (void)handle;  // 如果不需要 handle，可以忽略
-    (void)userptr; // 如果不需要 userptr，可以忽略
-
-    switch (type) {
-        case CURLINFO_TEXT:
-            break;
-        case CURLINFO_HEADER_OUT:
-            fprintf(stderr, ">> Request Header: %.*s", (int)size, data);
-            break;
-        case CURLINFO_DATA_OUT:
-            fprintf(stderr, ">> Request Body: %.*s", (int)size, data);
-            break;
-        case CURLINFO_HEADER_IN:
-            fprintf(stderr, "<< Response Header: %.*s", (int)size, data);
-            break;
-        case CURLINFO_DATA_IN:
-            break;
-        default:
-            break;
-    }
-    return 0;
-}
-
-vector<string> SisSystem::xpathQuery(const string& xmlContent, const string& xpathExpr)const {
-    vector<string> output;
-    // 将字符串形式的XML内容解析为libxml2文档对象
-    xmlDocPtr doc = htmlReadMemory(xmlContent.c_str(), xmlContent.size(), NULL, "utf-8", HTML_PARSE_RECOVER|HTML_PARSE_NOERROR);
-    if (doc == nullptr) {
-        std::cerr << "Failed to parse document\n";
-        return output;
-    }
-
-    // 创建XPath上下文，用于在该文档中执行XPath查询
-    xmlXPathContextPtr context = xmlXPathNewContext(doc);
-    if (context == nullptr) {
-        std::cerr << "Failed to create XPath context\n";
-        xmlFreeDoc(doc);
-        return output;
-    }
-
-    // 使用XPath表达式在文档中查找匹配的节点
-    xmlXPathObjectPtr result = xmlXPathEvalExpression((const xmlChar*)xpathExpr.c_str(), context);
-    if (result == nullptr) {
-        std::cerr << "Failed to evaluate XPath expression\n";
-        xmlXPathFreeContext(context);
-        xmlFreeDoc(doc);
-        return output;
-    }
-
-    if (xmlXPathNodeSetIsEmpty(result->nodesetval)) {
-        //cout << "No results\n";
-        //如果没有匹配正确的内容则返回空的output
-    } else {
-        // 遍历找到的节点集合，获取每个节点的内容
-        xmlNodeSetPtr nodes = result->nodesetval;
-        for (int i = 0; i < nodes->nodeNr; i++) {
-            xmlNodePtr node = nodes->nodeTab[i];
-            xmlChar* content = xmlNodeGetContent(node);
-            output.push_back(reinterpret_cast<char*>(content));
-            xmlFree(content);
-        }
-    }
-
-    // 释放XPath对象和上下文资源
-    xmlXPathFreeObject(result);
-    xmlXPathFreeContext(context);
-    xmlFreeDoc(doc);
-    return output;
-}
-
+SisSystem::~SisSystem(){}
 
 //login function implementation
 bool SisSystem::login(){
@@ -164,30 +30,30 @@ bool SisSystem::login(){
     }
 
     //尝试登录
-    if(sis_handle){
+    if(handle){
 
         CURLcode res;
 
         //忽略登录过程返回的响应体（注释下行可把响应体打印到终端）
-        curl_easy_setopt(sis_handle, CURLOPT_WRITEFUNCTION, ignore_calback);
+        curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, ignore_calback);
         //打印详细输出
-        //curl_easy_setopt(sis_handle, CURLOPT_VERBOSE, 1L);
-        //curl_easy_setopt(sis_handle, CURLOPT_DEBUGFUNCTION, debug_callback);
+        //curl_easy_setopt(handle, CURLOPT_VERBOSE, 1L);
+        //curl_easy_setopt(handle, CURLOPT_DEBUGFUNCTION, debug_callback);
 
         // 启用自动cookie处理，指定cookie文件
         cookiefile = username + "sisCookies.txt";
-        curl_easy_setopt(sis_handle, CURLOPT_COOKIEJAR,  cookiefile.c_str());  // 保存cookies
-        curl_easy_setopt(sis_handle, CURLOPT_COOKIEFILE, cookiefile.c_str()); // 发送保存的cookies
+        curl_easy_setopt(handle, CURLOPT_COOKIEJAR,  cookiefile.c_str());  // 保存cookies
+        curl_easy_setopt(handle, CURLOPT_COOKIEFILE, cookiefile.c_str()); // 发送保存的cookies
 
         //logout
-        //curl_easy_setopt(sis_handle, CURLOPT_URL, "https://sis.cuhk.edu.cn/psp/csprd/EMPLOYEE/HRMS/?cmd=logout");
-        //curl_easy_setopt(sis_handle, CURLOPT_HTTPGET, 1L);
-        //curl_easy_setopt(sis_handle, CURLOPT_FOLLOWLOCATION, 1L);
-        //curl_easy_perform(sis_handle);
-        //curl_easy_setopt(sis_handle, CURLOPT_URL, "https://sts.cuhk.edu.cn/adfs/ls/?wa=wsignout1.0");
-        //curl_easy_perform(sis_handle);
-        //curl_easy_setopt(sis_handle, CURLOPT_URL, "https://sts.cuhk.edu.cn/adfs/oauth2/logout");
-        //curl_easy_perform(sis_handle);
+        //curl_easy_setopt(handle, CURLOPT_URL, "https://sis.cuhk.edu.cn/psp/csprd/EMPLOYEE/HRMS/?cmd=logout");
+        //curl_easy_setopt(handle, CURLOPT_HTTPGET, 1L);
+        //curl_easy_setopt(handle, CURLOPT_FOLLOWLOCATION, 1L);
+        //curl_easy_perform(handle);
+        //curl_easy_setopt(handle, CURLOPT_URL, "https://sts.cuhk.edu.cn/adfs/ls/?wa=wsignout1.0");
+        //curl_easy_perform(handle);
+        //curl_easy_setopt(handle, CURLOPT_URL, "https://sts.cuhk.edu.cn/adfs/oauth2/logout");
+        //curl_easy_perform(handle);
 
         //向sts.cuhk.edu.cn发送登录请求(POST)
         string url = string("https://sts.cuhk.edu.cn/adfs/oauth2/authorize?")
@@ -197,14 +63,14 @@ bool SisSystem::login(){
             + "&client-request-id=" + "e4ad901b-ac83-4ace-8413-0040020000e8";
 
         string strdata ="UserName=cuhksz\\" + username + "&Kmsi=true&AuthMethod=FormsAuthentication&Password=" + password ; //POST data
-        curl_easy_setopt(sis_handle, CURLOPT_POSTFIELDS, strdata.c_str());
-        curl_easy_setopt(sis_handle, CURLOPT_FOLLOWLOCATION, 1L);
-        curl_easy_setopt(sis_handle, CURLOPT_URL, url.c_str() );
+        curl_easy_setopt(handle, CURLOPT_POSTFIELDS, strdata.c_str());
+        curl_easy_setopt(handle, CURLOPT_FOLLOWLOCATION, 1L);
+        curl_easy_setopt(handle, CURLOPT_URL, url.c_str() );
 
-        res = curl_easy_perform(sis_handle);
+        res = curl_easy_perform(handle);
 
         char* final_url;
-        curl_easy_getinfo(sis_handle, CURLINFO_EFFECTIVE_URL, &final_url);
+        curl_easy_getinfo(handle, CURLINFO_EFFECTIVE_URL, &final_url);
         string code = string(final_url).substr(string(final_url).find("code=")+5);
         
         url = string("https://sis.cuhk.edu.cn/psp/csprd/?")
@@ -237,21 +103,21 @@ bool SisSystem::login(){
                 "&pwd=" + randomstring +
                 "&ptlangsel=" + "ENG";
             
-        curl_easy_setopt(sis_handle, CURLOPT_POSTFIELDS, strdata.c_str());
-        curl_easy_setopt(sis_handle, CURLOPT_URL, url.c_str() );
-        curl_easy_setopt(sis_handle, CURLOPT_FOLLOWLOCATION, 1L);
-        res = curl_easy_perform(sis_handle);
+        curl_easy_setopt(handle, CURLOPT_POSTFIELDS, strdata.c_str());
+        curl_easy_setopt(handle, CURLOPT_URL, url.c_str() );
+        curl_easy_setopt(handle, CURLOPT_FOLLOWLOCATION, 1L);
+        res = curl_easy_perform(handle);
 
         // 手动添加 Cookie
-        curl_easy_setopt(sis_handle, CURLOPT_COOKIE, "PS_DEVICEFEATURES=width:1728 height:1152 pixelratio:1.25 touch:0 geolocation:1 websockets:1 webworkers:1 datepicker:1 dtpicker:1 timepicker:1 dnd:1 sessionstorage:1 localstorage:1 history:1 canvas:1 svg:1 postmessage:1 hc:0");
+        curl_easy_setopt(handle, CURLOPT_COOKIE, "PS_DEVICEFEATURES=width:1728 height:1152 pixelratio:1.25 touch:0 geolocation:1 websockets:1 webworkers:1 datepicker:1 dtpicker:1 timepicker:1 dnd:1 sessionstorage:1 localstorage:1 history:1 canvas:1 svg:1 postmessage:1 hc:0");
         url = "https://sis.cuhk.edu.cn/psc/csprd/EMPLOYEE/HRMS/s/WEBLIB_PTBR.ISCRIPT1.FieldFormula.IScript_StartPage?&";
-        curl_easy_setopt(sis_handle, CURLOPT_URL, url.c_str() );
-        curl_easy_setopt(sis_handle, CURLOPT_HTTPGET, 1L);
-        curl_easy_setopt(sis_handle, CURLOPT_FOLLOWLOCATION, 1L);
+        curl_easy_setopt(handle, CURLOPT_URL, url.c_str() );
+        curl_easy_setopt(handle, CURLOPT_HTTPGET, 1L);
+        curl_easy_setopt(handle, CURLOPT_FOLLOWLOCATION, 1L);
 
-        res = curl_easy_perform(sis_handle);
+        res = curl_easy_perform(handle);
 
-        curl_easy_getinfo(sis_handle, CURLINFO_EFFECTIVE_URL, &final_url);
+        curl_easy_getinfo(handle, CURLINFO_EFFECTIVE_URL, &final_url);
 
         if(res != CURLE_OK){
             std::cerr << "Login failed because:" << curl_easy_strerror(res) << endl;
@@ -268,92 +134,10 @@ bool SisSystem::login(){
 
     }
 
-    std::cerr << "Failed to initialize sis_handle." << endl;
+    std::cerr << "Failed to initialize handle." << endl;
     return false;
 
 }
-
-string SisSystem::getRequest(const string& url)const{
-    string response = "";
-    Memory chunk = {nullptr, 0};
-    if(is_login){
-        curl_easy_setopt(sis_handle, CURLOPT_URL, url.c_str());
-        curl_easy_setopt(sis_handle, CURLOPT_FOLLOWLOCATION, 1L);
-        curl_easy_setopt(sis_handle, CURLOPT_HTTPGET, 1L);
-        curl_easy_setopt(sis_handle, CURLOPT_WRITEFUNCTION, write_callback);
-        curl_easy_setopt(sis_handle, CURLOPT_WRITEDATA, (void*)&chunk);
-        CURLcode res;
-        res = curl_easy_perform(sis_handle);  
-        if(res != CURLE_OK){
-            std::cerr<< "Get request failed:" << curl_easy_strerror(res) << endl;
-        }
-
-        if (chunk.response){
-            response = chunk.response;
-            free(chunk.response);
-        }
-        else{
-            std::cerr << "No response received from server.\n";
-        }
-
-        return response; 
-    }
-    std::cerr<< "GetRequest failed:Login before get request" << endl;
-    return response;
-}
-
-string SisSystem::postRequest(const string& url, const string& strdata)const{
-    string response = "";
-    Memory chunk = {nullptr, 0};
-    if(is_login){
-        curl_easy_setopt(sis_handle, CURLOPT_URL, url.c_str());
-        curl_easy_setopt(sis_handle, CURLOPT_WRITEFUNCTION, write_callback);
-        curl_easy_setopt(sis_handle, CURLOPT_WRITEDATA, (void*)&chunk);
-        const char* data = strdata.c_str();
-        curl_easy_setopt(sis_handle, CURLOPT_POSTFIELDS, data);
-        curl_easy_setopt(sis_handle, CURLOPT_FOLLOWLOCATION, 1L);
-        CURLcode res;
-        res = curl_easy_perform(sis_handle);  
-        if(res != CURLE_OK){
-            std::cerr<< "Post request failed:" << curl_easy_strerror(res) << endl;
-        }
-
-        if (chunk.response){
-            response = chunk.response;
-            free(chunk.response);
-        }
-        else{
-            std::cerr << "No response received from server.\n";
-        }
-
-        return response; 
-    }
-    std::cerr<< "PostRequest failed:Login before post request" << endl;
-    return response;
-}
-
-bool SisSystem::change_info(const string& username, const string& password){
-    if(is_login){
-        return false;
-    }
-    this->username = username;
-    this->password = password;
-    return true;
-}
-
-
-string SisSystem::get_commands()const{
-
-    std::ostringstream result;
-    for(auto it = command_list.begin(); it != command_list.end(); ++it ){
-        result << *it;
-        if(std::next(it) != command_list.end()){
-            result << ", ";
-        }
-    }
-    return result.str();
-}
-
 
 string SisSystem::get_schedule(){
     if (!login()) {
@@ -400,6 +184,11 @@ string SisSystem::get_schedule(){
                     table[row][table_index]="*";
                     table[row+1][table_index]="*";
                 }
+                if(xpathQuery(rawData, xpath.str()+"@rowspan")[0]=="4"){
+                    table[row][table_index]="*";
+                    table[row+1][table_index]="*";
+                    table[row+2][table_index]="*";
+                }
             }
             //时间格
             if(xpathQuery(rawData, xpath.str()+"@class")[0]=="SSSWEEKLYTIMEBACKGROUND"){
@@ -425,14 +214,6 @@ string SisSystem::get_schedule(){
     }
 
     return final_result;
-}
-
-string SisSystem::vector_toString(const vector<string>& vector)const{
-    string result;
-    for(string element : vector){
-        result+=element+"\n";
-    }
-    return result;
 }
 
 void SisSystem::printTable(const vector<vector<string>>& Vector)const{
@@ -475,16 +256,6 @@ string SisSystem::course_parser(const string& courseinfo)const{
         std::cout << "No match found." << std::endl;
     }
     return result;
-}
-
-string SisSystem::space_cutter(const string& str)const{
-    std::regex pattern("^\\s*(.*?)\\s*$");
-    std::smatch match;
-    if (std::regex_match(str, match, pattern)) {
-        return match[1];
-    } else {
-        return "";
-    }
 }
 
 string SisSystem::parse_ICSID(const std::string& text)const{
@@ -545,7 +316,7 @@ string SisSystem::get_course(string course_code, string term, string openOnly){
     
     string ICSID = parse_ICSID(response);
     string ICStateNum = parse_ICStateNum(response);
-    char* escaped_icsid = curl_easy_escape(sis_handle, ICSID.c_str(), static_cast<int>(ICSID.length()));
+    char* escaped_icsid = curl_easy_escape(handle, ICSID.c_str(), static_cast<int>(ICSID.length()));
 
     url=("https://sis.cuhk.edu.cn/psc/csprd/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.CLASS_SEARCH.GBL");
     string data = 
@@ -635,7 +406,7 @@ string SisSystem::get_grades(string term){
     
     string ICSID = parse_ICSID(response);
     string ICStateNum = parse_ICStateNum(response);
-    char* escaped_icsid = curl_easy_escape(sis_handle, ICSID.c_str(), static_cast<int>(ICSID.length()));
+    char* escaped_icsid = curl_easy_escape(handle, ICSID.c_str(), static_cast<int>(ICSID.length()));
 
     vector termlist = xpathQuery(response, "//span[@id[starts-with(.,'TERM_CAR$')]]");
 

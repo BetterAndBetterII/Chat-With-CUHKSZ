@@ -2,14 +2,13 @@ cmake_minimum_required(VERSION 3.16)
 set(CMAKE_CXX_STANDARD 20)
 project(backend)
 
-
 # 查找并链接外部库
 find_package(cpr CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
-# 查找libcurl
 find_package(CURL CONFIG REQUIRED)
-#查找Libxml
 find_package(LibXml2 CONFIG REQUIRED)
+
+set(HISTORY_FOLDER $ENV{HOME}/history)
 
 # 查找源文件（不包含测试文件）
 file(GLOB_RECURSE BACKEND_SOURCES
@@ -25,6 +24,7 @@ add_library(backend_lib
 target_include_directories(backend_lib
         PUBLIC
         ${PROJECT_SOURCE_DIR}/include
+        ${PROJECT_SOURCE_DIR}/third_party
 )
 
 # 将外部库链接到后端库
@@ -42,7 +42,7 @@ if (WIN32)
 endif()
 
 # ----------------- 部署 -----------------
-add_executable(backend test/test_server.cpp)
+add_executable(backend main.cpp)
 target_link_libraries(backend
         PRIVATE
         backend_lib
@@ -111,3 +111,11 @@ target_link_libraries(curl_protocol_test
         PRIVATE
         backend_lib
 )
+
+add_executable(curl_agent_test test/test_agent.cpp)
+target_link_libraries(curl_agent_test
+        PRIVATE
+        backend_lib
+)
+
+add_definitions(-DHISTORY_FOLDER="${HISTORY_FOLDER}")
