@@ -82,46 +82,6 @@ private slots:
     }
 };
 
-// class ChatMessageWidget : public QWidget {
-//     Q_OBJECT
-//
-// public:
-//     ChatMessageWidget(const QString &text, const QString &avatarPath, bool isUser = true, QWidget *parent = nullptr)
-//         : QWidget(parent) {
-//
-//         // 设置整体布局
-//         QHBoxLayout *mainLayout = new QHBoxLayout(this);
-//         mainLayout->setContentsMargins(10, 10, 10, 10);
-//         mainLayout->setSpacing(10);
-//
-//         // 头像
-//         QLabel *avatar = new QLabel;
-//         avatar->setFixedSize(50, 50);
-//         avatar->setStyleSheet("border-radius: 25px;");
-//         avatar->setPixmap(QPixmap(avatarPath).scaled(50, 50, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation));
-//
-//         // 气泡文本
-//         QLabel *message = new QLabel(text);
-//         message->setWordWrap(true);
-//         message->setStyleSheet(isUser
-//                                ? "background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1, stop:0 #0078d7, stop:1 #005a9e); color: white; border-radius: 12px; padding: 12px;"
-//                                : "background-color: #f0f0f0; color: black; border-radius: 12px; padding: 12px;");
-//         message->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-//         message->setMaximumWidth(500);  // 增加气泡的最大宽度，使其能够容纳更多文字
-//
-//         // 布局调整
-//         if (isUser) {
-//             mainLayout->addStretch();
-//             mainLayout->addWidget(message);
-//             mainLayout->addWidget(avatar);
-//         } else {
-//             mainLayout->addWidget(avatar);
-//             mainLayout->addWidget(message);
-//             mainLayout->addStretch();
-//         }
-//     }
-// };
-
 class WelcomeWindow : public QWidget {
     Q_OBJECT
 
@@ -228,9 +188,9 @@ public:
 
         // 将文字放置到button7的正左边
         QHBoxLayout *textAndButtonLayout = new QHBoxLayout();
-        textAndButtonLayout->addWidget(bookingDescription1); // 先显示“结合传统与现代”
+        textAndButtonLayout->addWidget(bookingDescription1); // 先显示"结合传统与现代"
         textAndButtonLayout->addStretch(); // 居中显示文字
-        textAndButtonLayout->addWidget(bookingDescription2); // 然后显示“融汇中国与西方”
+        textAndButtonLayout->addWidget(bookingDescription2); // 然后显示"融汇中国与西方"
 
         // 将文字添加到grid布局里，位置紧贴booking按钮正下方
         gridLayout->addLayout(textAndButtonLayout); // 放置在第3行，占据4列
@@ -663,38 +623,118 @@ public:
     explicit LoginWindow(Client *client, QWidget *parent = nullptr)
         : QWidget(parent), client(client) {  // 使用传入的 Client 指针
         setWindowTitle("Login");
-        setFixedSize(800, 400);
+        setFixedSize(800, 400);  // 固定窗口大小
+        setWindowFlags(Qt::Window | Qt::MSWindowsFixedSizeDialogHint);  // 设置窗口不可调整大小
 
         auto *mainLayout = new QVBoxLayout(this);
-        // mainLayout->setMargin(150);
-        mainLayout->setContentsMargins(200, 100, 200, 150 );
+        mainLayout->setContentsMargins(200, 100, 200, 150);
+
         // 用户名输入
         auto *usernameLayout = new QHBoxLayout();
         auto *usernameLabel = new QLabel("Username:", this);
+        usernameLabel->setFixedWidth(100);  // 增加宽度到100
+        usernameLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        // 添加样式以处理文本溢出
+        usernameLabel->setStyleSheet(
+            "QLabel {"
+            "   color: white;"
+            "   font-size: 14px;"
+            "   font-weight: bold;"
+            "   padding-right: 5px;"  // 右侧添加一些padding
+            "   min-width: 100px;"    // 确保最小宽度
+            "}"
+        );
         QPalette pe;
-        pe.setColor(QPalette::WindowText,Qt::white);
+        pe.setColor(QPalette::WindowText, Qt::white);
         usernameLabel->setPalette(pe);
         usernameEdit = new QLineEdit(this);
+        // 美化输入框
+        usernameEdit->setStyleSheet(
+            "QLineEdit {"
+            "   padding: 8px;"
+            "   font-size: 14px;"
+            "   border: 2px solid #ccc;"
+            "   border-radius: 10px;"
+            "   background-color: white;"
+            "}"
+            "QLineEdit:focus {"
+            "   border: 2px solid #0078d7;"
+            "   background-color: #f0f8ff;"
+            "}"
+        );
         usernameLayout->addWidget(usernameLabel);
         usernameLayout->addWidget(usernameEdit);
 
         // 密码输入
         QHBoxLayout *passwordLayout = new QHBoxLayout();
         QLabel *passwordLabel = new QLabel("Password:", this);
+        passwordLabel->setFixedWidth(100);  // 增加宽度到100
+        passwordLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        // 使用相同的样式
+        passwordLabel->setStyleSheet(
+            "QLabel {"
+            "   color: white;"
+            "   font-size: 14px;"
+            "   font-weight: bold;"
+            "   padding-right: 5px;"  // 右侧添加一些padding
+            "   min-width: 100px;"    // 确保最小宽度
+            "}"
+        );
         passwordLabel->setPalette(pe);
         passwordEdit = new QLineEdit(this);
-        passwordEdit->setEchoMode(QLineEdit::Password);  // 隐藏密码输入
+        passwordEdit->setEchoMode(QLineEdit::Password);
+        // 使用相同的样式美化密码输入框
+        passwordEdit->setStyleSheet(
+            "QLineEdit {"
+            "   padding: 8px;"
+            "   font-size: 14px;"
+            "   border: 2px solid #ccc;"
+            "   border-radius: 10px;"
+            "   background-color: white;"
+            "}"
+            "QLineEdit:focus {"
+            "   border: 2px solid #0078d7;"
+            "   background-color: #f0f8ff;"
+            "}"
+        );
         passwordLayout->addWidget(passwordLabel);
         passwordLayout->addWidget(passwordEdit);
 
-        // 登录按钮
+        // 设置布局间距
+        usernameLayout->setSpacing(10);  // 设置标签和输入框之间的间距
+        passwordLayout->setSpacing(10);  // 设置标签和输入框之间的间距
+        mainLayout->setSpacing(15);      // 设置各行之间的间距
+
+        // 登录按钮样式美化
         loginButton = new QPushButton("Login", this);
-        loginButton->setStyleSheet("width: 140px;height: 30px;");
+        loginButton->setStyleSheet(
+            "QPushButton {"
+            "   width: 140px;"
+            "   height: 35px;"
+            "   font-size: 14px;"
+            "   font-weight: bold;"
+            "   color: white;"
+            "   background-color: #0078d7;"
+            "   border: none;"
+            "   border-radius: 17px;"
+            "}"
+            "QPushButton:hover {"
+            "   background-color: #0066b3;"
+            "}"
+            "QPushButton:pressed {"
+            "   background-color: #005299;"
+            "}"
+        );
         loginButton->move(330, 310);
 
         mainLayout->addLayout(usernameLayout);
         mainLayout->addLayout(passwordLayout);
-        // mainLayout->addWidget(loginButton);
+        mainLayout->addSpacing(20);
+
+        // 设置标签字体样式
+        QString labelStyle = "QLabel { color: white; font-size: 14px; font-weight: bold; }";
+        usernameLabel->setStyleSheet(labelStyle);
+        passwordLabel->setStyleSheet(labelStyle);
 
         connect(loginButton, &QPushButton::clicked, this, &LoginWindow::validateLogin);
     }
