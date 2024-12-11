@@ -6,7 +6,24 @@
 #include <iostream>
 
 Client::Client(const std::string& host, int port)
-    : http_client_(host, port) {}
+    : http_client_(host, port) {
+        this->host = host;
+        this->port = port;
+        http_client_.set_connection_timeout(200); // 设置连接超时为200秒
+        http_client_.set_read_timeout(200);       // 设置读取超时为200秒
+    }
+
+bool Client::test_connection() const
+{
+    try {
+        httplib::Client cli(host + ":" + std::to_string(port));
+        cli.set_connection_timeout(2);  // 设置2秒超时
+        auto res = cli.Get("/");        // 或使用任何已知的有效端点
+        return res && res->status != 0; // 只要能收到响应就认为连接正常
+    } catch (...) {
+        return false;
+    }
+}
 
 bool Client::login(const std::string& username, const std::string& password) {
 
@@ -16,12 +33,25 @@ bool Client::login(const std::string& username, const std::string& password) {
     json req_json;
     req_json["username"] = username;
     req_json["password"] = password;
-    //std::cout<<"test"<<std::endl;
-    auto res = http_client_.Post("/login", req_json.dump(), "application/json");
-    if (res && res->status == 200) {
-        std::cout<<"Login"<<res->body<<std::endl;
-        return true;
+    http_client_.set_connection_timeout(2); // 设置连接超时为2秒
+    http_client_.set_read_timeout(2);       // 设置读取超时为2秒
+    try
+    {
+        auto res = http_client_.Post("/login", req_json.dump(), "application/json");
+        if (res && res->status == 200) {
+            std::cout<<"Login"<<res->body<<std::endl;
+            http_client_.set_connection_timeout(200); // 设置连接超时为200秒
+            http_client_.set_read_timeout(200);       // 设置读取超时为200秒
+            return true;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Exception: " << e.what() << std::endl;
+        http_client_.set_connection_timeout(200); // 设置连接超时为200秒
+        http_client_.set_read_timeout(200);       // 设置读取超时为200秒
+        return false;
     }
+    http_client_.set_connection_timeout(200); // 设置连接超时为200秒
+    http_client_.set_read_timeout(200);       // 设置读取超时为200秒
     return false;
 }
 
