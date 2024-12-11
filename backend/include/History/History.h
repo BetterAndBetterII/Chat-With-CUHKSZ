@@ -5,6 +5,8 @@
 #include <nlohmann/json.hpp>
 #include <filesystem>
 
+using json = nlohmann::json;
+
 class History {
 public:
     explicit History(int number = 0);
