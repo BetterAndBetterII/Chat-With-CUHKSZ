@@ -20,6 +20,6 @@ public:
     );
     json send_message(json message);
 private:
-    const std::string API_KEY = "ak-GZTdsRjD60WUwxUrtf07b76t8K1YSbsOPiu7q01Vj0DPB9Hy";
+    const std::string API_KEY = std::getenv("APIKEY");
 };
 #endif
