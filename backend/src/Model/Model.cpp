@@ -33,7 +33,7 @@ json Model::build_message(
 json Model::send_message(const json message) {
     // std::cout << "body: " << message.dump() << std::endl;
     cpr::Response response = Post(
-        cpr::Url{"https://api.nextapi.fun/v1/chat/completions"},
+        cpr::Url{API_BASE},
         cpr::Header{{"Authorization", "Bearer " + API_KEY}},
         cpr::Body{message.dump()}
     );

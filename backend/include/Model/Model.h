@@ -20,6 +20,7 @@ public:
     );
     json send_message(json message);
 private:
+    const std::string API_BASE = std::getenv("APIBASE") ? std::getenv("APIBASE") : "https://api.nextapi.fun/v1/chat/completions";
     const std::string API_KEY = std::getenv("APIKEY");
 };
 #endif
