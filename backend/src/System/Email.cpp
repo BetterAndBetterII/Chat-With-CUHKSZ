@@ -163,5 +163,5 @@ std::string EmailSystem::send_email(const std::vector<std::string>& recipients_s
         return "Send email failed because: " + std::string(curl_easy_strerror(res));
     }
 
-    return "Send email success.";
+    return "Send email to " + recipients_str[0] + " success. Don't repeatly send email.";
 }

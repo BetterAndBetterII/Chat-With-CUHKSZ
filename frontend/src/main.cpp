@@ -112,7 +112,11 @@ public:
         // 顶部横幅布局
         QHBoxLayout *topLayout = new QHBoxLayout();
         QLabel *titleLabel = new QLabel("Chat With CUHKSZ", this);
-        titleLabel->setStyleSheet("font-size: 40px; font-weight: bold; color: #444444; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);");
+        titleLabel->setStyleSheet("font-size: 40px; "
+            "font-family: Arial, sans-serif;"
+            "font-weight: bold; "
+            "color: #444444; "
+            "text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);");
         topLayout->addStretch(); // 添加左侧弹性空间
         topLayout->addWidget(titleLabel);
         topLayout->addStretch(); // 添加右侧弹性空间
@@ -227,8 +231,8 @@ public:
         QLabel *bookingDescription2 = new QLabel("Bridging China and the West", this);
         bookingDescription1->setAlignment(Qt::AlignCenter);
         bookingDescription2->setAlignment(Qt::AlignCenter);
-        bookingDescription1->setStyleSheet("font-size: 10px; font-family: KaiTi; font-style: italic; color: black;");
-        bookingDescription2->setStyleSheet("font-size: 10px; font-family: KaiTi; font-style: italic; color: black;");
+        bookingDescription1->setStyleSheet("font-size: 10px; font-family: Arial; font-style: italic; color: black;");
+        bookingDescription2->setStyleSheet("font-size: 10px; font-family: Arial; font-style: italic; color: black;");
 
         textAndButtonLayout->addWidget(bookingDescription1);
         textAndButtonLayout->addStretch();
@@ -286,8 +290,14 @@ public:
 
                 bookingDescription1->setText("结合传统与现代");
                 bookingDescription2->setText("融汇中国与西方");
-                bookingDescription1->setStyleSheet("font-size: 24px; font-family: KaiTi; font-style: italic; color: black;");
-                bookingDescription2->setStyleSheet("font-size: 24px; font-family: KaiTi; font-style: italic; color: black;");
+                bookingDescription1->setStyleSheet("font-size: 24px; "
+                    "font-family: 'Noto Sans CJK SC', 'WenQuanYi Micro Hei', sans-serif; "
+                    "font-style: italic; "
+                    "color: black;");
+                bookingDescription2->setStyleSheet("font-size: 24px; "
+                    "font-family: 'Noto Sans CJK SC', 'WenQuanYi Micro Hei', sans-serif; "
+                    "font-style: italic; "
+                    "color: black;");
             } else {
                 // 切换回英文
                 buttonLanguage->setText("Language: ENGLISH");
@@ -553,7 +563,8 @@ public:
         welcomeLabel->hide();  // 添加这一行
         QString messageText = message;
         // 移除最后的"<exit>"
-        messageText.remove(QRegularExpression("\\n*<exit>$"));
+        messageText.remove(QRegularExpression("\\n*<exit>$"));  // 移除最后的\n<exit>
+        messageText.remove(QRegularExpression("<exit>$"));  // 移除最后的<exit>
 
         QNChatMessage* messageW = new QNChatMessage(chatList);
         QListWidgetItem* item = new QListWidgetItem(chatList);

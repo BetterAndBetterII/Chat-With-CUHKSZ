@@ -29,12 +29,10 @@ QNChatMessage::QNChatMessage(QWidget *parent) : QWidget(parent)
     );
     
     QFont te_font = this->font();
-    te_font.setFamily("MicrosoftYaHei");
+    // 使用系统默认的无衬线字体，按照优先级尝试
+    te_font.setFamily("MicrosoftYaHei, Noto Sans CJK SC, WenQuanYi Micro Hei, SimHei, Sans-serif");
     te_font.setPointSize(12);
-//    te_font.setWordSpacing(0);
-//    te_font.setLetterSpacing(QFont::PercentageSpacing,0);
-//    te_font.setLetterSpacing(QFont::PercentageSpacing, 100);          //300%,100为默认  //设置字间距%
-//    te_font.setLetterSpacing(QFont::AbsoluteSpacing, 0);             //设置字间距为3像素 //设置字间距像素值
+    te_font.setLetterSpacing(QFont::AbsoluteSpacing, 1);
     this->setFont(te_font);
     m_leftPixmap = QPixmap(":/img/CustomerService.png");
     m_rightPixmap = QPixmap(":/img/CustomerCopy.png");
@@ -74,16 +72,17 @@ void QNChatMessage::setText(QString text, QSize allSize, QNChatMessage::User_Typ
 
 QSize QNChatMessage::fontRect(QString str)
 {
+    // 设置字体的大小
     m_msg = str;
     std::string s = str.toStdString();
     int minHei = 30;
     int iconWH = 30;
     int iconSpaceW = 20;
     int iconRectW = 5;
-    int iconTMPH = 10;
+    int iconTMPH = 12;  // 头像的高度
     int sanJiaoW = 6;
     int kuangTMP = 20;
-    int textSpaceRect = 12;
+    int textSpaceRect = 15;  // 文本框的左右间距
     m_kuangWidth = this->width() - kuangTMP - 2*(iconWH+iconSpaceW+iconRectW);
     m_textWidth = m_kuangWidth - 2*textSpaceRect;
     m_spaceWid = this->width() - m_textWidth;
@@ -116,8 +115,8 @@ QSize QNChatMessage::fontRect(QString str)
 
 QSize QNChatMessage::getRealString(QString src)
 {
-    QFontMetricsF fm(this->font());
-    m_lineHeight = fm.lineSpacing();
+    QFontMetricsF fm(this->font());  // 获取字体度量
+    m_lineHeight = fm.lineSpacing();  // 获取行高
     int nCount = src.count("\n");
     int nMaxWidth = 0;
     if(nCount == 0) {
@@ -154,7 +153,7 @@ QSize QNChatMessage::getRealString(QString src)
             }
         }
     }
-    return QSize(nMaxWidth+m_spaceWid, (nCount + 1) * m_lineHeight+2*m_lineHeight);
+    return QSize(nMaxWidth+m_spaceWid, (nCount + 1) * m_lineHeight+2.5*m_lineHeight);
 }
 
 void QNChatMessage::paintEvent(QPaintEvent *event)

@@ -55,10 +55,11 @@ std::string Agent::run(const std::string &message, const bool enable_tools) {
         std::string tool_call = answer["tool_calls"][0]["function"]["name"];
         json tool_arguments = answer["tool_calls"][0]["function"]["arguments"];
         std::string tool_str = "<Tool Call>: " + tool_call + " with arguments: " + std::string(tool_arguments);
+        std::cout<<"tool_str: "<<tool_str<<std::endl;
         insert_memory(tool_str, "assistant");
 
-        std::cout<<tool_str<<std::endl;
         std::string tool_result = "<Tool> Called " + tool_str + " <Result>: " + tools->handle_tool_call(tool_call, tool_arguments);
+        std::cout<<"tool_result: "<<tool_result<<std::endl;
         insert_memory(tool_result, "user");
         return tool_result;
     }
