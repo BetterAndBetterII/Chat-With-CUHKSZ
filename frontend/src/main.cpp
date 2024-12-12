@@ -1,51 +1,33 @@
 #include <QApplication>
-#include <QMainWindow>
 #include <QWidget>
 #include <QSplitter>
 #include <QListWidget>
-#include <QVBoxLayout>
 #include <QTextEdit>
-#include <QPushButton>
-#include <QLabel>
 #include <QHBoxLayout>
 #include <QPixmap>
 #include <qpainter.h>
-#include <QFrame>
-#include <QScroller>
 #include <QStackedLayout>
 #include <QMap>
 #include <QList>
-#include <QIcon>
 #include <QKeyEvent>
 #include <QUrl>
 #include <QDesktopServices>
-#include <QGridLayout>
-#include <QWidget>
 #include <QStackedWidget>
 #include <QApplication>
 #include <QMainWindow>
-#include <QDateTime>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
-#include <QMessageBox>
 #include <QString>
-#include <QDebug>
 #include <QListView>
 #include "../include/Client/Client.h" // 根据 include 的实际路径
 // #include "../include/third_party/httplib.h"
 #include <iostream>
-#include <QApplication>
 #include "qnchatmessage.h"
-#include <QJsonDocument>
-#include <QJsonObject>
 #include <QtConcurrent/QtConcurrent>
 #include <QFuture>
 #include <QMessageBox>
 #include <QUuid>
-#include <QTimer>
 #include <QRegularExpression>
 
 class CustomTextEdit : public QTextEdit {
@@ -1014,30 +996,6 @@ int main(int argc, char *argv[]) {
     Client client("localhost", 8080);
     LoginWindow loginWindow(&client);
     loginWindow.show();
-
-
-    // 模拟登录
-    // std::string username = "123090490";
-    // std::string password = "SXH2005sxh@ZL";
-
-    // if (client.login(username, password)) {
-    //     std::cout << "Login successfully!" << std::endl;
-
-    //     // 发送消息
-    //     std::string session_id = "session_user123";
-    //     std::string response = client.send_message(session_id, "Hello, Server!");
-    //     std::cout << "Server response: " << response << std::endl;
-
-    //     // 获取聊天记录
-    //     std::string chat_history = client.get_chat_history(session_id);
-    //     std::cout << "Chat history: " << chat_history << std::endl;
-
-    //     // 获取所有会话的第一条消息
-    //     std::string first_messages = client.get_first_messages();
-    //     std::cout << "All first messages: " << first_messages << std::endl;
-    // } else {
-    //     std::cout << "Login failed!" << std::endl;
-    // }
 
     return app.exec();
 }
