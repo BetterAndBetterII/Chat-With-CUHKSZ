@@ -16,10 +16,10 @@
 
 ```bash
 docker pull ghcr.io/betterandbetterii/chat-with-cuhksz:latest
-docker run -d --name chat-with-cuhksz-backend -p 8080:8080 ghcr.io/betterandbetterii/chat-with-cuhksz:latest
+docker run -d --name chat-with-cuhksz-backend -p 8080:8080 ghcr.io/betterandbetterii/chat-with-cuhksz:latest -e APIBASE=https://api.nextapi.fun/v1/chat/completions -e APIKEY=YOUR_API_KEY
 ```
 
-或
+或使用docker-compose快速启动（需要配置APIKEY）：
 
 ```bash
 docker-compose up -d --build

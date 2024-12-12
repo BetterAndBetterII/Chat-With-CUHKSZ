@@ -9,6 +9,9 @@ services:
       - linux-cache:/var/cache
     ports:
       - 8080:8080
+    environment:
+      - APIBASE=https://api.nextapi.fun/v1/chat/completions
+      - APIKEY=YOUR_API_KEY
 volumes:
   linux-chatwithcuhksz:
     driver: local
