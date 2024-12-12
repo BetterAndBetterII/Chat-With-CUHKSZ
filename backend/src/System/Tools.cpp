@@ -54,7 +54,8 @@ std::string Tools::handle_tool_call(const std::string& tool_name,  const json& a
         return email->send_email(recipient_vector,std::string(json_arguments["subject"]),std::string(json_arguments["body"]));
     }
     if (tool_name=="getKnowledge") {
-        knowledge->loadAllFiles("/home/yf/Workplace/Group_project/Chat-With-CUHKSZ/backend/KnowledgeBase/phoenix_cuhksz_knowledge-main");
+        std::string home_path = (std::getenv("HOME") ? std::string(std::getenv("HOME")) : "/app") + "/KnowledgeBase/phoenix_cuhksz_knowledge-main";
+        knowledge->loadAllFiles(home_path);
         return knowledge->getKnowledge(std::string(json_arguments["keyword_1"]),std::string(json_arguments["keyword_2"]),std::string(json_arguments["keyword_3"]));
     }
     return "Unknown tool!";

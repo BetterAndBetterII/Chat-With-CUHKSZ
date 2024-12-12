@@ -90,8 +90,11 @@ USER app
 
 WORKDIR /app
 
+ENV HOME=/app
+
 # 从构建阶段复制必要的文件
 COPY --from=builder /app/build/backend/backend .
+COPY --from=builder /app/backend/KnowledgeBase ./KnowledgeBase
 COPY --from=builder /opt/vcpkg/installed/x64-linux/lib/*.so* /usr/local/lib/
 
 # 更新动态链接器缓存
